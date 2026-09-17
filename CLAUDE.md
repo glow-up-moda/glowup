@@ -41,7 +41,7 @@ Tienda online de **ropa interior femenina y accesorios** (gorras, anteojos de so
 | Hosting | Netlify |
 | Analítica | Meta Pixel + Google Analytics 4 |
 
-Variables de entorno (`.env.local` local; `.env.example` sin valores en el repo). Verificar los nombres actuales de las claves en la documentación de Supabase.
+Variables de entorno (`.env.local` local; `.env.example` sin valores en el repo). Nombres verificados con la documentación de Supabase en septiembre de 2026. Las claves viejas `anon` y `service_role` se retiran a fines de 2026: usamos siempre la publicable y la secreta.
 
 ```
 NEXT_PUBLIC_SITE_URL=
@@ -373,5 +373,6 @@ Con logo, paleta y voz de marca:
 - [ ] ¿Cupón y descuento por transferencia se acumulan?
 - [ ] Zonas y costos de envío; punto de retiro y horarios.
 - [ ] Alias, CBU y número de WhatsApp.
+- [ ] Región de producción de Supabase. La base tiene que quedar donde corran las funciones de Netlify: en el plan gratis es Ohio, y São Paulo requiere plan Pro. La región no se cambia después de crear el proyecto. El proyecto de desarrollo está en São Paulo.
 - [ ] Dominio, usuario de Instagram y registro de marca en el INPI.
 - [ ] Textos legales revisados.
