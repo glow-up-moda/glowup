@@ -91,6 +91,21 @@ Reglas de contraste (obligatorias):
 - Links: chocolate con subrayado.
 - Sin modo oscuro.
 
+### Colores funcionales (solo estados)
+
+| Token | Hex | Uso |
+|---|---|---|
+| `error` | `#B42318` | Errores de formulario, pago rechazado, alertas del panel |
+| `exito` | `#2F6B3A` | Confirmaciones: pago aprobado, pedido creado, stock actualizado |
+
+- No son colores de marca: no se usan en botones principales, fondos de sección ni decoración, y no cambian la proporción 60/25/10/5.
+- Nunca el color solo: siempre con ícono y texto. El error además marca el borde del campo y se enlaza al input con `aria-describedby`.
+- Solo sobre crema o crema oscuro: error 6.2:1 y éxito 6.0:1 sobre crema; 5.4:1 y 5.2:1 sobre crema oscuro.
+- Prohibido sobre rosa o coral: 3.3:1 y 2.5:1, no llegan a 4.5:1.
+- Bloque de aviso: fondo crema oscuro, borde del color funcional, ícono y texto del mismo color.
+- Si hace falta un chip lleno en el panel, el texto va en crema (6.2:1 sobre error, 6.0:1 sobre éxito).
+- Los avisos neutros o informativos usan fondo rosa con texto chocolate.
+
 ### Logo
 
 El logo se está redibujando para usar esta paleta (ver pendientes):
@@ -346,7 +361,7 @@ Con logo, paleta y voz de marca:
 6. **Envíos y retiro.**
 7. **SEO, analítica, rendimiento y accesibilidad.**
 8. **Legales y prueba completa:** compras de prueba con cada método, pagos rechazados, reservas vencidas y webhook duplicado.
-9. **Lanzamiento:** credenciales de producción, dominio, backup periódico de la base y monitoreo de errores.
+9. **Lanzamiento:** credenciales de producción, dominio, **quitar el `noindex` del layout**, backup periódico de la base y monitoreo de errores.
 
 ## 17. Pendientes
 
