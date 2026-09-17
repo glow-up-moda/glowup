@@ -1,0 +1,9 @@
+# Generado por otras herramientas
+.next
+out
+node_modules
+package-lock.json
+next-env.d.ts
+
+# Los .md se escriben a mano (CLAUDE.md) o los mantiene Next.js (AGENTS.md)
+*.md
