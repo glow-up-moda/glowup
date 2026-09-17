@@ -39,7 +39,7 @@ Tienda online de **ropa interior femenina y accesorios** (gorras, anteojos de so
 | Emails | Resend + React Email |
 | Validación | Zod |
 | Formato | Prettier + `prettier-plugin-tailwindcss` (ordena las clases) |
-| Hosting | Netlify |
+| Hosting | Netlify (`glowupind.netlify.app` hasta tener dominio propio) |
 | Analítica | Meta Pixel + Google Analytics 4 |
 
 Variables de entorno (`.env.local` local; `.env.example` sin valores en el repo). Nombres verificados con la documentación de Supabase en septiembre de 2026. Las claves viejas `anon` y `service_role` se retiran a fines de 2026: usamos siempre la publicable y la secreta.
