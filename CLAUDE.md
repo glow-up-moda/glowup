@@ -22,6 +22,7 @@ Tienda online de **ropa interior femenina y accesorios** (gorras, anteojos de so
 - Una tarea terminada = un commit. Código, nombres y commits en inglés; textos visibles en español.
 - No agregues dependencias sin explicar para qué sirven y si existe una alternativa nativa.
 - Nunca subas `.env` ni claves al repositorio.
+- **El repositorio es público** (`glow-up-moda/glowup`). Además de las claves, nunca subas alias, CBU, teléfono, direcciones ni datos de clientas: esos valores viven en la tabla `settings` o en variables de entorno, nunca en el código, en migraciones ni en datos de prueba.
 - Pagos: solo credenciales de prueba de Mercado Pago hasta el lanzamiento.
 - Cambios de base de datos siempre como migraciones en `supabase/migrations/`.
 - Al terminar una tarea con interfaz, revisala en 375px (celular) y en escritorio.
