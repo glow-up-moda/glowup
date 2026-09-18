@@ -56,6 +56,8 @@ NEXT_PUBLIC_META_PIXEL_ID=
 NEXT_PUBLIC_GA4_ID=
 ```
 
+Regiones: la base de Supabase está en `us-east-2` (Ohio), la misma región donde Netlify ejecuta el servidor en el plan gratis. Así la consulta entre servidor y base es de milisegundos, que es lo que siente una clienta comprando. Medido desde Paraná, una consulta desde la computadora tarda unos 60 ms. La región de un proyecto de Supabase no se puede cambiar después: si alguna vez se pasa a Netlify Pro y se mueven las funciones a São Paulo, la base de producción también tiene que crearse en São Paulo.
+
 ## 4. Estructura de carpetas (objetivo)
 
 ```
@@ -374,6 +376,5 @@ Con logo, paleta y voz de marca:
 - [ ] ¿Cupón y descuento por transferencia se acumulan?
 - [ ] Zonas y costos de envío; punto de retiro y horarios.
 - [ ] Alias, CBU y número de WhatsApp.
-- [ ] Región de producción de Supabase. La base tiene que quedar donde corran las funciones de Netlify: en el plan gratis es Ohio, y São Paulo requiere plan Pro. La región no se cambia después de crear el proyecto. El proyecto de desarrollo está en São Paulo.
 - [ ] Dominio, usuario de Instagram y registro de marca en el INPI.
 - [ ] Textos legales revisados.
