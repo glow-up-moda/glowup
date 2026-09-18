@@ -248,7 +248,7 @@ Tiene que ser cómodo de usar desde el celular.
 
 ## 8. Modelo de datos (base)
 
-Montos siempre en **enteros de centavos**. Fechas guardadas en UTC y mostradas en `America/Argentina/Buenos_Aires`. El esquema vive en `supabase/migrations/`.
+Montos siempre en **enteros de centavos**. Fechas guardadas en UTC y mostradas en `America/Argentina/Buenos_Aires`. El esquema vive en `supabase/migrations/`; después de cada migración, regenerar los tipos con `npm run db:types`.
 
 - `categories` (id, parent_id, name, slug único, sort_order)
 - `products` (id, category_id, name, slug único, description, materials_care, measurements, model_info, cost_cents, price_cents, compare_at_price_cents, is_published, seo_title, seo_description, created_at)
@@ -306,6 +306,7 @@ Las ejecutan solo el servidor (`service_role`) y el cron. Ninguna es `security d
 
 - Los errores usan `message` como código estable (`out_of_stock`, `invalid_coupon`, `invalid_shipping`, `item_unavailable`, `invalid_items`, `invalid_payload`, `insufficient_stock`, `invalid_movement`) y `details` con un JSON. La app traduce el código al texto de la tienda.
 - Tope de 10 unidades por línea: una reserva por transferencia inmoviliza stock durante 24 horas.
+- Datos de prueba en `supabase/seed.sql`, aplicados con `npx supabase db push --include-seed`. Nunca van a producción.
 
 ## 9. Reglas de stock
 

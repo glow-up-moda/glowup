@@ -4,6 +4,10 @@ out
 node_modules
 package-lock.json
 next-env.d.ts
+# Lo genera `npm run db:types` a partir de la base
+src/lib/supabase/database.types.ts
+# Estado interno de la CLI de Supabase
+supabase/.temp
 
 # Los .md se escriben a mano (CLAUDE.md) o los mantiene Next.js (AGENTS.md)
 *.md
