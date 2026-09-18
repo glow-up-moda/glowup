@@ -248,27 +248,37 @@ Tiene que ser cómodo de usar desde el celular.
 
 ## 8. Modelo de datos (base)
 
-Montos siempre en **enteros de centavos**. Fechas guardadas en UTC y mostradas en `America/Argentina/Buenos_Aires`.
+Montos siempre en **enteros de centavos**. Fechas guardadas en UTC y mostradas en `America/Argentina/Buenos_Aires`. El esquema vive en `supabase/migrations/`.
 
-- `categories` (id, parent_id, name, slug, sort_order)
-- `products` (id, category_id, name, slug, description, materials_care, measurements, model_info, cost_cents, price_cents, compare_at_price_cents, is_published, seo_title, seo_description, created_at)
-- `product_images` (id, product_id, path, alt, sort_order)
+- `categories` (id, parent_id, name, slug único, sort_order)
+- `products` (id, category_id, name, slug único, description, materials_care, measurements, model_info, cost_cents, price_cents, compare_at_price_cents, is_published, seo_title, seo_description, created_at)
+  - Un producto vendido no se puede borrar (sus variantes están en pedidos): se despublica.
+- `product_images` (id, product_id, path, alt obligatorio, sort_order)
 - `product_variants` (id, product_id, color, size, sku, stock_on_hand, stock_reserved, low_stock_threshold)
-  - Disponible = `stock_on_hand - stock_reserved`. Restricciones para que ningún valor sea negativo.
-- `kits` (id, name, slug, price_cents, compare_at_price_cents, is_published) y `kit_items` (kit_id, variant_id, quantity). Los kits no tienen stock propio.
-- `orders` (id, number `GU-000123`, status, payment_method, email, phone, shipping_method, shipping_address, is_gift, gift_message, subtotal_cents, discount_cents, shipping_cents, total_cents, coupon_id, reserved_until, mp_preference_id, mp_payment_id, needs_review, created_at)
+  - Disponible = `stock_on_hand - stock_reserved`. Ningún valor puede ser negativo, y `stock_reserved` nunca supera a `stock_on_hand`: esa restricción es la red de seguridad de §9.6.
+  - `low_stock_threshold` vacío usa `low_stock_default` de `settings`.
+- `kits` (id, name, slug único, price_cents, compare_at_price_cents, is_published) y `kit_items` (kit_id, variant_id, quantity). Los kits no tienen stock propio. Si en la fase 3 se muestran en `/producto/[slug]`, hace falta unicidad de slug entre productos y kits.
+- `orders` (id, number, status, payment_method `mercadopago | transfer`, email, phone, shipping_method `delivery | same_day | pickup`, shipping_zone_id, shipping_address, is_gift, gift_message, subtotal_cents, coupon_discount_cents, transfer_discount_cents, discount_cents, shipping_cents, total_cents, coupon_id, reserved_until, mp_preference_id, mp_payment_id, needs_review, review_reason, created_at)
   - status: `pending_payment | paid | preparing | shipped | ready_for_pickup | delivered | cancelled`
-- `order_items` (order_id, variant_id, kit_id, name_snapshot, unit_price_cents, quantity)
+  - number: `GU-001000` en adelante (la secuencia arranca en 1000).
+  - La base exige `discount_cents = coupon_discount_cents + transfer_discount_cents` y `total_cents = subtotal_cents - discount_cents + shipping_cents`.
+  - `coupon_id` solo se guarda si el cupón se aplicó. `review_reason` explica por qué el pedido quedó con `needs_review`.
+- `order_items` (order_id, parent_item_id, variant_id, kit_id, name_snapshot, unit_price_cents, quantity)
+  - Un kit entra como una línea con `kit_id` y su precio, y sus componentes como líneas hijas (`parent_item_id`) con `variant_id` y precio 0. Así el pedido guarda la composición con la que se vendió, aunque el kit cambie después. Las operaciones de stock recorren solo las líneas con variante.
 - `stock_movements` (id, variant_id, type, quantity, order_id, note, created_by, created_at)
   - type: `restock | web_sale | manual_sale | adjustment | reservation | release | return`
+  - `quantity` siempre positiva y el tipo da la dirección; solo `adjustment` lleva signo.
+  - Los movimientos manuales (`restock`, `manual_sale`, `adjustment`, `return`) exigen usuario; ventas manuales y ajustes, además, nota.
 - `payment_events` (id, provider_event_id único, payload, processed_at) para idempotencia de webhooks.
 - `coupons` (id, code, type `percent | fixed`, value, min_subtotal_cents, starts_at, ends_at, max_uses, used_count)
+  - `percent`: value es el porcentaje (1 a 100). `fixed`: value en centavos. Los códigos se guardan en mayúsculas.
 - `price_changes` (product_id, old_price_cents, new_price_cents, reason, created_by, created_at)
-- `shipping_zones` (id, name, provinces, postal_codes, price_cents, eta_text, same_day)
-- `back_in_stock_requests` (variant_id, email, created_at, notified_at)
+- `shipping_zones` (id, name único, provinces, postal_codes, price_cents, eta_text, same_day)
+- `back_in_stock_requests` (variant_id, email, created_at, notified_at). Un solo aviso pendiente por variante y email.
 - `reviews` (id, product_id, order_id, rating, text, name, status `pending | approved | rejected`)
 - `favorites` (user_id, product_id), solo con cuenta.
-- `settings` (clave/valor: transfer_discount_percent, free_shipping_threshold_cents, bank_alias, bank_cbu, low_stock_default, announcement_messages, whatsapp_number, same_day_cutoff_time)
+- `settings` (clave/valor jsonb: transfer_discount_percent, free_shipping_threshold_cents, discounts_stack, bank_alias, bank_cbu, low_stock_default, last_units_threshold, announcement_messages, whatsapp_number, same_day_cutoff_time)
+  - Los valores iniciales están en la migración del esquema, porque producción también los necesita. Alias, CBU y WhatsApp arrancan vacíos: el repo es público.
 
 **RLS activado en todas las tablas.** El público solo lee productos publicados, imágenes, categorías, kits, zonas de envío y reseñas aprobadas. Todo lo demás pasa por el servidor.
 
