@@ -280,7 +280,15 @@ Montos siempre en **enteros de centavos**. Fechas guardadas en UTC y mostradas e
 - `settings` (clave/valor jsonb: transfer_discount_percent, free_shipping_threshold_cents, discounts_stack, bank_alias, bank_cbu, low_stock_default, last_units_threshold, announcement_messages, whatsapp_number, same_day_cutoff_time)
   - Los valores iniciales están en la migración del esquema, porque producción también los necesita. Alias, CBU y WhatsApp arrancan vacíos: el repo es público.
 
-**RLS activado en todas las tablas.** El público solo lee productos publicados, imágenes, categorías, kits, zonas de envío y reseñas aprobadas. Todo lo demás pasa por el servidor.
+### Exposición por la API
+
+**RLS activado en todas las tablas**, y además nada se lee por la API salvo lo que se habilita a mano. Supabase da por defecto todos los permisos a `anon` y `authenticated` sobre cada tabla y función nueva; la migración de RLS los revoca también para lo que se cree después. **Toda tabla, vista o función nueva nace privada**: para exponerla hace falta un `grant` explícito y su política.
+
+- `anon` y `authenticated` leen categorías, productos publicados (sin `cost_cents`), sus imágenes, sus variantes (solo `id`, `product_id`, `color` y `size`), kits publicados con sus ítems, zonas de envío y reseñas aprobadas (sin `order_id`).
+- Como el stock está oculto, `select *` sobre `product_variants` falla: pedir siempre las columnas.
+- La disponibilidad pública sale de las vistas `variant_availability` y `kit_availability`, que devuelven solo `is_available` e `is_last_units` (umbral `last_units_threshold`). Corren con los permisos de su dueño, porque `anon` no puede leer las columnas de stock, y por eso filtran adentro lo publicado. El revisor de Supabase las marca como "security definer view": es intencional.
+- `favorites`: cada persona logueada lee, agrega y borra solo los suyos.
+- Todo lo demás (pedidos, stock, cupones, settings, pagos) solo desde el servidor con la clave secreta.
 
 ## 9. Reglas de stock
 
