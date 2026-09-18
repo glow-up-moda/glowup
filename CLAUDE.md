@@ -290,6 +290,23 @@ Montos siempre en **enteros de centavos**. Fechas guardadas en UTC y mostradas e
 - `favorites`: cada persona logueada lee, agrega y borra solo los suyos.
 - Todo lo demás (pedidos, stock, cupones, settings, pagos) solo desde el servidor con la clave secreta.
 
+### Funciones de la base
+
+Las ejecutan solo el servidor (`service_role`) y el cron. Ninguna es `security definer`: no necesitan más permisos que los de quien las llama.
+
+| Función | Uso |
+|---|---|
+| `quote_cart(payload)` | Presupuesto del carrito y el checkout. Si un producto se despublicó, lo marca en vez de fallar |
+| `create_order_with_reservation(payload)` | Crea el pedido y reserva el stock, todo o nada (§9.1) |
+| `confirm_order_payment(order_id, mp_payment_id)` | Pago aprobado (§9.3 y §9.6). Confirmar dos veces no descuenta dos veces |
+| `release_order_reservation(order_id, reason)` | Pago rechazado o cancelado (§9.4) |
+| `release_expired_reservations()` | La corre el cron `release-expired-reservations` cada 5 minutos (§9.5) |
+| `record_stock_movement(...)` y `restock_variant(...)` | Movimientos manuales (§9.8). Reponer devuelve los avisos pendientes (§9.10) |
+| `calculate_order_totals(...)` | La única implementación del cálculo de §10, que usan las anteriores |
+
+- Los errores usan `message` como código estable (`out_of_stock`, `invalid_coupon`, `invalid_shipping`, `item_unavailable`, `invalid_items`, `invalid_payload`, `insufficient_stock`, `invalid_movement`) y `details` con un JSON. La app traduce el código al texto de la tienda.
+- Tope de 10 unidades por línea: una reserva por transferencia inmoviliza stock durante 24 horas.
+
 ## 9. Reglas de stock
 
 1. **Reservar al crear el pedido** dentro de una sola función de Postgres (transacción). Si alguna variante no alcanza, se rechaza todo el pedido y se informa qué talle se agotó.
@@ -306,9 +323,11 @@ Montos siempre en **enteros de centavos**. Fechas guardadas en UTC y mostradas e
 ## 10. Reglas de precios
 
 - **El total se calcula siempre en el servidor** con los precios de la base. Nunca confiar en precios, descuentos o costos de envío enviados por el navegador.
-- Orden de cálculo: subtotal → cupón → descuento por transferencia → envío.
-- Por defecto, cupón y descuento por transferencia no se acumulan: se aplica el mayor (configurable, ver pendientes).
-- Envío gratis si el subtotal con descuentos ≥ `free_shipping_threshold_cents`.
+- El cálculo vive en la función `calculate_order_totals` (§8): recibe qué se compra, el cupón, el medio de pago, el método de envío y el id de la zona, y lee todos los montos de la base. `src/lib/pricing` queda para formato y margen.
+- Orden de cálculo: subtotal → cupón → descuento por transferencia → envío. Los descuentos se redondean al peso.
+- Por defecto, cupón y descuento por transferencia no se acumulan: se aplica el mayor, y en empate la transferencia, para no gastar el cupón (`discounts_stack`, ver pendientes).
+- Envío gratis si el subtotal con descuentos ≥ `free_shipping_threshold_cents` (vacío = sin envío gratis). El costo sale siempre de `shipping_zones`; el retiro no lleva zona y el envío en el día solo va a zonas `same_day`.
+- Cupones: se validan al crear el pedido (vigencia, usos máximos y monto mínimo) y otra vez al confirmar el pago. Al confirmar, la vigencia se mide contra la fecha del pedido, y si algo falla el pago no se rechaza, porque ya está cobrado: el pedido queda con `needs_review`.
 - `order_items` guarda el precio del momento; cambiar precios no altera pedidos existentes.
 - Aumento masivo: % sobre categoría o selección, redondeo configurable (por defecto hacia arriba a la centena de pesos), vista previa antes de aplicar y registro en `price_changes`.
 - Precio tachado solo si `compare_at_price_cents > price_cents`.
