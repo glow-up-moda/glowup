@@ -24,7 +24,7 @@ Tienda online de **ropa interior femenina y accesorios** (gorras, anteojos de so
 - Nunca subas `.env` ni claves al repositorio.
 - **El repositorio es público** (`glow-up-moda/glowup`). Además de las claves, nunca subas alias, CBU, teléfono, direcciones ni datos de clientas: esos valores viven en la tabla `settings` o en variables de entorno, nunca en el código, en migraciones ni en datos de prueba.
 - Pagos: solo credenciales de prueba de Mercado Pago hasta el lanzamiento.
-- Cambios de base de datos siempre como migraciones en `supabase/migrations/`.
+- Cambios de base de datos siempre como migraciones en `supabase/migrations/`, en este orden: primero la migración pasa junto con `supabase/tests/smoke.sql` dentro de una transacción que se deshace; después, commit y push; recién entonces, `npx supabase db push`. Los tipos (`npm run db:types`) se regeneran después de aplicar y van en el commit siguiente. El cron no se prueba en esa transacción: se verifica en `cron.job_run_details`.
 - Al terminar una tarea con interfaz, revisala en 375px (celular) y en escritorio.
 
 ## 3. Stack
@@ -307,6 +307,7 @@ Las ejecutan solo el servidor (`service_role`) y el cron. Ninguna es `security d
 - Los errores usan `message` como código estable (`out_of_stock`, `invalid_coupon`, `invalid_shipping`, `item_unavailable`, `invalid_items`, `invalid_payload`, `insufficient_stock`, `invalid_movement`) y `details` con un JSON. La app traduce el código al texto de la tienda.
 - Tope de 10 unidades por línea: una reserva por transferencia inmoviliza stock durante 24 horas.
 - Datos de prueba en `supabase/seed.sql`, aplicados con `npx supabase db push --include-seed`. Nunca van a producción.
+- Pruebas de humo en `supabase/tests/smoke.sql`, con `npm run db:test`. Crean sus propios datos dentro de una transacción que se deshace, así que no dependen del seed, y restauran la secuencia de pedidos. Si algo falla, la corrida se corta con un error que nombra la prueba; si no, termina en "todas las pruebas pasaron". No son pgTAP: `supabase test db` no aplica.
 
 ## 9. Reglas de stock
 
