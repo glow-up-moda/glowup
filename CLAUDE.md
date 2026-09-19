@@ -18,7 +18,8 @@ Tienda online de **ropa interior femenina y accesorios** (gorras, anteojos de so
 ## 2. Forma de trabajo
 
 - Modificá los archivos existentes en su lugar. **No crees copias ni versiones paralelas** (`page-v2.tsx`, `hero-nuevo.tsx`, `styles-old.css`).
-- Antes de una tarea grande, proponé un plan corto y esperá confirmación.
+- **Avanzá sin pedir confirmación.** Tomá las decisiones con criterio y contalas en dos líneas cuando ya estén hechas. Solo frená y preguntá si algo cuesta plata, borra datos, toca producción o necesita una clave o una cuenta personal (Supabase, Netlify, GitHub, Mercado Pago, etc.).
+- Informes cortos: qué se hizo, qué falta, y seguir. Sin resúmenes largos ni listas de verificación en cada paso.
 - Una tarea terminada = un commit. Código, nombres y commits en inglés; textos visibles en español.
 - No agregues dependencias sin explicar para qué sirven y si existe una alternativa nativa.
 - Nunca subas `.env` ni claves al repositorio.
