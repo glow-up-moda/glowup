@@ -264,6 +264,7 @@ Montos siempre en **enteros de centavos**. Fechas guardadas en UTC y mostradas e
   - number: `GU-001000` en adelante (la secuencia arranca en 1000).
   - La base exige `discount_cents = coupon_discount_cents + transfer_discount_cents` y `total_cents = subtotal_cents - discount_cents + shipping_cents`.
   - `coupon_id` solo se guarda si el cupón se aplicó. `review_reason` explica por qué el pedido quedó con `needs_review`.
+  - `paid_at` se completa solo al pasar a `paid`: las ventas del día se cuentan por fecha de cobro.
 - `order_items` (order_id, parent_item_id, variant_id, kit_id, name_snapshot, unit_price_cents, quantity)
   - Un kit entra como una línea con `kit_id` y su precio, y sus componentes como líneas hijas (`parent_item_id`) con `variant_id` y precio 0. Así el pedido guarda la composición con la que se vendió, aunque el kit cambie después. Las operaciones de stock recorren solo las líneas con variante.
 - `stock_movements` (id, variant_id, type, quantity, order_id, note, created_by, created_at)
@@ -273,7 +274,8 @@ Montos siempre en **enteros de centavos**. Fechas guardadas en UTC y mostradas e
 - `payment_events` (id, provider_event_id único, payload, processed_at) para idempotencia de webhooks.
 - `coupons` (id, code, type `percent | fixed`, value, min_subtotal_cents, starts_at, ends_at, max_uses, used_count)
   - `percent`: value es el porcentaje (1 a 100). `fixed`: value en centavos. Los códigos se guardan en mayúsculas.
-- `price_changes` (product_id, old_price_cents, new_price_cents, reason, created_by, created_at)
+- `price_changes` (product_id, old_price_cents, new_price_cents, reason, created_by, created_at). Lo llena un trigger en cada cambio de precio, suelto o masivo; el motivo llega por `app.price_change_reason`.
+- `admin_users` (user_id, name, created_at): quién entra al panel.
 - `shipping_zones` (id, name único, provinces, postal_codes, price_cents, eta_text, same_day)
 - `back_in_stock_requests` (variant_id, email, created_at, notified_at). Un solo aviso pendiente por variante y email.
 - `reviews` (id, product_id, order_id, rating, text, name, status `pending | approved | rejected`)
@@ -285,27 +287,32 @@ Montos siempre en **enteros de centavos**. Fechas guardadas en UTC y mostradas e
 
 **RLS activado en todas las tablas**, y además nada se lee por la API salvo lo que se habilita a mano. Supabase da por defecto todos los permisos a `anon` y `authenticated` sobre cada tabla y función nueva; la migración de RLS los revoca también para lo que se cree después. **Toda tabla, vista o función nueva nace privada**: para exponerla hace falta un `grant` explícito y su política.
 
-- `anon` y `authenticated` leen categorías, productos publicados (sin `cost_cents`), sus imágenes, sus variantes (solo `id`, `product_id`, `color` y `size`), kits publicados con sus ítems, zonas de envío y reseñas aprobadas (sin `order_id`).
-- Como el stock está oculto, `select *` sobre `product_variants` falla: pedir siempre las columnas.
+- **La tienda (`anon`)** lee categorías, productos publicados (sin `cost_cents`), sus imágenes, sus variantes (solo `id`, `product_id`, `color` y `size`), kits publicados con sus ítems, zonas de envío y reseñas aprobadas (sin `order_id`). Como el stock está oculto, `select *` sobre `product_variants` falla: pedir siempre las columnas.
+- **El catálogo se lee siempre con un cliente sin sesión**, aunque la clienta esté logueada: con su sesión sería `authenticated` y no vería nada.
 - La disponibilidad pública sale de las vistas `variant_availability` y `kit_availability`, que devuelven solo `is_available` e `is_last_units` (umbral `last_units_threshold`). Corren con los permisos de su dueño, porque `anon` no puede leer las columnas de stock, y por eso filtran adentro lo publicado. El revisor de Supabase las marca como "security definer view": es intencional.
+- **El panel (`authenticated`)** lee y escribe con la sesión de cada administradora, no con la clave secreta. Tiene permisos completos sobre lo que administra, pero cada política exige `private.is_admin()`: estar en `admin_users` y haber pasado el segundo factor (`aal2`). Sin segundo factor, una administradora solo ve su propia fila de `admin_users`, para que el servidor sepa mandarla a verificarlo. Una clienta con cuenta no ve catálogo, pedidos ni configuración.
 - `favorites`: cada persona logueada lee, agrega y borra solo los suyos.
-- Todo lo demás (pedidos, stock, cupones, settings, pagos) solo desde el servidor con la clave secreta.
+- La clave secreta queda para lo que no tiene sesión: checkout, webhooks, cron y el alta de administradoras.
+- Fotos: bucket público `product-images`, solo WebP y hasta 2 MB. Solo las administradoras suben, reemplazan o borran.
 
 ### Funciones de la base
 
-Las ejecutan solo el servidor (`service_role`) y el cron. Ninguna es `security definer`: no necesitan más permisos que los de quien las llama.
+Ninguna es `security definer` salvo `private.is_admin()`, que lee `admin_users` sin pasar por su RLS (si no, la política se llamaría a sí misma) y vive fuera de la API. Las demás corren con los permisos de quien llama, así que RLS decide adentro: las que usa el panel se pueden llamar con la sesión de una administradora, y a cualquier otra persona logueada le fallan con `order_not_found` o `variant_not_found`.
 
-| Función | Uso |
-|---|---|
-| `quote_cart(payload)` | Presupuesto del carrito y el checkout. Si un producto se despublicó, lo marca en vez de fallar |
-| `create_order_with_reservation(payload)` | Crea el pedido y reserva el stock, todo o nada (§9.1) |
-| `confirm_order_payment(order_id, mp_payment_id)` | Pago aprobado (§9.3 y §9.6). Confirmar dos veces no descuenta dos veces |
-| `release_order_reservation(order_id, reason)` | Pago rechazado o cancelado (§9.4) |
-| `release_expired_reservations()` | La corre el cron `release-expired-reservations` cada 5 minutos (§9.5) |
-| `record_stock_movement(...)` y `restock_variant(...)` | Movimientos manuales (§9.8). Reponer devuelve los avisos pendientes (§9.10) |
-| `calculate_order_totals(...)` | La única implementación del cálculo de §10, que usan las anteriores |
+| Función | Quién | Uso |
+|---|---|---|
+| `quote_cart(payload)` | servidor | Presupuesto del carrito y el checkout. Si un producto se despublicó, lo marca en vez de fallar |
+| `create_order_with_reservation(payload)` | servidor | Crea el pedido y reserva el stock, todo o nada (§9.1) |
+| `confirm_order_payment(order_id, mp_payment_id)` | servidor y panel | Pago aprobado o transferencia confirmada (§9.3 y §9.6). Confirmar dos veces no descuenta dos veces |
+| `release_order_reservation(order_id, reason)` | servidor y panel | Pago rechazado o pedido cancelado (§9.4) |
+| `release_expired_reservations()` | cron | La corre `release-expired-reservations` cada 5 minutos (§9.5) |
+| `record_stock_movement(...)` y `restock_variant(...)` | panel | Movimientos manuales (§9.8). Reponer devuelve los avisos pendientes (§9.10) |
+| `set_order_status(order_id, status)` | panel | Pagado → preparando → enviado o listo para retirar → entregado, con vuelta de un paso |
+| `preview_price_change(...)` y `apply_price_change(...)` | panel | Aumento o descuento masivo (§10) con la misma fórmula (`adjusted_price`) en la vista previa y al aplicar |
+| `admin_dashboard()` y la vista `low_stock_variants` | panel | Ventas de hoy y de la semana, pedidos por preparar y alertas |
+| `calculate_order_totals(...)` | servidor | La única implementación del cálculo de §10, que usan las anteriores |
 
-- Los errores usan `message` como código estable (`out_of_stock`, `invalid_coupon`, `invalid_shipping`, `item_unavailable`, `invalid_items`, `invalid_payload`, `insufficient_stock`, `invalid_movement`) y `details` con un JSON. La app traduce el código al texto de la tienda.
+- Los errores usan `message` como código estable (`out_of_stock`, `invalid_coupon`, `invalid_shipping`, `item_unavailable`, `invalid_items`, `invalid_payload`, `insufficient_stock`, `invalid_movement`, `invalid_transition`, `invalid_price_change`) y `details` con un JSON. La app traduce el código al texto de la tienda.
 - Tope de 10 unidades por línea: una reserva por transferencia inmoviliza stock durante 24 horas.
 - Datos de prueba en `supabase/seed.sql`, aplicados con `npx supabase db push --include-seed`. Nunca van a producción.
 - Pruebas de humo en `supabase/tests/smoke.sql`, con `npm run db:test`. Crean sus propios datos dentro de una transacción que se deshace, así que no dependen del seed, y restauran la secuencia de pedidos. Si algo falla, la corrida se corta con un error que nombra la prueba; si no, termina en "todas las pruebas pasaron". No son pgTAP: `supabase test db` no aplica.

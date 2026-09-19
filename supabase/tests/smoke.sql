@@ -1,7 +1,7 @@
 -- Pruebas de humo de la base (CLAUDE.md §8 y §9).
 --
 -- Se corren contra la base de desarrollo, después de cada migración:
---   npx supabase db query --linked -f supabase/tests/smoke.sql
+--   npm run db:test
 --
 -- El resultado es binario: si una prueba falla, la corrida se corta con un
 -- error que la nombra; si todas pasan, la última línea dice "todas las pruebas
@@ -11,7 +11,9 @@
 -- Todo pasa dentro de una transacción que se deshace, con datos propios
 -- (prefijo "prueba"): no depende del seed ni lo toca. Lo único que no vuelve
 -- atrás con un rollback es la secuencia de números de pedido, así que la prueba
--- guarda su posición y la restaura, pase o falle.
+-- guarda su posición y la restaura al final, pase o falle. Por eso todo vive en
+-- un solo bloque: restaurarla a mitad de camino haría chocar los números de los
+-- pedidos que siguen vivos dentro de la transacción.
 --
 -- No es pgTAP: `supabase test db` no aplica acá. El cron tampoco se prueba en
 -- este archivo, porque pg_cron solo corre jobs confirmados: se verifica aparte,
@@ -77,7 +79,7 @@ insert into public.coupons (code, type, value, min_subtotal_cents, ends_at, max_
   ('PRUEBAAGOTADO', 'percent', 20, 0, null, 1, 1),
   ('PRUEBAUNICO', 'fixed', 100000, 0, null, 1, 0);
 
--- Reglas de precios y de stock -------------------------------------------------
+-- Pruebas ------------------------------------------------------------------------
 
 do $$
 declare
@@ -87,21 +89,28 @@ declare
   v_msg text;
   v_detail text;
   v_count integer;
+  v_price integer;
   v_order uuid;
   v_order_kit uuid;
   v_order_late uuid;
   v_order_coupon uuid;
+  v_order_transfer uuid;
   v_neg90 uuid;
   v_neg100 uuid;
   v_nat100 uuid;
   v_nat90 uuid;
+  v_nat85 uuid;
   v_hidden uuid;
   v_clas_neg uuid;
   v_clas_bla uuid;
   v_clas_nat uuid;
+  v_luna_product uuid;
+  v_hidden_product uuid;
   v_kit uuid;
   v_zone uuid;
   v_zone_same_day uuid;
+  v_admin uuid := gen_random_uuid();
+  v_other uuid := gen_random_uuid();
   r record;
   v_base jsonb := jsonb_build_object('email', 'Prueba@Example.com', 'phone', '3430000000');
 begin
@@ -112,10 +121,13 @@ begin
     select id into v_neg100 from public.product_variants where sku = 'PRUEBA-NEG-100';
     select id into v_nat100 from public.product_variants where sku = 'PRUEBA-NAT-100';
     select id into v_nat90 from public.product_variants where sku = 'PRUEBA-NAT-90';
+    select id into v_nat85 from public.product_variants where sku = 'PRUEBA-NAT-85';
     select id into v_hidden from public.product_variants where sku = 'PRUEBA-OCULTO-M';
     select id into v_clas_neg from public.product_variants where sku = 'PRUEBA-CLAS-NEG-M';
     select id into v_clas_bla from public.product_variants where sku = 'PRUEBA-CLAS-BLA-M';
     select id into v_clas_nat from public.product_variants where sku = 'PRUEBA-CLAS-NAT-S';
+    select id into v_luna_product from public.products where slug = 'prueba-luna';
+    select id into v_hidden_product from public.products where slug = 'prueba-oculto';
     select id into v_kit from public.kits where slug = 'prueba-kit';
     select id into v_zone from public.shipping_zones where name = 'Prueba envío';
     select id into v_zone_same_day from public.shipping_zones where name = 'Prueba en el día';
@@ -432,7 +444,7 @@ begin
 
     -- 14 ---------------------------------------------------------------------
     -- Solo los rechazos: registrar un movimiento de verdad necesita una usuaria
-    -- real en auth.users.
+    -- en auth.users (eso se prueba en la sección del panel).
     v_msg := null;
     begin
       perform public.record_stock_movement(v_neg90, 'manual_sale', 1, 'Venta por Instagram', null);
@@ -462,6 +474,316 @@ begin
     if v_msg is distinct from 'insufficient_stock' then
       raise exception 'Prueba 14c, no se puede vender más de lo disponible: esperaba insufficient_stock y vino %', coalesce(v_msg, 'ningún error');
     end if;
+
+    -- 15. Permisos como la tienda: rol anon, el de la clave publicable ---------
+    set local role anon;
+
+    if current_user is distinct from 'anon' then
+      raise exception 'Prueba 15a, la prueba de permisos corre como anon: corre como %', current_user;
+    end if;
+    if not exists (select 1 from public.products where id = v_luna_product) then
+      raise exception 'Prueba 15b, anon lee productos publicados: no ve prueba-luna';
+    end if;
+    if exists (select 1 from public.products where id = v_hidden_product) then
+      raise exception 'Prueba 15c, anon no ve productos sin publicar: ve prueba-oculto';
+    end if;
+    if (select count(*) from public.variant_availability where product_id = v_luna_product) is distinct from 5 then
+      raise exception 'Prueba 15d, anon lee variant_availability de un producto publicado';
+    end if;
+    if exists (select 1 from public.variant_availability where product_id = v_hidden_product) then
+      raise exception 'Prueba 15e, variant_availability no muestra productos sin publicar';
+    end if;
+    select * into r from public.variant_availability where variant_id = v_neg100;
+    if r.is_available is not false then
+      raise exception 'Prueba 15f, un talle agotado figura como no disponible: %', r;
+    end if;
+    select * into r from public.variant_availability where variant_id = v_nat85;
+    if r.is_available is not true or r.is_last_units is not true then
+      raise exception 'Prueba 15g, dos unidades figuran como últimas unidades: %', r;
+    end if;
+    if not exists (select 1 from public.kit_availability where kit_id = v_kit and is_available) then
+      raise exception 'Prueba 15h, anon lee kit_availability';
+    end if;
+
+    -- 42501 = permiso denegado. Cualquier otro resultado falla con el nombre de
+    -- la prueba, incluso otro error.
+    v_msg := null;
+    begin
+      perform stock_on_hand from public.product_variants limit 1;
+    exception when others then
+      v_msg := sqlstate;
+    end;
+    if v_msg is distinct from '42501' then
+      raise exception 'Prueba 15i, anon no puede leer stock_on_hand: vino %', coalesce(v_msg, 'pudo leerlo');
+    end if;
+
+    v_msg := null;
+    begin
+      perform stock_reserved from public.product_variants limit 1;
+    exception when others then
+      v_msg := sqlstate;
+    end;
+    if v_msg is distinct from '42501' then
+      raise exception 'Prueba 15j, anon no puede leer stock_reserved: vino %', coalesce(v_msg, 'pudo leerlo');
+    end if;
+
+    v_msg := null;
+    begin
+      perform cost_cents from public.products limit 1;
+    exception when others then
+      v_msg := sqlstate;
+    end;
+    if v_msg is distinct from '42501' then
+      raise exception 'Prueba 15k, anon no puede leer cost_cents: vino %', coalesce(v_msg, 'pudo leerlo');
+    end if;
+
+    v_msg := null;
+    begin
+      perform 1 from public.orders limit 1;
+    exception when others then
+      v_msg := sqlstate;
+    end;
+    if v_msg is distinct from '42501' then
+      raise exception 'Prueba 15l, anon no puede leer orders: vino %', coalesce(v_msg, 'pudo leerlo');
+    end if;
+
+    v_msg := null;
+    begin
+      perform 1 from public.settings limit 1;
+    exception when others then
+      v_msg := sqlstate;
+    end;
+    if v_msg is distinct from '42501' then
+      raise exception 'Prueba 15m, anon no puede leer settings: vino %', coalesce(v_msg, 'pudo leerlo');
+    end if;
+
+    v_msg := null;
+    begin
+      perform public.create_order_with_reservation('{}'::jsonb);
+    exception when others then
+      v_msg := sqlstate;
+    end;
+    if v_msg is distinct from '42501' then
+      raise exception 'Prueba 15n, anon no puede crear pedidos: vino %', coalesce(v_msg, 'pudo llamarla');
+    end if;
+
+    v_msg := null;
+    begin
+      perform 1 from public.admin_users limit 1;
+    exception when others then
+      v_msg := sqlstate;
+    end;
+    if v_msg is distinct from '42501' then
+      raise exception 'Prueba 15o, anon no puede leer admin_users: vino %', coalesce(v_msg, 'pudo leerla');
+    end if;
+
+    v_msg := null;
+    begin
+      perform 1 from public.low_stock_variants limit 1;
+    exception when others then
+      v_msg := sqlstate;
+    end;
+    if v_msg is distinct from '42501' then
+      raise exception 'Prueba 15p, anon no puede leer low_stock_variants: vino %', coalesce(v_msg, 'pudo leerla');
+    end if;
+
+    v_msg := null;
+    begin
+      perform public.admin_dashboard();
+    exception when others then
+      v_msg := sqlstate;
+    end;
+    if v_msg is distinct from '42501' then
+      raise exception 'Prueba 15q, anon no puede pedir el resumen del panel: vino %', coalesce(v_msg, 'pudo llamarlo');
+    end if;
+
+    reset role;
+
+    -- Panel: usuarias simuladas con el JWT --------------------------------------
+    insert into auth.users (id, email, aud, role) values
+      (v_admin, 'admin-prueba@example.com', 'authenticated', 'authenticated'),
+      (v_other, 'clienta-prueba@example.com', 'authenticated', 'authenticated');
+    insert into public.admin_users (user_id, name) values (v_admin, 'Admin de prueba');
+
+    -- Una transferencia pendiente, creada como la crearía el checkout.
+    v_res := public.create_order_with_reservation(jsonb_build_object(
+      'email', 'prueba@example.com', 'phone', '3430000000',
+      'payment_method', 'transfer', 'shipping_method', 'pickup',
+      'items', jsonb_build_array(jsonb_build_object('variant_id', v_neg90, 'quantity', 1))));
+    v_order_transfer := (v_res ->> 'order_id')::uuid;
+
+    -- 16. Administradora con segundo factor --------------------------------------
+    perform set_config('request.jwt.claims',
+      jsonb_build_object('sub', v_admin, 'role', 'authenticated', 'aal', 'aal2')::text, true);
+    set local role authenticated;
+
+    if private.is_admin() is not true then
+      raise exception 'Prueba 16a, una administradora con segundo factor es administradora';
+    end if;
+    if not exists (select 1 from public.products where id = v_hidden_product) then
+      raise exception 'Prueba 16b, la administradora ve productos sin publicar';
+    end if;
+    select stock_on_hand into v_count from public.product_variants where id = v_neg90;
+    if v_count is null then
+      raise exception 'Prueba 16c, la administradora lee el stock';
+    end if;
+    if not exists (select 1 from public.orders where id = v_order_transfer) then
+      raise exception 'Prueba 16d, la administradora ve los pedidos';
+    end if;
+
+    v_res := public.confirm_order_payment(v_order_transfer, null);
+    select * into r from public.orders where id = v_order_transfer;
+    if r.status is distinct from 'paid' or r.paid_at is null then
+      raise exception 'Prueba 16e, confirmar una transferencia la marca pagada con fecha de pago: % %', r.status, r.paid_at;
+    end if;
+
+    perform public.set_order_status(v_order_transfer, 'preparing');
+    perform public.set_order_status(v_order_transfer, 'ready_for_pickup');
+    v_res := public.set_order_status(v_order_transfer, 'delivered');
+    if v_res ->> 'status' is distinct from 'delivered' then
+      raise exception 'Prueba 16f, un retiro pasa por preparando y listo para retirar hasta entregado: %', v_res;
+    end if;
+    v_msg := null;
+    begin
+      perform public.set_order_status(v_order_transfer, 'paid');
+    exception when others then
+      v_msg := sqlerrm;
+    end;
+    if v_msg is distinct from 'invalid_transition' then
+      raise exception 'Prueba 16g, no se puede saltar de entregado a pagado: vino %', coalesce(v_msg, 'ningún error');
+    end if;
+
+    v_res := public.restock_variant(v_neg90, 2, 'Ingreso de prueba', v_admin);
+    if not exists (
+      select 1 from public.stock_movements
+      where created_by = v_admin and type = 'restock' and variant_id = v_neg90
+    ) then
+      raise exception 'Prueba 16h, la administradora repone stock y queda su usuario: %', v_res;
+    end if;
+
+    update public.settings set value = '12' where key = 'transfer_discount_percent';
+    get diagnostics v_count = row_count;
+    if v_count is distinct from 1 then
+      raise exception 'Prueba 16i, la administradora edita la configuración';
+    end if;
+
+    select price_cents into v_price from public.products where id = v_luna_product;
+    update public.products set price_cents = v_price + 10000 where id = v_luna_product;
+    if not exists (
+      select 1 from public.price_changes
+      where product_id = v_luna_product and old_price_cents = v_price and new_price_cents = v_price + 10000
+        and reason = 'Edición manual' and created_by = v_admin
+    ) then
+      raise exception 'Prueba 16j, una edición de precio queda en el historial con su autora';
+    end if;
+
+    -- 3.300.000 + 10% = 3.630.000, que ya es múltiplo de la centena de pesos.
+    select p.new_price_cents into v_count
+    from public.preview_price_change(array[v_luna_product], 10, 10000, false) p;
+    if v_count is distinct from 3630000 then
+      raise exception 'Prueba 16k, la vista previa del aumento: %', v_count;
+    end if;
+    -- En dos sentencias: una sola no ve lo que cambia la función que llama.
+    v_count := public.apply_price_change(array[v_luna_product], 10, 10000, false, 'Aumento de prueba');
+    select price_cents into v_price from public.products where id = v_luna_product;
+    if v_count is distinct from 1 or v_price is distinct from 3630000 then
+      raise exception 'Prueba 16l, aplicar el aumento deja el precio de la vista previa: % productos, precio %', v_count, v_price;
+    end if;
+    if not exists (
+      select 1 from public.price_changes where product_id = v_luna_product and reason = 'Aumento de prueba'
+    ) then
+      raise exception 'Prueba 16m, el aumento masivo queda en el historial con su motivo';
+    end if;
+    if public.adjusted_price(1234500, 5, 10000) is distinct from 1300000 then
+      raise exception 'Prueba 16n, el redondeo es hacia arriba a la centena de pesos: %', public.adjusted_price(1234500, 5, 10000);
+    end if;
+    v_msg := null;
+    begin
+      perform public.apply_price_change(array[v_luna_product], 0, 10000, false, null);
+    exception when others then
+      v_msg := sqlerrm;
+    end;
+    if v_msg is distinct from 'invalid_price_change' then
+      raise exception 'Prueba 16o, un cambio de 0%% se rechaza: vino %', coalesce(v_msg, 'ningún error');
+    end if;
+
+    v_res := public.admin_dashboard();
+    if (v_res ->> 'sales_today_cents') is null or (v_res ->> 'orders_today')::integer < 1 then
+      raise exception 'Prueba 16p, el resumen del panel cuenta la venta de hoy: %', v_res;
+    end if;
+    if not exists (select 1 from public.low_stock_variants where sku = 'PRUEBA-NEG-100') then
+      raise exception 'Prueba 16q, un talle agotado aparece en stock bajo';
+    end if;
+
+    reset role;
+
+    -- 17. La misma administradora, solo con contraseña ---------------------------
+    perform set_config('request.jwt.claims',
+      jsonb_build_object('sub', v_admin, 'role', 'authenticated', 'aal', 'aal1')::text, true);
+    set local role authenticated;
+
+    if private.is_admin() then
+      raise exception 'Prueba 17a, sin segundo factor no es administradora';
+    end if;
+    if not exists (select 1 from public.admin_users where user_id = v_admin) then
+      raise exception 'Prueba 17b, sin segundo factor ve su propia fila para ir a verificarlo';
+    end if;
+    select count(*) into v_count from public.orders;
+    if v_count is distinct from 0 then
+      raise exception 'Prueba 17c, sin segundo factor no ve pedidos: ve %', v_count;
+    end if;
+    select count(*) into v_count from public.products;
+    if v_count is distinct from 0 then
+      raise exception 'Prueba 17d, sin segundo factor no ve productos: ve %', v_count;
+    end if;
+
+    reset role;
+
+    -- 18. Una clienta con cuenta --------------------------------------------------
+    perform set_config('request.jwt.claims',
+      jsonb_build_object('sub', v_other, 'role', 'authenticated', 'aal', 'aal2')::text, true);
+    set local role authenticated;
+
+    if private.is_admin() then
+      raise exception 'Prueba 18a, una clienta no es administradora';
+    end if;
+    select count(*) into v_count from public.products;
+    if v_count is distinct from 0 then
+      raise exception 'Prueba 18b, una clienta no lee el catálogo con su sesión (costos y stock): ve %', v_count;
+    end if;
+    select count(*) into v_count from public.orders;
+    if v_count is distinct from 0 then
+      raise exception 'Prueba 18c, una clienta no ve pedidos: ve %', v_count;
+    end if;
+    select count(*) into v_count from public.admin_users;
+    if v_count is distinct from 0 then
+      raise exception 'Prueba 18d, una clienta no ve administradoras: ve %', v_count;
+    end if;
+    update public.settings set value = '50' where key = 'transfer_discount_percent';
+    get diagnostics v_count = row_count;
+    if v_count is distinct from 0 then
+      raise exception 'Prueba 18e, una clienta no edita la configuración';
+    end if;
+    v_msg := null;
+    begin
+      perform public.confirm_order_payment(v_order_transfer, null);
+    exception when others then
+      v_msg := sqlerrm;
+    end;
+    if v_msg is distinct from 'order_not_found' then
+      raise exception 'Prueba 18f, una clienta no confirma pagos: vino %', coalesce(v_msg, 'ningún error');
+    end if;
+    v_msg := null;
+    begin
+      perform public.record_stock_movement(v_neg90, 'restock', 1, 'Intento', v_other);
+    exception when others then
+      v_msg := sqlerrm;
+    end;
+    if v_msg is distinct from 'variant_not_found' then
+      raise exception 'Prueba 18g, una clienta no mueve stock: vino %', coalesce(v_msg, 'ningún error');
+    end if;
+
+    reset role;
   exception when others then
     -- La secuencia no vuelve atrás con el rollback: se restaura antes de fallar.
     perform setval('public.order_number_seq', v_seq_last, v_seq_called);
@@ -469,121 +791,6 @@ begin
   end;
 
   perform setval('public.order_number_seq', v_seq_last, v_seq_called);
-end
-$$;
-
--- Permisos, como la tienda: rol anon, el de la clave publicable -----------------
-
-do $$
-declare
-  v_msg text;
-  v_luna uuid;
-  v_hidden uuid;
-  v_neg100 uuid;
-  v_nat85 uuid;
-  v_kit uuid;
-  r record;
-begin
-  select id into v_luna from public.products where slug = 'prueba-luna';
-  select id into v_hidden from public.products where slug = 'prueba-oculto';
-  select id into v_neg100 from public.product_variants where sku = 'PRUEBA-NEG-100';
-  select id into v_nat85 from public.product_variants where sku = 'PRUEBA-NAT-85';
-  select id into v_kit from public.kits where slug = 'prueba-kit';
-
-  set local role anon;
-
-  if current_user is distinct from 'anon' then
-    raise exception 'Prueba 15a, la prueba de permisos corre como anon: corre como %', current_user;
-  end if;
-
-  if not exists (select 1 from public.products where id = v_luna) then
-    raise exception 'Prueba 15b, anon lee productos publicados: no ve prueba-luna';
-  end if;
-  if exists (select 1 from public.products where id = v_hidden) then
-    raise exception 'Prueba 15c, anon no ve productos sin publicar: ve prueba-oculto';
-  end if;
-
-  if (select count(*) from public.variant_availability where product_id = v_luna) is distinct from 5 then
-    raise exception 'Prueba 15d, anon lee variant_availability de un producto publicado';
-  end if;
-  if exists (select 1 from public.variant_availability where product_id = v_hidden) then
-    raise exception 'Prueba 15e, variant_availability no muestra productos sin publicar';
-  end if;
-  select * into r from public.variant_availability where variant_id = v_neg100;
-  if r.is_available is not false then
-    raise exception 'Prueba 15f, un talle agotado figura como no disponible: %', r;
-  end if;
-  select * into r from public.variant_availability where variant_id = v_nat85;
-  if r.is_available is not true or r.is_last_units is not true then
-    raise exception 'Prueba 15g, dos unidades figuran como últimas unidades: %', r;
-  end if;
-  if not exists (select 1 from public.kit_availability where kit_id = v_kit and is_available) then
-    raise exception 'Prueba 15h, anon lee kit_availability';
-  end if;
-
-  -- 42501 = permiso denegado. Cualquier otro resultado falla con el nombre de
-  -- la prueba, incluso otro error.
-  v_msg := null;
-  begin
-    perform stock_on_hand from public.product_variants limit 1;
-  exception when others then
-    v_msg := sqlstate;
-  end;
-  if v_msg is distinct from '42501' then
-    raise exception 'Prueba 15i, anon no puede leer stock_on_hand: vino %', coalesce(v_msg, 'pudo leerlo');
-  end if;
-
-  v_msg := null;
-  begin
-    perform stock_reserved from public.product_variants limit 1;
-  exception when others then
-    v_msg := sqlstate;
-  end;
-  if v_msg is distinct from '42501' then
-    raise exception 'Prueba 15j, anon no puede leer stock_reserved: vino %', coalesce(v_msg, 'pudo leerlo');
-  end if;
-
-  v_msg := null;
-  begin
-    perform cost_cents from public.products limit 1;
-  exception when others then
-    v_msg := sqlstate;
-  end;
-  if v_msg is distinct from '42501' then
-    raise exception 'Prueba 15k, anon no puede leer cost_cents: vino %', coalesce(v_msg, 'pudo leerlo');
-  end if;
-
-  v_msg := null;
-  begin
-    perform 1 from public.orders limit 1;
-  exception when others then
-    v_msg := sqlstate;
-  end;
-  if v_msg is distinct from '42501' then
-    raise exception 'Prueba 15l, anon no puede leer orders: vino %', coalesce(v_msg, 'pudo leerlo');
-  end if;
-
-  v_msg := null;
-  begin
-    perform 1 from public.settings limit 1;
-  exception when others then
-    v_msg := sqlstate;
-  end;
-  if v_msg is distinct from '42501' then
-    raise exception 'Prueba 15m, anon no puede leer settings: vino %', coalesce(v_msg, 'pudo leerlo');
-  end if;
-
-  v_msg := null;
-  begin
-    perform public.create_order_with_reservation('{}'::jsonb);
-  exception when others then
-    v_msg := sqlstate;
-  end;
-  if v_msg is distinct from '42501' then
-    raise exception 'Prueba 15n, anon no puede crear pedidos: vino %', coalesce(v_msg, 'pudo llamarla');
-  end if;
-
-  reset role;
 end
 $$;
 
