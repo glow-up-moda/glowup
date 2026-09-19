@@ -601,8 +601,8 @@ begin
 
     -- Panel: usuarias simuladas con el JWT --------------------------------------
     insert into auth.users (id, email, aud, role) values
-      (v_admin, 'admin-prueba@example.com', 'authenticated', 'authenticated'),
-      (v_other, 'clienta-prueba@example.com', 'authenticated', 'authenticated');
+      (v_admin, 'admin-humo@example.com', 'authenticated', 'authenticated'),
+      (v_other, 'clienta-humo@example.com', 'authenticated', 'authenticated');
     insert into public.admin_users (user_id, name) values (v_admin, 'Admin de prueba');
 
     -- Una transferencia pendiente, creada como la crearía el checkout.
@@ -713,6 +713,26 @@ begin
     end if;
     if not exists (select 1 from public.low_stock_variants where sku = 'PRUEBA-NEG-100') then
       raise exception 'Prueba 16q, un talle agotado aparece en stock bajo';
+    end if;
+
+    v_count := public.set_settings(jsonb_build_object(
+      'transfer_discount_percent', 15, 'bank_alias', null));
+    if v_count is distinct from 2
+       or public.setting_text('transfer_discount_percent') is distinct from '15'
+       or public.setting_text('bank_alias') is not null
+       or (select jsonb_typeof(value) from public.settings where key = 'bank_alias') is distinct from 'null' then
+      raise exception 'Prueba 16r, guardar la configuración deja el null de JSON en lo que queda vacío: % filas', v_count;
+    end if;
+    v_msg := null;
+    begin
+      perform public.set_settings(jsonb_build_object('clave_inventada', 1));
+    exception when others then
+      v_msg := sqlerrm;
+      get stacked diagnostics v_detail = pg_exception_detail;
+    end;
+    if v_msg is distinct from 'invalid_setting'
+       or nullif(v_detail, '')::jsonb #>> '{keys,0}' is distinct from 'clave_inventada' then
+      raise exception 'Prueba 16s, una clave que no existe se rechaza: % %', coalesce(v_msg, 'ningún error'), v_detail;
     end if;
 
     reset role;
