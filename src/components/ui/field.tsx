@@ -4,7 +4,8 @@ import { IconAlert } from "./icons";
 
 // Campos con label siempre visible, ayuda y error enlazados con
 // aria-describedby (CLAUDE.md §5 y §15). Texto de 16px en los inputs para que
-// el celular no haga zoom al tocarlos.
+// el celular no haga zoom al tocarlos. Si el mismo formulario aparece varias
+// veces en una página, cada campo necesita su propio id.
 
 export const inputClass =
   "min-h-11 w-full rounded-input border-2 border-transparent bg-crema-oscuro px-3 py-2 text-base text-chocolate placeholder:text-chocolate/60 focus:border-chocolate aria-[invalid=true]:border-error";
@@ -12,43 +13,49 @@ export const inputClass =
 type FieldBase = {
   label: string;
   name: string;
+  id?: string;
   hint?: ReactNode;
   error?: string;
 };
 
 function describedBy(
-  name: string,
+  id: string,
   hint?: ReactNode,
   error?: string,
 ): string | undefined {
-  const ids = [
-    hint ? `${name}-hint` : null,
-    error ? `${name}-error` : null,
-  ].filter(Boolean);
+  const ids = [hint ? `${id}-hint` : null, error ? `${id}-error` : null].filter(
+    Boolean,
+  );
   return ids.length ? ids.join(" ") : undefined;
 }
 
 function FieldFrame({
   label,
-  name,
+  id,
   hint,
   error,
   children,
-}: FieldBase & { children: ReactNode }) {
+}: {
+  label: string;
+  id: string;
+  hint?: ReactNode;
+  error?: string;
+  children: ReactNode;
+}) {
   return (
     <div className="flex flex-col gap-1.5">
-      <label htmlFor={name} className="text-sm font-medium">
+      <label htmlFor={id} className="text-sm font-medium">
         {label}
       </label>
       {children}
       {hint && (
-        <p id={`${name}-hint`} className="text-sm text-chocolate/80">
+        <p id={`${id}-hint`} className="text-sm text-chocolate/80">
           {hint}
         </p>
       )}
       {error && (
         <p
-          id={`${name}-error`}
+          id={`${id}-error`}
           className="flex items-start gap-1.5 text-sm text-error"
         >
           <IconAlert width={16} height={16} className="mt-0.5 shrink-0" />
@@ -62,18 +69,19 @@ function FieldFrame({
 export function TextField({
   label,
   name,
+  id = name,
   hint,
   error,
   className = "",
   ...props
-}: FieldBase & Omit<ComponentProps<"input">, "name">) {
+}: FieldBase & Omit<ComponentProps<"input">, "name" | "id">) {
   return (
-    <FieldFrame label={label} name={name} hint={hint} error={error}>
+    <FieldFrame label={label} id={id} hint={hint} error={error}>
       <input
-        id={name}
+        id={id}
         name={name}
         aria-invalid={error ? true : undefined}
-        aria-describedby={describedBy(name, hint, error)}
+        aria-describedby={describedBy(id, hint, error)}
         className={`${inputClass} ${className}`}
         {...props}
       />
@@ -84,19 +92,20 @@ export function TextField({
 export function TextAreaField({
   label,
   name,
+  id = name,
   hint,
   error,
   className = "",
   ...props
-}: FieldBase & Omit<ComponentProps<"textarea">, "name">) {
+}: FieldBase & Omit<ComponentProps<"textarea">, "name" | "id">) {
   return (
-    <FieldFrame label={label} name={name} hint={hint} error={error}>
+    <FieldFrame label={label} id={id} hint={hint} error={error}>
       <textarea
-        id={name}
+        id={id}
         name={name}
         rows={4}
         aria-invalid={error ? true : undefined}
-        aria-describedby={describedBy(name, hint, error)}
+        aria-describedby={describedBy(id, hint, error)}
         className={`${inputClass} ${className}`}
         {...props}
       />
@@ -107,19 +116,20 @@ export function TextAreaField({
 export function SelectField({
   label,
   name,
+  id = name,
   hint,
   error,
   className = "",
   children,
   ...props
-}: FieldBase & Omit<ComponentProps<"select">, "name">) {
+}: FieldBase & Omit<ComponentProps<"select">, "name" | "id">) {
   return (
-    <FieldFrame label={label} name={name} hint={hint} error={error}>
+    <FieldFrame label={label} id={id} hint={hint} error={error}>
       <select
-        id={name}
+        id={id}
         name={name}
         aria-invalid={error ? true : undefined}
-        aria-describedby={describedBy(name, hint, error)}
+        aria-describedby={describedBy(id, hint, error)}
         className={`${inputClass} ${className}`}
         {...props}
       >
@@ -132,27 +142,29 @@ export function SelectField({
 export function CheckboxField({
   label,
   name,
+  id = name,
   hint,
   ...props
-}: Omit<FieldBase, "error"> & Omit<ComponentProps<"input">, "name" | "type">) {
+}: Omit<FieldBase, "error"> &
+  Omit<ComponentProps<"input">, "name" | "type" | "id">) {
   return (
     <div className="flex flex-col gap-1">
       <label
-        htmlFor={name}
+        htmlFor={id}
         className="flex min-h-11 cursor-pointer items-center gap-3"
       >
         <input
-          id={name}
+          id={id}
           name={name}
           type="checkbox"
-          aria-describedby={hint ? `${name}-hint` : undefined}
+          aria-describedby={hint ? `${id}-hint` : undefined}
           className="size-5 shrink-0 accent-chocolate"
           {...props}
         />
         <span className="text-base">{label}</span>
       </label>
       {hint && (
-        <p id={`${name}-hint`} className="-mt-1 pl-8 text-sm text-chocolate/80">
+        <p id={`${id}-hint`} className="-mt-1 pl-8 text-sm text-chocolate/80">
           {hint}
         </p>
       )}

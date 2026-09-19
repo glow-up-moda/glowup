@@ -242,7 +242,11 @@ Footer: links, legales, Data Fiscal, redes
 Tiene que ser cómodo de usar desde el celular.
 - **Inicio:** ventas del día y la semana, pedidos por preparar y alertas (stock bajo, pedidos para revisar, transferencias por confirmar).
 - **Productos:** crear y editar, variantes (color + talle), fotos, costo, precio, precio tachado, SEO, publicado sí/no.
+  - Un producto nuevo arranca como borrador. Para publicarlo hacen falta al menos una variante y dos fotos.
+  - El stock inicial de una variante entra como ingreso de mercadería, así queda en el historial.
+  - Fotos: el navegador las achica a 2000 px antes de subirlas, y el servidor las pasa a WebP con `sharp` (hasta 1600 × 2000 y una miniatura de 480 × 600) y las guarda en Storage. El texto alternativo es obligatorio.
 - **Stock:** ingreso de mercadería, ajustes, venta manual rápida (Instagram, WhatsApp, en persona) e historial de movimientos.
+- **Formularios del panel:** con `useFormAction` (`src/components/admin/use-form-action.ts`), no con `<form action>` directo. React 19 resetea el formulario al terminar la acción y eso cambia los `<select>` aunque haya fallado: una venta con error volvía a "Entró mercadería".
 - **Precios:** aumento o descuento masivo por categoría o selección, con redondeo, vista previa y margen.
 - **Pedidos:** filtros por estado, detalle, confirmar transferencia, cambiar estado y hoja imprimible para armar el paquete.
 - **Kits, cupones, reseñas (moderación), avisos de reposición y zonas de envío.**
