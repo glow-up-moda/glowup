@@ -451,3 +451,4 @@ Con logo, paleta y voz de marca:
 - [ ] Alias, CBU y número de WhatsApp.
 - [ ] Dominio, usuario de Instagram y registro de marca en el INPI.
 - [ ] Textos legales revisados.
+- [ ] Activar en Supabase Auth la protección de contraseñas filtradas (HaveIBeenPwned), que hoy está apagada.
