@@ -13,3 +13,9 @@ export function isUuid(value: string): boolean {
 export function likePattern(value: string): string {
   return `%${value.replace(/[\\%_]/g, (match) => `\\${match}`)}%`;
 }
+
+/** Un parámetro repetido (checkboxes) como lista. */
+export function paramList(value: string | string[] | undefined): string[] {
+  if (!value) return [];
+  return (Array.isArray(value) ? value : [value]).map((item) => item.trim());
+}

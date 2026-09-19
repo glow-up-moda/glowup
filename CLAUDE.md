@@ -248,6 +248,9 @@ Tiene que ser cómodo de usar desde el celular.
 - **Stock:** ingreso de mercadería, ajustes, venta manual rápida (Instagram, WhatsApp, en persona) e historial de movimientos.
 - **Formularios del panel:** con `useFormAction` (`src/components/admin/use-form-action.ts`), no con `<form action>` directo. React 19 resetea el formulario al terminar la acción y eso cambia los `<select>` aunque haya fallado: una venta con error volvía a "Entró mercadería".
 - **Precios:** aumento o descuento masivo por categoría o selección, con redondeo, vista previa y margen.
+  - Alcance: una categoría (incluye sus subcategorías), los productos que se marquen o todo el catálogo. El porcentaje va de -90 a 300 y el redondeo es siempre hacia arriba.
+  - La vista previa muestra el margen antes y después, marca los borradores y avisa cuando el precio nuevo alcanza al tachado y el producto deja de verse como oferta.
+  - Cada cambio queda en `price_changes` con el motivo que se escriba.
 - **Pedidos:** filtros por estado, detalle, confirmar transferencia, cambiar estado y hoja imprimible para armar el paquete.
   - Pestañas por `?estado=`: `por-preparar` (pagados, la vista inicial), `transferencias` (pendientes por transferencia), `revisar`, `preparando`, `enviados`, `entregados`, `cancelados` y `todos`. La búsqueda recorre todos los pedidos, por número o por email.
   - Estados: pagado → preparando → enviado (o listo para retirar, si es retiro) → entregado, con un paso atrás por si hubo un error. Los aplica `set_order_status`.
@@ -261,6 +264,7 @@ Tiene que ser cómodo de usar desde el celular.
   - Ingreso en `/admin/ingresar` con email y contraseña, y después un código de una app de autenticación (TOTP) en `/admin/verificar`. La primera vez, esa pantalla muestra el QR para configurarla.
   - Las cuentas se dan de alta con `npm run admin:create`, que pide email, nombre y contraseña en la terminal. Si alguien pierde el celular, el mismo comando le borra el segundo paso para configurarlo de nuevo.
   - `requireAdmin()` (`src/lib/auth/admin.ts`) va en cada página y cada acción del panel; `src/proxy.ts` solo renueva la sesión.
+  - Una administradora con movimientos de stock a su nombre no se puede borrar de `auth`: el historial exige el usuario. Para sacarle el acceso, se la quita de `admin_users`.
 
 ## 8. Modelo de datos (base)
 

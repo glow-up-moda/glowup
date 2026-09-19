@@ -171,3 +171,41 @@ export function CheckboxField({
     </div>
   );
 }
+
+export function RadioGroupField({
+  legend,
+  name,
+  options,
+  value,
+  hint,
+}: {
+  legend: string;
+  name: string;
+  options: readonly { value: string; label: string }[];
+  value?: string;
+  hint?: ReactNode;
+}) {
+  return (
+    <fieldset className="flex flex-col gap-1">
+      <legend className="text-sm font-medium">{legend}</legend>
+      {options.map((option) => (
+        <label
+          key={option.value}
+          htmlFor={`${name}-${option.value}`}
+          className="flex min-h-11 cursor-pointer items-center gap-3"
+        >
+          <input
+            id={`${name}-${option.value}`}
+            type="radio"
+            name={name}
+            value={option.value}
+            defaultChecked={value === option.value}
+            className="size-5 shrink-0 accent-chocolate"
+          />
+          <span className="text-base">{option.label}</span>
+        </label>
+      ))}
+      {hint && <p className="text-sm text-chocolate/80">{hint}</p>}
+    </fieldset>
+  );
+}
