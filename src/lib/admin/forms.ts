@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { parsePesos } from "@/lib/format";
+import { fromLocalInput, parsePesos } from "@/lib/format";
 
 /** Estado que devuelven las acciones de formulario del panel. */
 export type FormState = {
@@ -89,3 +89,15 @@ export const checkbox = z
   .string()
   .optional()
   .transform((value) => value === "on" || value === "true");
+
+/** Fecha y hora opcional de un <input type="datetime-local">, a ISO; vacío es null. */
+export const optionalDateTime = (message = "Revisá la fecha y la hora.") =>
+  z.string().transform((value, ctx) => {
+    if (value.trim() === "") return null;
+    const iso = fromLocalInput(value);
+    if (!iso) {
+      ctx.addIssue({ code: "custom", message });
+      return z.NEVER;
+    }
+    return iso;
+  });

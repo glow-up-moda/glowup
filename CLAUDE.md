@@ -257,7 +257,9 @@ Tiene que ser cómodo de usar desde el celular.
   - Las transferencias se confirman a mano, con un paso de confirmación. Una transferencia de un pedido ya cancelado también se puede confirmar: si todavía hay stock se descuenta; si no, queda para revisar (§9.6). Mercado Pago nunca se confirma desde el panel.
   - "Ya lo revisé" apaga `needs_review`, pero el motivo queda guardado en el pedido.
   - La hoja para armar (`/admin/pedidos/[numero]/hoja`) no lleva precios: puede ir dentro de la caja.
-- **Kits, cupones, reseñas (moderación), avisos de reposición y zonas de envío.**
+- **Cupones:** listado con estado (activo, programado, vencido, agotado), alta y edición con vigencia en hora de Argentina, "desactivar ahora" (le corta la vigencia) y borrado solo si nunca se usó.
+  - Desactivar un cupón programado también le borra la fecha de inicio: la base exige que el inicio sea anterior al fin.
+- **Kits, reseñas (moderación), avisos de reposición y zonas de envío.**
 - **Reportes:** más vendidos, talles más vendidos, avisos de reposición por variante y margen.
 - **Configuración:** % de descuento por transferencia, monto de envío gratis, alias y CBU, umbral de stock bajo, mensajes de la barra de anuncios, número de WhatsApp.
 - **Acceso:** solo usuarios con rol admin y verificación en dos pasos.
