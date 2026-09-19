@@ -7,8 +7,9 @@ const byMessage: Record<string, string> = {
   invalid_movement: "Revisá la cantidad y la nota del movimiento.",
   variant_not_found: "Esa variante ya no existe.",
   order_not_found: "No encontramos ese pedido.",
+  // El panel solo ofrece pasos válidos: si falla, el pedido cambió en otra pestaña.
   invalid_transition:
-    "Ese cambio de estado no se puede hacer desde el estado actual.",
+    "El pedido cambió mientras lo mirabas. Recargá la página para ver cómo quedó.",
   invalid_price_change:
     "Revisá el porcentaje, el redondeo y los productos elegidos.",
 };

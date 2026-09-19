@@ -249,6 +249,11 @@ Tiene que ser cómodo de usar desde el celular.
 - **Formularios del panel:** con `useFormAction` (`src/components/admin/use-form-action.ts`), no con `<form action>` directo. React 19 resetea el formulario al terminar la acción y eso cambia los `<select>` aunque haya fallado: una venta con error volvía a "Entró mercadería".
 - **Precios:** aumento o descuento masivo por categoría o selección, con redondeo, vista previa y margen.
 - **Pedidos:** filtros por estado, detalle, confirmar transferencia, cambiar estado y hoja imprimible para armar el paquete.
+  - Pestañas por `?estado=`: `por-preparar` (pagados, la vista inicial), `transferencias` (pendientes por transferencia), `revisar`, `preparando`, `enviados`, `entregados`, `cancelados` y `todos`. La búsqueda recorre todos los pedidos, por número o por email.
+  - Estados: pagado → preparando → enviado (o listo para retirar, si es retiro) → entregado, con un paso atrás por si hubo un error. Los aplica `set_order_status`.
+  - Las transferencias se confirman a mano, con un paso de confirmación. Una transferencia de un pedido ya cancelado también se puede confirmar: si todavía hay stock se descuenta; si no, queda para revisar (§9.6). Mercado Pago nunca se confirma desde el panel.
+  - "Ya lo revisé" apaga `needs_review`, pero el motivo queda guardado en el pedido.
+  - La hoja para armar (`/admin/pedidos/[numero]/hoja`) no lleva precios: puede ir dentro de la caja.
 - **Kits, cupones, reseñas (moderación), avisos de reposición y zonas de envío.**
 - **Reportes:** más vendidos, talles más vendidos, avisos de reposición por variante y margen.
 - **Configuración:** % de descuento por transferencia, monto de envío gratis, alias y CBU, umbral de stock bajo, mensajes de la barra de anuncios, número de WhatsApp.
@@ -275,6 +280,7 @@ Montos siempre en **enteros de centavos**. Fechas guardadas en UTC y mostradas e
   - La base exige `discount_cents = coupon_discount_cents + transfer_discount_cents` y `total_cents = subtotal_cents - discount_cents + shipping_cents`.
   - `coupon_id` solo se guarda si el cupón se aplicó. `review_reason` explica por qué el pedido quedó con `needs_review`.
   - `paid_at` se completa solo al pasar a `paid`: las ventas del día se cuentan por fecha de cobro.
+  - `shipping_address` es un objeto con las claves `name`, `street`, `number`, `floor`, `apartment`, `city`, `province`, `postal_code` y `notes`. El panel las muestra en ese orden, porque `jsonb` no guarda el orden de las claves.
 - `order_items` (order_id, parent_item_id, variant_id, kit_id, name_snapshot, unit_price_cents, quantity)
   - Un kit entra como una línea con `kit_id` y su precio, y sus componentes como líneas hijas (`parent_item_id`) con `variant_id` y precio 0. Así el pedido guarda la composición con la que se vendió, aunque el kit cambie después. Las operaciones de stock recorren solo las líneas con variante.
 - `stock_movements` (id, variant_id, type, quantity, order_id, note, created_by, created_at)

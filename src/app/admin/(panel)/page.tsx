@@ -4,25 +4,11 @@ import Link from "next/link";
 import { PageHeader } from "@/components/admin/page-header";
 import { IconAlert, IconChevronRight } from "@/components/ui/icons";
 import { Notice } from "@/components/ui/notice";
+import type { DashboardSummary } from "@/lib/admin/dashboard";
 import { requireAdmin } from "@/lib/auth/admin";
-import { formatMoney } from "@/lib/format";
+import { formatMoney, plural } from "@/lib/format";
 
 export const metadata: Metadata = { title: "Inicio" };
-
-type Summary = {
-  sales_today_cents: number;
-  orders_today: number;
-  sales_week_cents: number;
-  orders_week: number;
-  to_prepare: number;
-  pending_transfers: number;
-  needs_review: number;
-  low_stock: number;
-};
-
-function plural(count: number, one: string, many: string): string {
-  return `${count} ${count === 1 ? one : many}`;
-}
 
 export default async function DashboardPage() {
   const { supabase, name } = await requireAdmin();
@@ -35,7 +21,7 @@ export default async function DashboardPage() {
       .order("available")
       .limit(5),
   ]);
-  const summary = summaryData as Summary | null;
+  const summary = summaryData as DashboardSummary | null;
 
   const alerts = summary
     ? [

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { FilterNav } from "@/components/admin/filter-nav";
 import { PageHeader } from "@/components/admin/page-header";
 import { Badge } from "@/components/ui/badge";
 import { ButtonLink } from "@/components/ui/button";
@@ -88,25 +89,14 @@ export default async function ProductsPage({
         </button>
       </form>
 
-      <nav
-        aria-label="Filtrar productos"
-        className="mb-5 flex gap-2 overflow-x-auto pb-1"
-      >
-        {filters.map((filter) => (
-          <Link
-            key={filter.value}
-            href={filterHref(filter.value)}
-            aria-current={estado === filter.value ? "page" : undefined}
-            className={`inline-flex min-h-11 shrink-0 items-center rounded-full px-4 ${
-              estado === filter.value
-                ? "bg-chocolate text-crema"
-                : "bg-crema-oscuro"
-            }`}
-          >
-            {filter.label}
-          </Link>
-        ))}
-      </nav>
+      <FilterNav
+        label="Filtrar productos"
+        items={filters.map((filter) => ({
+          href: filterHref(filter.value),
+          label: filter.label,
+          active: estado === filter.value,
+        }))}
+      />
 
       {error ? (
         <Notice tone="error">

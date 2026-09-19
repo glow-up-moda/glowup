@@ -19,6 +19,8 @@ const dateTime = new Intl.DateTimeFormat("es-AR", {
   month: "short",
   hour: "2-digit",
   minute: "2-digit",
+  // En Argentina se escribe 14:27, no 02:27 p. m.
+  hourCycle: "h23",
 });
 
 const dateOnly = new Intl.DateTimeFormat("es-AR", {
@@ -91,4 +93,9 @@ export function fromLocalInput(value: string): string | null {
   if (!value) return null;
   const date = new Date(`${value}:00${AR_OFFSET}`);
   return Number.isNaN(date.getTime()) ? null : date.toISOString();
+}
+
+/** "1 pedido", "3 pedidos". */
+export function plural(count: number, one: string, many: string): string {
+  return `${count} ${count === 1 ? one : many}`;
 }
