@@ -14,6 +14,24 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_users: {
+        Row: {
+          created_at: string
+          name: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          name: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       back_in_stock_requests: {
         Row: {
           created_at: string
@@ -37,6 +55,13 @@ export type Database = {
           variant_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "back_in_stock_requests_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
+            referencedRelation: "low_stock_variants"
+            referencedColumns: ["variant_id"]
+          },
           {
             foreignKeyName: "back_in_stock_requests_variant_id_fkey"
             columns: ["variant_id"]
@@ -194,6 +219,13 @@ export type Database = {
             foreignKeyName: "kit_items_variant_id_fkey"
             columns: ["variant_id"]
             isOneToOne: false
+            referencedRelation: "low_stock_variants"
+            referencedColumns: ["variant_id"]
+          },
+          {
+            foreignKeyName: "kit_items_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
             referencedRelation: "product_variants"
             referencedColumns: ["id"]
           },
@@ -306,6 +338,13 @@ export type Database = {
             foreignKeyName: "order_items_variant_id_fkey"
             columns: ["variant_id"]
             isOneToOne: false
+            referencedRelation: "low_stock_variants"
+            referencedColumns: ["variant_id"]
+          },
+          {
+            foreignKeyName: "order_items_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
             referencedRelation: "product_variants"
             referencedColumns: ["id"]
           },
@@ -332,6 +371,7 @@ export type Database = {
           mp_preference_id: string | null
           needs_review: boolean
           number: string
+          paid_at: string | null
           payment_method: Database["public"]["Enums"]["payment_method"]
           phone: string
           reserved_until: string | null
@@ -359,6 +399,7 @@ export type Database = {
           mp_preference_id?: string | null
           needs_review?: boolean
           number?: string
+          paid_at?: string | null
           payment_method: Database["public"]["Enums"]["payment_method"]
           phone: string
           reserved_until?: string | null
@@ -386,6 +427,7 @@ export type Database = {
           mp_preference_id?: string | null
           needs_review?: boolean
           number?: string
+          paid_at?: string | null
           payment_method?: Database["public"]["Enums"]["payment_method"]
           phone?: string
           reserved_until?: string | null
@@ -777,6 +819,13 @@ export type Database = {
             foreignKeyName: "stock_movements_variant_id_fkey"
             columns: ["variant_id"]
             isOneToOne: false
+            referencedRelation: "low_stock_variants"
+            referencedColumns: ["variant_id"]
+          },
+          {
+            foreignKeyName: "stock_movements_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
             referencedRelation: "product_variants"
             referencedColumns: ["id"]
           },
@@ -799,6 +848,27 @@ export type Database = {
         }
         Relationships: []
       }
+      low_stock_variants: {
+        Row: {
+          available: number | null
+          color: string | null
+          product_id: string | null
+          product_name: string | null
+          size: string | null
+          sku: string | null
+          threshold: number | null
+          variant_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_variants_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       variant_availability: {
         Row: {
           is_available: boolean | null
@@ -818,6 +888,25 @@ export type Database = {
       }
     }
     Functions: {
+      adjusted_price: {
+        Args: {
+          p_percent: number
+          p_price_cents: number
+          p_round_to_cents: number
+        }
+        Returns: number
+      }
+      admin_dashboard: { Args: never; Returns: Json }
+      apply_price_change: {
+        Args: {
+          p_include_compare_at: boolean
+          p_percent: number
+          p_product_ids: string[]
+          p_reason: string
+          p_round_to_cents: number
+        }
+        Returns: number
+      }
       calculate_order_totals: {
         Args: {
           p_coupon_code?: string
@@ -828,6 +917,14 @@ export type Database = {
           p_strict?: boolean
         }
         Returns: Json
+      }
+      check_price_change: {
+        Args: {
+          p_percent: number
+          p_product_ids: string[]
+          p_round_to_cents: number
+        }
+        Returns: undefined
       }
       confirm_order_payment: {
         Args: { p_mp_payment_id?: string; p_order_id: string }
@@ -843,6 +940,23 @@ export type Database = {
       }
       create_order_with_reservation: { Args: { payload: Json }; Returns: Json }
       kit_available_quantity: { Args: { p_kit_id: string }; Returns: number }
+      preview_price_change: {
+        Args: {
+          p_include_compare_at?: boolean
+          p_percent: number
+          p_product_ids: string[]
+          p_round_to_cents?: number
+        }
+        Returns: {
+          cost_cents: number
+          name: string
+          new_compare_at_price_cents: number
+          new_price_cents: number
+          old_compare_at_price_cents: number
+          old_price_cents: number
+          product_id: string
+        }[]
+      }
       quote_cart: { Args: { payload: Json }; Returns: Json }
       record_stock_movement: {
         Args: {
@@ -865,6 +979,13 @@ export type Database = {
           p_note: string
           p_quantity: number
           p_variant_id: string
+        }
+        Returns: Json
+      }
+      set_order_status: {
+        Args: {
+          p_order_id: string
+          p_status: Database["public"]["Enums"]["order_status"]
         }
         Returns: Json
       }

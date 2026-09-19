@@ -10,14 +10,17 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "db:types": "supabase gen types typescript --linked --schema public > src/lib/supabase/database.types.ts",
-    "db:test": "supabase db query --linked -f supabase/tests/smoke.sql"
+    "db:test": "supabase db query --linked -f supabase/tests/smoke.sql",
+    "admin:create": "node --env-file=.env.local scripts/create-admin.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.116.0",
     "next": "16.3.5",
     "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "react-dom": "19.2.8",
+    "sharp": "^0.35.4",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

@@ -39,6 +39,7 @@ Tienda online de **ropa interior femenina y accesorios** (gorras, anteojos de so
 | Pagos | Mercado Pago Checkout Pro (SDK oficial de Node) |
 | Emails | Resend + React Email |
 | Validación | Zod |
+| Imágenes | `sharp` en el servidor: las fotos se suben convertidas a WebP (las transformaciones de Supabase son pagas y Safari no codifica WebP) |
 | Formato | Prettier + `prettier-plugin-tailwindcss` (ordena las clases) |
 | Hosting | Netlify (`glowupind.netlify.app` hasta tener dominio propio) |
 | Analítica | Meta Pixel + Google Analytics 4 |
@@ -67,6 +68,8 @@ src/app/admin/            panel de administración (protegido)
 src/app/api/              webhooks y endpoints
 src/components/ui/        botones, inputs, badges
 src/components/store/     header, carrito lateral, tarjetas de producto
+src/components/admin/     armazón, navegación y piezas del panel
+scripts/                  tareas locales (alta de administradoras)
 src/lib/                  supabase, mercadopago, pricing, stock, shipping
 src/emails/               plantillas de React Email
 supabase/migrations/      SQL versionado
@@ -246,6 +249,9 @@ Tiene que ser cómodo de usar desde el celular.
 - **Reportes:** más vendidos, talles más vendidos, avisos de reposición por variante y margen.
 - **Configuración:** % de descuento por transferencia, monto de envío gratis, alias y CBU, umbral de stock bajo, mensajes de la barra de anuncios, número de WhatsApp.
 - **Acceso:** solo usuarios con rol admin y verificación en dos pasos.
+  - Ingreso en `/admin/ingresar` con email y contraseña, y después un código de una app de autenticación (TOTP) en `/admin/verificar`. La primera vez, esa pantalla muestra el QR para configurarla.
+  - Las cuentas se dan de alta con `npm run admin:create`, que pide email, nombre y contraseña en la terminal. Si alguien pierde el celular, el mismo comando le borra el segundo paso para configurarlo de nuevo.
+  - `requireAdmin()` (`src/lib/auth/admin.ts`) va en cada página y cada acción del panel; `src/proxy.ts` solo renueva la sesión.
 
 ## 8. Modelo de datos (base)
 
