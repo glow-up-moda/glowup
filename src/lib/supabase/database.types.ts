@@ -989,6 +989,7 @@ export type Database = {
         }
         Returns: Json
       }
+      set_settings: { Args: { p_values: Json }; Returns: number }
       setting_text: { Args: { p_key: string }; Returns: string }
     }
     Enums: {

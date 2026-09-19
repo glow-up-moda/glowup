@@ -101,3 +101,19 @@ export const optionalDateTime = (message = "Revisá la fecha y la hora.") =>
     }
     return iso;
   });
+
+/** Entero obligatorio dentro de un rango. */
+export const integer = (min: number, max: number, message: string) =>
+  z.string().transform((value, ctx) => {
+    const number = Number(value.trim());
+    if (
+      value.trim() === "" ||
+      !Number.isInteger(number) ||
+      number < min ||
+      number > max
+    ) {
+      ctx.addIssue({ code: "custom", message });
+      return z.NEVER;
+    }
+    return number;
+  });

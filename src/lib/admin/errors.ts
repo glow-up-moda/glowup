@@ -10,6 +10,7 @@ const byMessage: Record<string, string> = {
   // El panel solo ofrece pasos válidos: si falla, el pedido cambió en otra pestaña.
   invalid_transition:
     "El pedido cambió mientras lo mirabas. Recargá la página para ver cómo quedó.",
+  invalid_setting: "Esa opción de configuración no existe.",
   invalid_price_change:
     "Revisá el porcentaje, el redondeo y los productos elegidos.",
 };

@@ -262,6 +262,8 @@ Tiene que ser cómodo de usar desde el celular.
 - **Kits, reseñas (moderación), avisos de reposición y zonas de envío.**
 - **Reportes:** más vendidos, talles más vendidos, avisos de reposición por variante y margen.
 - **Configuración:** % de descuento por transferencia, monto de envío gratis, alias y CBU, umbral de stock bajo, mensajes de la barra de anuncios, número de WhatsApp.
+  - Una sola pantalla con todo, validado: CBU de 22 números, alias de 6 a 20 caracteres, WhatsApp solo números, horario de corte HH:MM y hasta 5 mensajes de anuncio de 80 caracteres, uno por línea.
+  - Un campo opcional vacío se guarda como el null de JSON. Escribir algo inválido nunca lo borra en silencio: vuelve con el error.
 - **Acceso:** solo usuarios con rol admin y verificación en dos pasos.
   - Ingreso en `/admin/ingresar` con email y contraseña, y después un código de una app de autenticación (TOTP) en `/admin/verificar`. La primera vez, esa pantalla muestra el QR para configurarla.
   - Las cuentas se dan de alta con `npm run admin:create`, que pide email, nombre y contraseña en la terminal. Si alguien pierde el celular, el mismo comando le borra el segundo paso para configurarlo de nuevo.
@@ -304,6 +306,7 @@ Montos siempre en **enteros de centavos**. Fechas guardadas en UTC y mostradas e
 - `favorites` (user_id, product_id), solo con cuenta.
 - `settings` (clave/valor jsonb: transfer_discount_percent, free_shipping_threshold_cents, discounts_stack, bank_alias, bank_cbu, low_stock_default, last_units_threshold, announcement_messages, whatsapp_number, same_day_cutoff_time)
   - Los valores iniciales están en la migración del esquema, porque producción también los necesita. Alias, CBU y WhatsApp arrancan vacíos: el repo es público.
+  - `value` es jsonb `not null` y un valor sin configurar es el null de JSON. El panel guarda con `set_settings`, no con un upsert: PostgREST convertiría ese null en NULL de SQL y la columna lo rechaza.
 
 ### Exposición por la API
 
@@ -332,9 +335,10 @@ Ninguna es `security definer` salvo `private.is_admin()`, que lee `admin_users` 
 | `set_order_status(order_id, status)` | panel | Pagado → preparando → enviado o listo para retirar → entregado, con vuelta de un paso |
 | `preview_price_change(...)` y `apply_price_change(...)` | panel | Aumento o descuento masivo (§10) con la misma fórmula (`adjusted_price`) en la vista previa y al aplicar |
 | `admin_dashboard()` y la vista `low_stock_variants` | panel | Ventas de hoy y de la semana, pedidos por preparar y alertas |
+| `set_settings(valores)` | panel | Guarda la configuración; solo acepta claves que ya existen |
 | `calculate_order_totals(...)` | servidor | La única implementación del cálculo de §10, que usan las anteriores |
 
-- Los errores usan `message` como código estable (`out_of_stock`, `invalid_coupon`, `invalid_shipping`, `item_unavailable`, `invalid_items`, `invalid_payload`, `insufficient_stock`, `invalid_movement`, `invalid_transition`, `invalid_price_change`) y `details` con un JSON. La app traduce el código al texto de la tienda.
+- Los errores usan `message` como código estable (`out_of_stock`, `invalid_coupon`, `invalid_shipping`, `item_unavailable`, `invalid_items`, `invalid_payload`, `insufficient_stock`, `invalid_movement`, `invalid_transition`, `invalid_price_change`, `invalid_setting`) y `details` con un JSON. La app traduce el código al texto de la tienda.
 - Tope de 10 unidades por línea: una reserva por transferencia inmoviliza stock durante 24 horas.
 - Datos de prueba en `supabase/seed.sql`, aplicados con `npx supabase db push --include-seed`. Nunca van a producción.
 - Pruebas de humo en `supabase/tests/smoke.sql`, con `npm run db:test`. Crean sus propios datos dentro de una transacción que se deshace, así que no dependen del seed, y restauran la secuencia de pedidos. Si algo falla, la corrida se corta con un error que nombra la prueba; si no, termina en "todas las pruebas pasaron". No son pgTAP: `supabase test db` no aplica.
