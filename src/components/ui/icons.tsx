@@ -212,3 +212,64 @@ export function IconWhatsApp(props: IconProps) {
     </Svg>
   );
 }
+
+export function IconMenu(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path d="M4 7h16" />
+      <path d="M4 12h16" />
+      <path d="M4 17h16" />
+    </Svg>
+  );
+}
+
+export function IconClose(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path d="m6 6 12 12" />
+      <path d="m18 6-12 12" />
+    </Svg>
+  );
+}
+
+export function IconHeart(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path d="M12 20s-7.5-4.6-7.5-9.4A4.1 4.1 0 0 1 12 8a4.1 4.1 0 0 1 7.5 2.6C19.5 15.4 12 20 12 20z" />
+    </Svg>
+  );
+}
+
+export function IconBag(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path d="M5.5 8h13l-1 12h-11z" />
+      <path d="M9 8V6.5a3 3 0 0 1 6 0V8" />
+    </Svg>
+  );
+}
+
+export function IconChevronLeft(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path d="M14.5 5.5 8 12l6.5 6.5" />
+    </Svg>
+  );
+}
+
+/** Destello de 4 puntas: el motivo de marca (§5). Va relleno, no de trazo. */
+export function Sparkle(props: IconProps) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width={20}
+      height={20}
+      fill="currentColor"
+      aria-hidden="true"
+      focusable="false"
+      {...props}
+    >
+      <path d="M12 1.5c.5 4.6 1.9 7.4 4.3 8.7 1.3.7 3 1.2 5.2 1.5v.6c-4.6.5-7.4 1.9-8.7 4.3-.7 1.3-1.2 3-1.5 5.2h-.6c-.5-4.6-1.9-7.4-4.3-8.7-1.3-.7-3-1.2-5.2-1.5v-.6c4.6-.5 7.4-1.9 8.7-4.3.7-1.3 1.2-3 1.5-5.2z" />
+    </svg>
+  );
+}

@@ -94,3 +94,121 @@
     }
   }
 }
+
+/* Entrada suave de un texto que cambia (barra de anuncios, §5). */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@utility fade-in {
+  animation: fade-in 300ms var(--ease-brand) both;
+}
+
+@layer components {
+  /* Paneles que se deslizan (menú y carrito lateral, §6). El <dialog> ya trae
+     foco y Escape; acá van el desplazamiento y el fondo. Con
+     prefers-reduced-motion la regla de arriba deja solo la opacidad. */
+  dialog.drawer {
+    transition:
+      translate 450ms var(--ease-brand),
+      opacity 300ms var(--ease-brand),
+      overlay 450ms allow-discrete,
+      display 450ms allow-discrete;
+    translate: -100% 0;
+    opacity: 0;
+  }
+
+  dialog.drawer-right {
+    translate: 100% 0;
+  }
+
+  dialog.drawer[open] {
+    translate: 0 0;
+    opacity: 1;
+  }
+
+  @starting-style {
+    dialog.drawer[open] {
+      translate: -100% 0;
+      opacity: 0;
+    }
+
+    dialog.drawer-right[open] {
+      translate: 100% 0;
+    }
+  }
+
+  dialog.drawer::backdrop {
+    background-color: rgb(58 41 37 / 0.4);
+    opacity: 0;
+    transition:
+      opacity 300ms var(--ease-brand),
+      overlay 450ms allow-discrete,
+      display 450ms allow-discrete;
+  }
+
+  dialog.drawer[open]::backdrop {
+    opacity: 1;
+  }
+
+  @starting-style {
+    dialog.drawer[open]::backdrop {
+      opacity: 0;
+    }
+  }
+}
+
+/* Rebote del contador de la bolsa y del corazón de favoritos (§6). */
+@keyframes pop {
+  from {
+    transform: scale(0.6);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+@utility pop {
+  animation: pop 300ms var(--ease-bounce) both;
+}
+
+/* Entrada del hero: la única secuencia orquestada del sitio (§6). */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@utility rise {
+  animation: rise 600ms var(--ease-brand) both;
+}
+
+/* El destello se enciende una vez, al cargar el inicio. */
+@keyframes shine {
+  0% {
+    opacity: 0;
+    transform: scale(0.6) rotate(-25deg);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.12) rotate(0deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@utility shine {
+  animation: shine 900ms var(--ease-brand) both;
+}
