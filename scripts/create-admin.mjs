@@ -22,35 +22,55 @@ const supabase = createClient(url, secretKey, {
   auth: { persistSession: false, autoRefreshToken: false },
 });
 
-function ask(question) {
-  return new Promise((resolve) => {
-    const rl = readline.createInterface({
-      input: process.stdin,
-      output: process.stdout,
-    });
-    rl.question(question, (answer) => {
-      rl.close();
-      resolve(answer.trim());
+// Una sola lectura de teclado para todo el comando: abrir y cerrar una por
+// pregunta dejaba la entrada cerrada a la tercera, y el comando terminaba sin
+// pedir la contraseña.
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+  terminal: true,
+});
+
+// Si la entrada se cierra (por ejemplo, si el comando no corre en una terminal
+// donde se pueda escribir), la pregunta que quedó abierta nunca vuelve: hay
+// que avisarlo en vez de terminar en silencio.
+let onInputClosed = null;
+rl.on("close", () => onInputClosed?.());
+
+function question(text, transform = (answer) => answer) {
+  return new Promise((resolve, reject) => {
+    onInputClosed = () =>
+      reject(
+        new Error(
+          "se cerró la entrada del teclado. Corré `npm run admin:create` en una terminal donde puedas escribir.",
+        ),
+      );
+    rl.question(text, (answer) => {
+      onInputClosed = null;
+      resolve(transform(answer));
     });
   });
 }
 
-// Como sudo: no muestra nada mientras se escribe.
-function askHidden(question) {
-  return new Promise((resolve) => {
-    const rl = readline.createInterface({
-      input: process.stdin,
-      output: process.stdout,
-      terminal: true,
-    });
-    process.stdout.write(question);
-    rl._writeToOutput = (text) => {
-      if (/[\r\n]/.test(text)) rl.output.write("\n");
-    };
-    rl.question("", (answer) => {
-      rl.close();
-      resolve(answer);
-    });
+function ask(text) {
+  return question(text, (answer) => answer.trim());
+}
+
+// La contraseña se escribe con asteriscos. La terminal redibuja la línea en
+// cada tecla, así que hay que volver a escribir la pregunta: si no, la
+// pregunta desaparece y parece que el comando nunca la pidió.
+function askHidden(text) {
+  const plain = rl._writeToOutput.bind(rl);
+  rl._writeToOutput = (output) => {
+    if (output.includes(text)) {
+      rl.output.write(text + "*".repeat(rl.line.length));
+    } else if (/[\r\n]/.test(output)) {
+      rl.output.write("\n");
+    }
+  };
+  return question(text, (answer) => {
+    rl._writeToOutput = plain;
+    return answer;
   });
 }
 
@@ -130,7 +150,12 @@ async function main() {
   );
 }
 
-main().catch((error) => {
-  console.error(`\nNo se pudo completar: ${error.message}`);
-  process.exit(1);
-});
+main()
+  .then(() => {
+    rl.close();
+  })
+  .catch((error) => {
+    rl.close();
+    console.error(`\nNo se pudo completar: ${error.message}`);
+    process.exit(1);
+  });
