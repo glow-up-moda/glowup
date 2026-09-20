@@ -1,10 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
+import { quoteCart } from "@/app/(store)/actions";
 import { ButtonLink } from "@/components/ui/button";
-import { IconClose, IconTrash, Sparkle } from "@/components/ui/icons";
+import {
+  IconAlert,
+  IconClose,
+  IconTrash,
+  Sparkle,
+} from "@/components/ui/icons";
 import { formatMoney } from "@/lib/format";
 import { MAX_PER_LINE, useCart } from "@/lib/store/cart";
 import { productImageUrl } from "@/lib/images";
@@ -23,9 +29,15 @@ export function CartDrawer({
 }: {
   freeShippingThresholdCents: number | null;
 }) {
-  const { items, subtotalCents, isOpen, close, setQuantity, remove } =
+  const { items, subtotalCents, isOpen, close, setQuantity, remove, setPrice } =
     useCart();
   const dialogRef = useRef<HTMLDialogElement>(null);
+  // Qué encontró la última revisión contra la base: qué se agotó y si algún
+  // precio cambió desde que se guardó el carrito.
+  const [checked, setChecked] = useState<{
+    issues: Record<string, "agotado" | "no-disponible">;
+    pricesChanged: boolean;
+  }>({ issues: {}, pricesChanged: false });
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -33,6 +45,48 @@ export function CartDrawer({
     if (isOpen && !dialog.open) dialog.showModal();
     if (!isOpen && dialog.open) dialog.close();
   }, [isOpen]);
+
+  // Al abrirlo se revalidan precios y stock contra la base (§7).
+  useEffect(() => {
+    if (!isOpen || items.length === 0) return;
+    let active = true;
+    quoteCart(
+      items.map((line) => ({
+        kind: line.kind,
+        id: line.id,
+        quantity: line.quantity,
+      })),
+    ).then((quote) => {
+      if (!active || !quote) return;
+      const issues: Record<string, "agotado" | "no-disponible"> = {};
+      let pricesChanged = false;
+      for (const line of quote.lines) {
+        if (line.unavailable) issues[line.id] = "no-disponible";
+        else if (line.outOfStock) issues[line.id] = "agotado";
+        const saved = items.find((item) => item.id === line.id);
+        if (
+          saved &&
+          !line.unavailable &&
+          line.unitPriceCents > 0 &&
+          saved.priceCents !== line.unitPriceCents
+        ) {
+          pricesChanged = true;
+          setPrice(line.id, line.unitPriceCents);
+        }
+      }
+      // El aviso de precios queda mientras el carrito siga abierto: al
+      // corregir el precio, la revisión siguiente ya no encuentra diferencia.
+      setChecked((previous) => ({
+        issues,
+        pricesChanged: pricesChanged || previous.pricesChanged,
+      }));
+    });
+    return () => {
+      active = false;
+    };
+  }, [isOpen, items, setPrice]);
+
+  const blocked = Object.keys(checked.issues).length > 0;
 
   const missing = missingForFreeShipping(
     subtotalCents,
@@ -49,7 +103,10 @@ export function CartDrawer({
   return (
     <dialog
       ref={dialogRef}
-      onClose={close}
+      onClose={() => {
+        close();
+        setChecked({ issues: {}, pricesChanged: false });
+      }}
       aria-label="Tu carrito"
       className="drawer drawer-right m-0 ml-auto h-dvh max-h-none w-[min(26rem,92vw)] max-w-none bg-crema p-0 text-chocolate shadow-drawer"
     >
@@ -75,6 +132,12 @@ export function CartDrawer({
           </div>
         ) : (
           <>
+            {checked.pricesChanged && (
+              <p className="mx-4 mt-3 rounded-card bg-rosa px-3 py-2 text-sm">
+                Actualizamos los precios: son los de hoy.
+              </p>
+            )}
+
             <ul className="flex-1 divide-y divide-crema-oscuro overflow-y-auto px-4">
               {items.map((item) => (
                 <li key={item.id} className="flex gap-3 py-4">
@@ -138,6 +201,18 @@ export function CartDrawer({
                         {formatMoney(item.priceCents * item.quantity)}
                       </span>
                     </div>
+                    {checked.issues[item.id] && (
+                      <p className="mt-1 flex items-start gap-1.5 text-sm text-error">
+                        <IconAlert
+                          width={16}
+                          height={16}
+                          className="mt-0.5 shrink-0"
+                        />
+                        {checked.issues[item.id] === "agotado"
+                          ? "Se agotó mientras lo tenías guardado. Bajá la cantidad o sacalo."
+                          : "Ya no está a la venta. Sacalo para seguir."}
+                      </p>
+                    )}
                   </div>
                   <button
                     type="button"
@@ -179,13 +254,19 @@ export function CartDrawer({
               <p className="mt-1 text-sm">
                 El envío y los descuentos se calculan en el siguiente paso.
               </p>
-              <ButtonLink
-                href="/checkout"
-                onClick={close}
-                className="mt-3 w-full"
-              >
-                Ir a pagar
-              </ButtonLink>
+              {blocked ? (
+                <p className="mt-3 rounded-card bg-crema-oscuro px-3 py-2 text-sm">
+                  Revisá lo que quedó sin stock arriba y seguí.
+                </p>
+              ) : (
+                <ButtonLink
+                  href="/checkout"
+                  onClick={close}
+                  className="mt-3 w-full"
+                >
+                  Ir a pagar
+                </ButtonLink>
+              )}
             </div>
           </>
         )}

@@ -117,6 +117,8 @@ type CartContextValue = {
   add: (item: Omit<CartItem, "quantity">, quantity?: number) => void;
   setQuantity: (id: string, quantity: number) => void;
   remove: (id: string) => void;
+  /** Corrige el precio con el que responde el servidor (§10). */
+  setPrice: (id: string, priceCents: number) => void;
   clear: () => void;
 };
 
@@ -162,6 +164,18 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     write(getSnapshot().filter((line) => line.id !== id));
   }, []);
 
+  const setPrice = useCallback((id: string, priceCents: number) => {
+    const current = getSnapshot();
+    if (
+      !current.some((line) => line.id === id && line.priceCents !== priceCents)
+    ) {
+      return;
+    }
+    write(
+      current.map((line) => (line.id === id ? { ...line, priceCents } : line)),
+    );
+  }, []);
+
   const value = useMemo<CartContextValue>(
     () => ({
       items,
@@ -176,9 +190,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       add,
       setQuantity,
       remove,
+      setPrice,
       clear: () => write(EMPTY),
     }),
-    [items, isOpen, add, setQuantity, remove],
+    [items, isOpen, add, setQuantity, remove, setPrice],
   );
 
   return <CartContext value={value}>{children}</CartContext>;
