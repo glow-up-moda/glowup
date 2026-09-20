@@ -7,7 +7,7 @@ import { z } from "zod";
 import { dbErrorMessage } from "@/lib/admin/errors";
 import type { FormState } from "@/lib/admin/forms";
 import type { OrderStatus } from "@/lib/admin/orders";
-import { isUuid } from "@/lib/admin/params";
+import { isUuid } from "@/lib/params";
 import { requireAdmin } from "@/lib/auth/admin";
 
 // Acciones sobre pedidos. Pasan por las funciones de la base con la sesión de

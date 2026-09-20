@@ -8,7 +8,7 @@ import { ButtonLink } from "@/components/ui/button";
 import { inputClass } from "@/components/ui/field";
 import { IconChevronRight, IconPlus, IconSearch } from "@/components/ui/icons";
 import { Notice } from "@/components/ui/notice";
-import { likePattern, param } from "@/lib/admin/params";
+import { likePattern, param } from "@/lib/params";
 import { requireAdmin } from "@/lib/auth/admin";
 import { formatMoney } from "@/lib/format";
 import { productImageUrl } from "@/lib/images";

@@ -22,11 +22,16 @@ const STORAGE_KEY = "glowup-carrito";
 export const MAX_PER_LINE = 10;
 
 export type CartItem = {
-  variantId: string;
-  productSlug: string;
+  /** Qué se vende: una variante suelta o un kit armado (§8). */
+  kind: "variant" | "kit";
+  /** Id de la variante o del kit, según kind: identifica la línea. */
+  id: string;
+  /** A dónde lleva el nombre en el carrito. */
+  href: string;
   name: string;
-  color: string;
-  size: string;
+  /** Solo las variantes tienen color y talle. */
+  color: string | null;
+  size: string | null;
   priceCents: number;
   imagePath: string | null;
   quantity: number;
@@ -47,7 +52,7 @@ function readStored(): CartItem[] {
       (item): item is CartItem =>
         typeof item === "object" &&
         item !== null &&
-        typeof (item as CartItem).variantId === "string" &&
+        typeof (item as CartItem).id === "string" &&
         typeof (item as CartItem).quantity === "number",
     );
     return items.length ? items : EMPTY;
@@ -110,8 +115,8 @@ type CartContextValue = {
   open: () => void;
   close: () => void;
   add: (item: Omit<CartItem, "quantity">, quantity?: number) => void;
-  setQuantity: (variantId: string, quantity: number) => void;
-  remove: (variantId: string) => void;
+  setQuantity: (id: string, quantity: number) => void;
+  remove: (id: string) => void;
   clear: () => void;
 };
 
@@ -123,11 +128,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const add = useCallback((item: Omit<CartItem, "quantity">, quantity = 1) => {
     const current = getSnapshot();
-    const existing = current.find((line) => line.variantId === item.variantId);
+    const existing = current.find((line) => line.id === item.id);
     write(
       existing
         ? current.map((line) =>
-            line.variantId === item.variantId
+            line.id === item.id
               ? {
                   ...line,
                   ...item,
@@ -140,21 +145,21 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setIsOpen(true);
   }, []);
 
-  const setQuantity = useCallback((variantId: string, quantity: number) => {
+  const setQuantity = useCallback((id: string, quantity: number) => {
     const current = getSnapshot();
     write(
       quantity <= 0
-        ? current.filter((line) => line.variantId !== variantId)
+        ? current.filter((line) => line.id !== id)
         : current.map((line) =>
-            line.variantId === variantId
+            line.id === id
               ? { ...line, quantity: Math.min(quantity, MAX_PER_LINE) }
               : line,
           ),
     );
   }, []);
 
-  const remove = useCallback((variantId: string) => {
-    write(getSnapshot().filter((line) => line.variantId !== variantId));
+  const remove = useCallback((id: string) => {
+    write(getSnapshot().filter((line) => line.id !== id));
   }, []);
 
   const value = useMemo<CartContextValue>(

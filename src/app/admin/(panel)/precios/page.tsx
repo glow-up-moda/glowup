@@ -13,7 +13,7 @@ import {
 import { IconAlert } from "@/components/ui/icons";
 import { Notice } from "@/components/ui/notice";
 import { adminNames } from "@/lib/admin/catalog";
-import { isUuid, param, paramList } from "@/lib/admin/params";
+import { isUuid, param, paramList } from "@/lib/params";
 import {
   DEFAULT_ROUNDING,
   isPriceScope,

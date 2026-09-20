@@ -13,8 +13,8 @@ import {
   categoryOptions,
   lowStockDefault,
 } from "@/lib/admin/catalog";
-import { isUuid, param } from "@/lib/admin/params";
-import { compareVariants } from "@/lib/admin/sizes";
+import { isUuid, param } from "@/lib/params";
+import { compareVariants } from "@/lib/sizes";
 import { MOVEMENT_LABELS, movementSign } from "@/lib/admin/stock";
 import { requireAdmin } from "@/lib/auth/admin";
 import { centsToPesosInput, formatDateTime, formatMoney } from "@/lib/format";

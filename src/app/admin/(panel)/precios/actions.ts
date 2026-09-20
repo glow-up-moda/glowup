@@ -6,7 +6,7 @@ import { z } from "zod";
 
 import { dbErrorMessage } from "@/lib/admin/errors";
 import { fieldErrors, type FormState, text } from "@/lib/admin/forms";
-import { isUuid } from "@/lib/admin/params";
+import { isUuid } from "@/lib/params";
 import { parsePercent, parseRounding, percentLabel } from "@/lib/admin/prices";
 import { requireAdmin } from "@/lib/auth/admin";
 

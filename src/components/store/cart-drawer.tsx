@@ -77,9 +77,9 @@ export function CartDrawer({
           <>
             <ul className="flex-1 divide-y divide-crema-oscuro overflow-y-auto px-4">
               {items.map((item) => (
-                <li key={item.variantId} className="flex gap-3 py-4">
+                <li key={item.id} className="flex gap-3 py-4">
                   <Link
-                    href={`/producto/${item.productSlug}`}
+                    href={item.href}
                     onClick={close}
                     className="flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-input bg-crema-oscuro"
                   >
@@ -96,27 +96,31 @@ export function CartDrawer({
                   </Link>
                   <div className="min-w-0 flex-1">
                     <Link
-                      href={`/producto/${item.productSlug}`}
+                      href={item.href}
                       onClick={close}
                       className="font-medium"
                     >
                       {item.name}
                     </Link>
-                    <p className="text-sm">
-                      {item.color} · Talle {item.size}
-                    </p>
+                    {item.color && item.size ? (
+                      <p className="text-sm">
+                        {item.color} · Talle {item.size}
+                      </p>
+                    ) : (
+                      <p className="text-sm">Kit armado</p>
+                    )}
                     <div className="mt-2 flex items-center justify-between gap-3">
                       <label className="flex items-center gap-2 text-sm">
                         <span className="sr-only">
-                          Cantidad de {item.name} {item.color} talle {item.size}
+                          Cantidad de {item.name}
+                          {item.color
+                            ? ` ${item.color} talle ${item.size}`
+                            : ""}
                         </span>
                         <select
                           value={item.quantity}
                           onChange={(event) =>
-                            setQuantity(
-                              item.variantId,
-                              Number(event.target.value),
-                            )
+                            setQuantity(item.id, Number(event.target.value))
                           }
                           className="min-h-11 rounded-input border-2 border-transparent bg-crema-oscuro px-2 text-base"
                         >
@@ -137,7 +141,7 @@ export function CartDrawer({
                   </div>
                   <button
                     type="button"
-                    onClick={() => remove(item.variantId)}
+                    onClick={() => remove(item.id)}
                     aria-label={`Sacar ${item.name} del carrito`}
                     className="flex size-11 shrink-0 items-center justify-center self-start rounded-full hover:bg-crema-oscuro"
                   >

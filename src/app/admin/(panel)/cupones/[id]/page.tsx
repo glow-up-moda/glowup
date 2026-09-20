@@ -8,7 +8,7 @@ import { PageHeader, Section } from "@/components/admin/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Notice } from "@/components/ui/notice";
 import { couponState, couponValueText } from "@/lib/admin/coupons";
-import { isUuid, param } from "@/lib/admin/params";
+import { isUuid, param } from "@/lib/params";
 import { requireAdmin } from "@/lib/auth/admin";
 import { centsToPesosInput, formatDateTime, toLocalInput } from "@/lib/format";
 

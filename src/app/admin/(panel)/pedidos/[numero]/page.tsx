@@ -20,7 +20,7 @@ import {
   tabForOrder,
   whatsappLink,
 } from "@/lib/admin/orders";
-import { param } from "@/lib/admin/params";
+import { param } from "@/lib/params";
 import { MOVEMENT_LABELS, movementSign } from "@/lib/admin/stock";
 import { requireAdmin } from "@/lib/auth/admin";
 import { formatDateTime, formatMoney } from "@/lib/format";

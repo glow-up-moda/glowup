@@ -7,7 +7,7 @@ import { ButtonLink } from "@/components/ui/button";
 import { IconChevronRight, IconPlus } from "@/components/ui/icons";
 import { Notice } from "@/components/ui/notice";
 import { couponState, couponValueText } from "@/lib/admin/coupons";
-import { param } from "@/lib/admin/params";
+import { param } from "@/lib/params";
 import { requireAdmin } from "@/lib/auth/admin";
 import { formatDateTime, formatMoney } from "@/lib/format";
 

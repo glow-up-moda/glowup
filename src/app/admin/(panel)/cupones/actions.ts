@@ -13,7 +13,7 @@ import {
   optionalPesos,
   text,
 } from "@/lib/admin/forms";
-import { isUuid } from "@/lib/admin/params";
+import { isUuid } from "@/lib/params";
 import { requireAdmin } from "@/lib/auth/admin";
 import { parsePesos } from "@/lib/format";
 

@@ -17,7 +17,7 @@ import {
   STATUS_LABELS,
   STATUS_TONES,
 } from "@/lib/admin/orders";
-import { likePattern, param } from "@/lib/admin/params";
+import { likePattern, param } from "@/lib/params";
 import { requireAdmin } from "@/lib/auth/admin";
 import { formatDateTime, formatMoney, plural } from "@/lib/format";
 

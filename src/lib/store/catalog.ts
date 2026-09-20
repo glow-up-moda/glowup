@@ -1,5 +1,6 @@
 import { cache } from "react";
 
+import { compareSizes } from "@/lib/sizes";
 import { createCatalogClient } from "@/lib/supabase/catalog";
 
 // Lecturas del catálogo público. Todo pasa por el cliente sin sesión (§8), y
@@ -28,6 +29,13 @@ export type KitCard = {
   priceCents: number;
   compareAtPriceCents: number | null;
   images: { path: string; alt: string }[];
+  items: {
+    name: string;
+    slug: string;
+    color: string;
+    size: string;
+    quantity: number;
+  }[];
   isAvailable: boolean;
   isLastUnits: boolean;
 };
@@ -126,28 +134,125 @@ function toCard(
   };
 }
 
-/** Productos publicados, lo último primero. */
+export type ProductSort = "nuevo" | "precio-asc" | "precio-desc";
+
+export type ProductFilters = {
+  categoryIds?: string[];
+  sizes?: string[];
+  colors?: string[];
+  minCents?: number | null;
+  maxCents?: number | null;
+  onlyAvailable?: boolean;
+  sort?: ProductSort;
+  limit?: number;
+};
+
+/** Productos publicados, con los filtros del listado (§7). */
 export async function listProducts({
   categoryIds,
+  sizes,
+  colors,
+  minCents,
+  maxCents,
+  onlyAvailable,
+  sort = "nuevo",
   limit,
-}: {
-  categoryIds?: string[];
-  limit?: number;
-} = {}): Promise<ProductCard[]> {
+}: ProductFilters = {}): Promise<ProductCard[]> {
   const supabase = createCatalogClient();
+  // Con talle o color, la consulta necesita la variante: !inner deja solo los
+  // productos que tienen alguna que coincida.
+  const needsVariant = Boolean(sizes?.length || colors?.length);
   let query = supabase
     .from("products")
-    .select(CARD_COLUMNS)
-    .order("created_at", { ascending: false });
+    .select(
+      needsVariant
+        ? CARD_COLUMNS.replace("product_variants(", "product_variants!inner(")
+        : CARD_COLUMNS,
+    );
+
   if (categoryIds?.length) query = query.in("category_id", categoryIds);
+  if (sizes?.length) query = query.in("product_variants.size", sizes);
+  if (colors?.length) query = query.in("product_variants.color", colors);
+  if (minCents != null) query = query.gte("price_cents", minCents);
+  if (maxCents != null) query = query.lte("price_cents", maxCents);
+
+  query =
+    sort === "precio-asc"
+      ? query.order("price_cents", { ascending: true })
+      : sort === "precio-desc"
+        ? query.order("price_cents", { ascending: false })
+        : query.order("created_at", { ascending: false });
   if (limit) query = query.limit(limit);
 
   const { data } = await query;
-  const products = (data ?? []) as ProductRow[];
+  // El select se arma según los filtros, así que supabase-js no puede inferir
+  // la forma: la declara ProductRow.
+  const products = (data ?? []) as unknown as ProductRow[];
   const availability = await availabilityByProduct(
     products.map((product) => product.id),
   );
-  return products.map((product) => toCard(product, availability));
+  const cards = products.map((product) => toCard(product, availability));
+  return onlyAvailable ? cards.filter((card) => card.isAvailable) : cards;
+}
+
+export type CategoryFacets = {
+  sizes: string[];
+  colors: string[];
+  minCents: number;
+  maxCents: number;
+};
+
+/**
+ * Talles, colores y rango de precios que existen en una categoría, para armar
+ * los filtros sin ofrecer opciones que no llevan a ningún lado.
+ */
+export async function getCategoryFacets(
+  categoryIds?: string[],
+): Promise<CategoryFacets> {
+  const supabase = createCatalogClient();
+  let query = supabase
+    .from("products")
+    .select("price_cents, product_variants(color, size)");
+  if (categoryIds?.length) query = query.in("category_id", categoryIds);
+
+  const { data } = await query;
+  const products = data ?? [];
+  const prices = products.map((product) => product.price_cents);
+
+  return {
+    sizes: [
+      ...new Set(
+        products.flatMap((product) =>
+          product.product_variants.map((variant) => variant.size),
+        ),
+      ),
+    ].sort(compareSizes),
+    colors: [
+      ...new Set(
+        products.flatMap((product) =>
+          product.product_variants.map((variant) => variant.color),
+        ),
+      ),
+    ].sort((a, b) => a.localeCompare(b, "es")),
+    minCents: prices.length ? Math.min(...prices) : 0,
+    maxCents: prices.length ? Math.max(...prices) : 0,
+  };
+}
+
+/** Una categoría por su slug, con sus subcategorías. */
+export async function getCategoryBySlug(slug: string): Promise<{
+  category: Category | { id: string; name: string; slug: string };
+  parent?: Category;
+} | null> {
+  const navigation = await getNavigation();
+  const parent = navigation.find((category) => category.slug === slug);
+  if (parent) return { category: parent };
+
+  for (const category of navigation) {
+    const child = category.children.find((item) => item.slug === slug);
+    if (child) return { category: child, parent: category };
+  }
+  return null;
 }
 
 /** Kits publicados, con la foto del primer producto que los compone. */
@@ -156,7 +261,7 @@ export async function listKits(limit?: number): Promise<KitCard[]> {
   let query = supabase
     .from("kits")
     .select(
-      "id, name, slug, price_cents, compare_at_price_cents, created_at, kit_items(variant_id, quantity, product_variants(product_id))",
+      "id, name, slug, price_cents, compare_at_price_cents, created_at, kit_items(quantity, product_variants(product_id, color, size, products(name, slug)))",
     )
     .order("created_at", { ascending: false });
   if (limit) query = query.limit(limit);
@@ -205,6 +310,16 @@ export async function listKits(limit?: number): Promise<KitCard[]> {
       .filter((id): id is string => Boolean(id))
       .flatMap((productId) => imagesByProduct.get(productId) ?? [])
       .slice(0, 2);
+    const items = kit.kit_items
+      .map((item) => ({
+        name: item.product_variants?.products?.name ?? "",
+        slug: item.product_variants?.products?.slug ?? "",
+        color: item.product_variants?.color ?? "",
+        size: item.product_variants?.size ?? "",
+        quantity: item.quantity,
+      }))
+      .filter((item) => item.name)
+      .sort((a, b) => a.name.localeCompare(b.name, "es"));
     return {
       id: kit.id,
       name: kit.name,
@@ -212,6 +327,7 @@ export async function listKits(limit?: number): Promise<KitCard[]> {
       priceCents: kit.price_cents,
       compareAtPriceCents: kit.compare_at_price_cents,
       images,
+      items,
       isAvailable: state?.is_available === true,
       isLastUnits: state?.is_last_units === true,
     };
