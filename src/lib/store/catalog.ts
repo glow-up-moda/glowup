@@ -138,6 +138,8 @@ export type ProductSort = "nuevo" | "precio-asc" | "precio-desc";
 
 export type ProductFilters = {
   categoryIds?: string[];
+  /** Ids puntuales: lo usa la página de favoritos. */
+  ids?: string[];
   sizes?: string[];
   colors?: string[];
   minCents?: number | null;
@@ -150,6 +152,7 @@ export type ProductFilters = {
 /** Productos publicados, con los filtros del listado (§7). */
 export async function listProducts({
   categoryIds,
+  ids,
   sizes,
   colors,
   minCents,
@@ -171,6 +174,7 @@ export async function listProducts({
     );
 
   if (categoryIds?.length) query = query.in("category_id", categoryIds);
+  if (ids?.length) query = query.in("id", ids);
   if (sizes?.length) query = query.in("product_variants.size", sizes);
   if (colors?.length) query = query.in("product_variants.color", colors);
   if (minCents != null) query = query.gte("price_cents", minCents);
@@ -332,4 +336,36 @@ export async function listKits(limit?: number): Promise<KitCard[]> {
       isLastUnits: state?.is_last_units === true,
     };
   });
+}
+
+/**
+ * Búsqueda por nombre y descripción. Los caracteres que tienen sentido para la
+ * base (comodines, comillas, comas) se sacan del término: en un buscador de
+ * productos no aportan nada y complican el escapado.
+ */
+export async function searchProducts(
+  term: string,
+  limit = 24,
+): Promise<ProductCard[]> {
+  const clean = term
+    .trim()
+    .slice(0, 60)
+    .replace(/[%_\,"()]/g, " ")
+    .trim();
+  if (clean.length < 2) return [];
+
+  const supabase = createCatalogClient();
+  const pattern = `%${clean}%`;
+  const { data } = await supabase
+    .from("products")
+    .select(CARD_COLUMNS)
+    .or(`name.ilike.${pattern},description.ilike.${pattern}`)
+    .order("created_at", { ascending: false })
+    .limit(limit);
+
+  const products = (data ?? []) as unknown as ProductRow[];
+  const availability = await availabilityByProduct(
+    products.map((product) => product.id),
+  );
+  return products.map((product) => toCard(product, availability));
 }

@@ -1,10 +1,11 @@
 import Link from "next/link";
 
-import { IconHeart, IconSearch } from "@/components/ui/icons";
+import { IconHeart } from "@/components/ui/icons";
 import { getNavigation } from "@/lib/store/catalog";
 
 import { BagButton } from "./bag-button";
 import { MenuDrawer } from "./menu-drawer";
+import { SearchDialog } from "./search-dialog";
 
 export async function StoreHeader() {
   const categories = await getNavigation();
@@ -45,13 +46,7 @@ export async function StoreHeader() {
         </nav>
 
         <div className="ml-auto flex items-center gap-1">
-          <Link
-            href="/buscar"
-            aria-label="Buscar"
-            className="flex size-11 items-center justify-center rounded-full hover:bg-crema-oscuro"
-          >
-            <IconSearch />
-          </Link>
+          <SearchDialog />
           <Link
             href="/favoritos"
             aria-label="Favoritos"

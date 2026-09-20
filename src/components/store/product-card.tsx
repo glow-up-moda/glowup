@@ -7,6 +7,7 @@ import type {
 } from "@/lib/store/catalog";
 import { formatMoney } from "@/lib/format";
 
+import { FavoriteButton } from "./favorite-button";
 import { ProductImage } from "./product-image";
 
 const CARD_SIZES = "(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw";
@@ -44,7 +45,12 @@ export function ProductCard({
     product.compareAtPriceCents > product.priceCents;
 
   return (
-    <article>
+    <article className="relative">
+      <FavoriteButton
+        productId={product.id}
+        name={product.name}
+        className="absolute top-2 right-2 z-10"
+      />
       <Link
         href={`/producto/${product.slug}`}
         className="group block rounded-card focus-visible:outline-offset-4"
