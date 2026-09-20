@@ -273,3 +273,20 @@ export function Sparkle(props: IconProps) {
     </svg>
   );
 }
+
+/** Estrella de reseñas (no es el destello de la marca: esa tiene 4 puntas). */
+export function IconStar(props: IconProps) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width={18}
+      height={18}
+      fill="currentColor"
+      aria-hidden="true"
+      focusable="false"
+      {...props}
+    >
+      <path d="m12 3.2 2.6 5.3 5.8.8-4.2 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8L3.6 9.3l5.8-.8z" />
+    </svg>
+  );
+}
