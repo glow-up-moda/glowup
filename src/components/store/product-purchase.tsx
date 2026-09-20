@@ -188,12 +188,12 @@ export function ProductPurchase({
           )}
         </form>
       ) : (
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col items-stretch gap-2 sm:items-start">
           <AddToCartButton
             item={cartItem}
             disabled={!cartItem}
             label="Sumar al carrito"
-            className="w-full sm:w-auto"
+            className="sm:px-10"
           />
           {!size && <p className="text-sm">Elegí un talle para sumarlo.</p>}
         </div>
