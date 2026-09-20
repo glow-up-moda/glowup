@@ -56,9 +56,10 @@ function ask(text) {
   return question(text, (answer) => answer.trim());
 }
 
-// La contraseña se escribe con asteriscos. La terminal redibuja la línea en
-// cada tecla, así que hay que volver a escribir la pregunta: si no, la
-// pregunta desaparece y parece que el comando nunca la pidió.
+// La contraseña se escribe con asteriscos, así se ve que la terminal está
+// tomando lo que se teclea. Hay tres casos: la terminal redibuja la línea
+// entera (y hay que volver a escribir la pregunta, si no desaparece), llega
+// una tecla suelta (un asterisco por carácter) o se termina la línea.
 function askHidden(text) {
   const plain = rl._writeToOutput.bind(rl);
   rl._writeToOutput = (output) => {
@@ -66,6 +67,8 @@ function askHidden(text) {
       rl.output.write(text + "*".repeat(rl.line.length));
     } else if (/[\r\n]/.test(output)) {
       rl.output.write("\n");
+    } else if (!/[\p{Cc}\p{Cf}]/u.test(output)) {
+      rl.output.write("*".repeat(output.length));
     }
   };
   return question(text, (answer) => {
