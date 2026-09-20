@@ -9,6 +9,10 @@ import readline from "node:readline";
 
 import { createClient } from "@supabase/supabase-js";
 
+// El largo mínimo de la contraseña. El panel pide además un segundo factor
+// (§7), así que la contraseña sola nunca alcanza para entrar.
+const MIN_PASSWORD_LENGTH = 8;
+
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const secretKey = process.env.SUPABASE_SECRET_KEY;
 if (!url || !secretKey) {
@@ -97,9 +101,13 @@ async function main() {
   const name = await ask("Nombre (así saluda el panel): ");
   if (!name) throw new Error("Falta el nombre.");
 
-  const password = await askHidden("Contraseña (12 caracteres o más): ");
-  if (password.length < 12)
-    throw new Error("La contraseña tiene que tener al menos 12 caracteres.");
+  const password = await askHidden(
+    `Contraseña (${MIN_PASSWORD_LENGTH} caracteres o más): `,
+  );
+  if (password.length < MIN_PASSWORD_LENGTH)
+    throw new Error(
+      `La contraseña tiene que tener al menos ${MIN_PASSWORD_LENGTH} caracteres.`,
+    );
   const repeated = await askHidden("Repetila: ");
   if (password !== repeated) throw new Error("Las contraseñas no coinciden.");
 
