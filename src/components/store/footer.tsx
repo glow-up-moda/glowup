@@ -6,7 +6,7 @@ const help = [
   { href: "/guia-de-talles", label: "Guía de talles" },
   { href: "/envios-y-cambios", label: "Envíos y cambios" },
   { href: "/preguntas-frecuentes", label: "Preguntas frecuentes" },
-  { href: "/seguimiento", label: "Seguir mi pedido" },
+  // "Seguir mi pedido" entra con el checkout, en la fase 4.
 ];
 
 const about = [

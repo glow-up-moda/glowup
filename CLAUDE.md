@@ -196,6 +196,14 @@ El logo se está redibujando para usar esta paleta (ver pendientes):
 
 Botón flotante de WhatsApp en todas las páginas públicas excepto el checkout.
 
+Cómo está hecha la tienda:
+- Las categorías son rutas dinámicas (`/[categoria]` y `/[categoria]/[subcategoria]`) armadas con lo que hay en la base. Las rutas fijas (`/buscar`, `/kits`, `/favoritos`…) ganan sobre ellas, y un slug que no existe cae en el 404 de la tienda.
+- Los filtros de los listados viven en la dirección (`?talle=&color=&desde=&hasta=&disponibles=&orden=`): se comparten, se marcan y el botón de volver funciona. El formulario es GET, así que anda sin JavaScript.
+- Carrito y favoritos viven en el navegador y se leen con `useSyncExternalStore` (`src/lib/store/cart.tsx` y `favorites.ts`), no copiándolos a un estado con un efecto: así dos pestañas abiertas ven lo mismo. Un kit entra al carrito como una línea propia (`kind: "kit"`).
+- Los favoritos guardan solo ids: los precios y el stock se leen frescos cada vez.
+- "Avisame cuando vuelva" se guarda con una acción del servidor, porque `back_in_stock_requests` no está abierta a la API pública.
+- Mientras un producto no tenga fotos, en lugar del hueco se muestra el destello de la marca.
+
 ### Inicio (orden de secciones)
 
 ```
@@ -203,11 +211,11 @@ Barra de anuncios (rota: envío gratis desde $X / cuotas / descuento por transfe
 Header: menú, logo compacto, buscar, favoritos, bolsa
 Hero: foto en arco, título, botón "Ver colección"
 Categorías: Ropa interior, Accesorios, Kits
-Lo más vendido (carrusel horizontal)
+Lo nuevo (carrusel horizontal; pasa a "Lo más vendido" cuando haya ventas para calcularlo)
 Kits: Kit playa, Kit básicos, Kit regalo
 Beneficios: envío en el día en Paraná y Oro Verde, cuotas, transferencia, envío discreto, cambios
-Clientas reales (fotos elegidas a mano)
-Newsletter con cupón de primera compra
+Clientas reales (fotos elegidas a mano; pendiente, ver §17)
+Newsletter con cupón de primera compra (entra con los emails, fase 5)
 Footer: links, legales, Data Fiscal, redes
 ```
 
@@ -452,3 +460,6 @@ Con logo, paleta y voz de marca:
 - [ ] Dominio, usuario de Instagram y registro de marca en el INPI.
 - [ ] Textos legales revisados.
 - [ ] Activar en Supabase Auth la protección de contraseñas filtradas (HaveIBeenPwned), que hoy está apagada.
+- [ ] Fotos de clientas reales para el inicio.
+- [ ] CUIT y QR de Data Fiscal de ARCA para el pie.
+- [ ] Medidas reales para la guía de talles (hoy solo dice cómo medirse y qué talles hay).
