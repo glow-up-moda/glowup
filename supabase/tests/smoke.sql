@@ -557,6 +557,14 @@ begin
       raise exception 'Prueba 15m, anon no puede leer settings: vino %', coalesce(v_msg, 'pudo leerlo');
     end if;
 
+    -- Pero sí lee por la vista las claves que muestra la tienda, y solo esas.
+    select count(*) into v_count from public.public_settings;
+    if v_count is distinct from 5
+       or (select value #>> '{}' from public.public_settings where key = 'transfer_discount_percent') is distinct from '10'
+       or exists (select 1 from public.public_settings where key in ('bank_alias', 'bank_cbu')) then
+      raise exception 'Prueba 15m2, anon lee la configuración de la tienda sin el alias ni el CBU: ve % claves', v_count;
+    end if;
+
     v_msg := null;
     begin
       perform public.create_order_with_reservation('{}'::jsonb);
