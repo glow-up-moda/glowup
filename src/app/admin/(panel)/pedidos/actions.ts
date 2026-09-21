@@ -34,9 +34,10 @@ export async function confirmTransfer(orderId: string): Promise<FormState> {
     .eq("id", orderId)
     .maybeSingle();
   if (!order) return notFound;
-  // Mercado Pago se confirma solo, consultando el pago a su API (§11).
+  // Los pagos con tarjeta se confirman solos, consultando el pago al
+  // proveedor (§11).
   if (order.payment_method !== "transfer") {
-    return { error: "Los pagos con Mercado Pago se confirman solos." };
+    return { error: "Los pagos con tarjeta se confirman solos." };
   }
 
   const { data, error } = await supabase.rpc("confirm_order_payment", {

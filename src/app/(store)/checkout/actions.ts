@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 
-import { createPreference, isMercadoPagoReady } from "@/lib/mercadopago/client";
+import { createCheckout, isUalaReady, MIN_CARD_CENTS } from "@/lib/uala/client";
 import { rememberOrder } from "@/lib/orders/access";
 import {
   checkoutErrorMessage,
@@ -24,7 +24,7 @@ const itemSchema = z.object({
 const quoteSchema = z.object({
   items: z.array(itemSchema).min(1).max(50),
   couponCode: z.string().trim().max(32).nullable(),
-  paymentMethod: z.enum(["mercadopago", "transfer"]),
+  paymentMethod: z.enum(["card", "transfer"]),
   shippingMethod: z.enum(["delivery", "same_day", "pickup"]),
   shippingZoneId: z.uuid().nullable(),
 });
@@ -137,11 +137,11 @@ export async function placeOrder(input: unknown): Promise<PlaceOrderResult> {
   // Este navegador puede ver el pedido sin escribir el email (§7).
   await rememberOrder(created.number);
 
-  if (order.paymentMethod !== "mercadopago") {
+  if (order.paymentMethod !== "card") {
     return { number: created.number };
   }
 
-  // Con Mercado Pago falta abrir el pago. Si no se puede, el pedido no queda
+  // Con tarjeta falta abrir el pago. Si no se puede, el pedido no queda
   // colgado reteniendo stock: se libera la reserva (§9.4) y se avisa.
   async function cancel(reason: string) {
     await supabase.rpc("release_order_reservation", {
@@ -150,29 +150,34 @@ export async function placeOrder(input: unknown): Promise<PlaceOrderResult> {
     });
   }
 
-  if (!isMercadoPagoReady()) {
-    await cancel("Mercado Pago sin configurar");
+  if (!isUalaReady()) {
+    await cancel("Cobro con tarjeta sin configurar");
     return {
       error:
-        "Por ahora no podemos cobrar con Mercado Pago. Elegí transferencia y listo.",
+        "Por ahora no podemos cobrar con tarjeta. Elegí transferencia y listo.",
+    };
+  }
+  if (created.total_cents < MIN_CARD_CENTS) {
+    await cancel("Monto por debajo del mínimo para tarjeta");
+    return {
+      error:
+        "Para pagar con tarjeta el pedido tiene que llegar a $25. Sumá algo más o pagá por transferencia.",
     };
   }
 
   try {
-    const preference = await createPreference({
+    const checkout = await createCheckout({
       id: created.order_id,
       number: created.number,
-      email: order.email,
       totalCents: created.total_cents,
-      reservedUntil: created.reserved_until,
     });
     await supabase
       .from("orders")
-      .update({ mp_preference_id: preference.id })
+      .update({ payment_checkout_id: checkout.uuid })
       .eq("id", created.order_id);
-    return { number: created.number, redirectUrl: preference.initPoint };
+    return { number: created.number, redirectUrl: checkout.checkoutLink };
   } catch {
-    await cancel("No se pudo abrir el pago en Mercado Pago");
+    await cancel("No se pudo abrir el pago con tarjeta");
     return {
       error: "No pudimos abrir el pago. Probá de nuevo o elegí transferencia.",
     };

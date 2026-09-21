@@ -368,12 +368,12 @@ export type Database = {
           gift_message: string | null
           id: string
           is_gift: boolean
-          mp_payment_id: string | null
-          mp_preference_id: string | null
           needs_review: boolean
           number: string
           paid_at: string | null
+          payment_checkout_id: string | null
           payment_method: Database["public"]["Enums"]["payment_method"]
+          payment_reference: string | null
           phone: string
           reserved_until: string | null
           review_reason: string | null
@@ -397,12 +397,12 @@ export type Database = {
           gift_message?: string | null
           id?: string
           is_gift?: boolean
-          mp_payment_id?: string | null
-          mp_preference_id?: string | null
           needs_review?: boolean
           number?: string
           paid_at?: string | null
+          payment_checkout_id?: string | null
           payment_method: Database["public"]["Enums"]["payment_method"]
+          payment_reference?: string | null
           phone: string
           reserved_until?: string | null
           review_reason?: string | null
@@ -426,12 +426,12 @@ export type Database = {
           gift_message?: string | null
           id?: string
           is_gift?: boolean
-          mp_payment_id?: string | null
-          mp_preference_id?: string | null
           needs_review?: boolean
           number?: string
           paid_at?: string | null
+          payment_checkout_id?: string | null
           payment_method?: Database["public"]["Enums"]["payment_method"]
+          payment_reference?: string | null
           phone?: string
           reserved_until?: string | null
           review_reason?: string | null
@@ -945,7 +945,7 @@ export type Database = {
         Returns: undefined
       }
       confirm_order_payment: {
-        Args: { p_mp_payment_id?: string; p_order_id: string }
+        Args: { p_order_id: string; p_payment_reference?: string }
         Returns: Json
       }
       coupon_error: {
@@ -1020,7 +1020,7 @@ export type Database = {
         | "ready_for_pickup"
         | "delivered"
         | "cancelled"
-      payment_method: "mercadopago" | "transfer"
+      payment_method: "card" | "transfer"
       review_status: "pending" | "approved" | "rejected"
       shipping_method: "delivery" | "same_day" | "pickup"
       stock_movement_type:
@@ -1168,7 +1168,7 @@ export const Constants = {
         "delivered",
         "cancelled",
       ],
-      payment_method: ["mercadopago", "transfer"],
+      payment_method: ["card", "transfer"],
       review_status: ["pending", "approved", "rejected"],
       shipping_method: ["delivery", "same_day", "pickup"],
       stock_movement_type: [

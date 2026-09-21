@@ -158,7 +158,7 @@ export default async function OrderPage({
                 <p>
                   {isTransfer
                     ? `Esperando la transferencia de ${formatMoney(order.total_cents)}. Confirmala cuando veas el comprobante.`
-                    : "Esperando el pago en Mercado Pago. Se confirma solo cuando se acredita."}
+                    : "Esperando el pago con tarjeta. Se confirma solo cuando se acredita."}
                 </p>
                 {order.reserved_until && (
                   <p className="text-sm">
@@ -192,7 +192,7 @@ export default async function OrderPage({
                 <p>
                   {isTransfer
                     ? "Pedido cancelado y reserva liberada. Si la transferencia llegó igual, confirmala: se descuenta el stock si todavía alcanza; si no, el pedido queda para revisar."
-                    : "Pedido cancelado y reserva liberada. Si Mercado Pago acredita el pago igual, se confirma solo y queda para revisar si falta stock."}
+                    : "Pedido cancelado y reserva liberada. Si el pago se acredita igual, se confirma solo y queda para revisar si falta stock."}
                 </p>
                 {isTransfer && (
                   <ConfirmAction
@@ -385,10 +385,10 @@ export default async function OrderPage({
               <dd>
                 {order.paid_at ? formatDateTime(order.paid_at) : "Todavía no"}
               </dd>
-              {order.mp_payment_id && (
+              {order.payment_reference && (
                 <>
-                  <dt>Pago en MP</dt>
-                  <dd className="break-all">{order.mp_payment_id}</dd>
+                  <dt>Pago</dt>
+                  <dd className="break-all">{order.payment_reference}</dd>
                 </>
               )}
             </dl>

@@ -42,8 +42,8 @@ export default async function FaqPage() {
 
       <Block title="¿Cómo puedo pagar?">
         <p>
-          Con Mercado Pago (tarjeta de débito, crédito o dinero en cuenta) o por
-          transferencia bancaria
+          Con tarjeta de crédito, débito o prepaga (el pago lo procesa Ualá Bis)
+          o por transferencia bancaria
           {settings.transferDiscountPercent > 0
             ? `, que tiene ${settings.transferDiscountPercent}% de descuento`
             : ""}

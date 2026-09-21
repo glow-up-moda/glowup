@@ -24,7 +24,7 @@ Tienda online de **ropa interior femenina y accesorios** (gorras, anteojos de so
 - No agregues dependencias sin explicar para qué sirven y si existe una alternativa nativa.
 - Nunca subas `.env` ni claves al repositorio.
 - **El repositorio es público** (`glow-up-moda/glowup`). Además de las claves, nunca subas alias, CBU, teléfono, direcciones ni datos de clientas: esos valores viven en la tabla `settings` o en variables de entorno, nunca en el código, en migraciones ni en datos de prueba.
-- Pagos: solo credenciales de prueba de Mercado Pago hasta el lanzamiento.
+- Pagos: solo credenciales de prueba de Ualá Bis hasta el lanzamiento (`UALA_ENVIRONMENT=test`).
 - Cambios de base de datos siempre como migraciones en `supabase/migrations/`, en este orden: primero la migración pasa junto con `supabase/tests/smoke.sql` dentro de una transacción que se deshace; después, commit y push; recién entonces, `npx supabase db push`. Los tipos (`npm run db:types`) se regeneran después de aplicar y van en el commit siguiente. El cron no se prueba en esa transacción: se verifica en `cron.job_run_details`.
 - Al terminar una tarea con interfaz, revisala en 375px (celular) y en escritorio.
 
@@ -36,7 +36,7 @@ Tienda online de **ropa interior femenina y accesorios** (gorras, anteojos de so
 | Estilos | Tailwind CSS con los tokens de la sección 5 |
 | Animación | Transiciones CSS; librería `motion` solo para el carrito lateral y la secuencia del hero |
 | Base de datos, auth, archivos | Supabase (Postgres, Auth, Storage) |
-| Pagos | Mercado Pago Checkout Pro (SDK oficial de Node) |
+| Pagos | Ualá Bis, API Cobros Online v2 (REST con `fetch`, sin dependencias) para tarjetas, y transferencia bancaria |
 | Emails | Resend + React Email |
 | Validación | Zod |
 | Imágenes | `sharp` en el servidor: las fotos se suben convertidas a WebP (las transformaciones de Supabase son pagas y Safari no codifica WebP) |
@@ -51,8 +51,10 @@ NEXT_PUBLIC_SITE_URL=
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 SUPABASE_SECRET_KEY=          # solo servidor
-MP_ACCESS_TOKEN=              # solo servidor
-MP_WEBHOOK_SECRET=            # solo servidor
+UALA_USERNAME=                # solo servidor
+UALA_CLIENT_ID=               # solo servidor
+UALA_CLIENT_SECRET=           # solo servidor
+UALA_ENVIRONMENT=test         # test | production
 RESEND_API_KEY=               # solo servidor
 NEXT_PUBLIC_META_PIXEL_ID=
 NEXT_PUBLIC_GA4_ID=
@@ -383,20 +385,25 @@ Ninguna es `security definer` salvo `private.is_admin()`, que lee `admin_users` 
 
 ## 11. Pagos
 
-### Mercado Pago (Checkout Pro)
+La plata de las ventas cae en la cuenta de Ualá: por eso las tarjetas se cobran con **Ualá Bis** y no con Mercado Pago. El medio de pago en la base se llama `card`, no por la marca del proveedor.
 
-- Crear la preferencia en el servidor con `external_reference = order.id`, `notification_url` apuntando al webhook y vencimiento igual a `reserved_until`.
-- La preferencia lleva **una sola línea con el total** del pedido: los descuentos y el envío ya los calculó la base (§10) y Mercado Pago exige que la suma de los ítems sea exactamente lo que se cobra. El detalle la clienta lo ve en el checkout y en `/pedido/[numero]`.
-- Si la preferencia no se puede crear, el pedido no queda reteniendo stock: se libera la reserva y se ofrece transferencia.
-- `/pedido/[numero]` ofrece "Terminar el pago" mientras la preferencia siga viva.
-- Excluir pagos en efectivo (tipo `ticket`) al menos al inicio.
-- Webhook `/api/webhooks/mercadopago`:
-  1. Validar la firma (`x-signature`) con `MP_WEBHOOK_SECRET`.
-  2. Registrar el evento en `payment_events`; si ya existe, responder 200 sin procesar.
-  3. Consultar el pago a la API de Mercado Pago; nunca confiar solo en el contenido del aviso.
-  4. Aplicar las reglas de stock según el estado.
-  5. Responder 200 rápido. Siempre 200, salvo firma inválida (401): un 500 hace que Mercado Pago reintente para siempre algo que no se arregla solo.
-- `back_urls` a `/pedido/[numero]`, que muestra el estado leído de la base, no de los parámetros de la URL.
+### Tarjetas (Ualá Bis, API Cobros Online v2)
+
+- Credenciales: app o web de Ualá → Ualá Bis → Cobros online → API. Hay un juego para test y otro para producción, y no son intercambiables.
+- Autenticación: `POST {auth}/auth/token` con `username`, `client_id`, `client_secret_id` y `grant_type: client_credentials`. El token dura 24 horas y se guarda en memoria con unos minutos de margen.
+- Crear el pago: `POST {checkout}/checkout` con el monto **en centavos como texto**, `external_reference = order.id`, `notification_url` al webhook y los dos `callback` a `/pedido/[numero]`. Devuelve el `uuid` de la orden y el `checkout_link` al que se manda a la clienta.
+- Mínimo por pago: $25. Por debajo de eso solo queda transferencia.
+- El `uuid` se guarda en `orders.payment_checkout_id`; el pago confirmado queda en `orders.payment_reference`.
+- Webhook `/api/webhooks/uala`:
+  1. **El aviso no viene firmado**, así que no se le cree nada: solo dice qué orden mirar.
+  2. Se anota el evento en `payment_events` (`uala:<uuid>:<estado>`); si ya estaba, se responde 200 sin hacer nada.
+  3. Se consulta el estado real con `GET {checkout}/orders/:uuid` usando nuestro token.
+  4. El pedido se busca por `external_reference`, y se comprueba que el monto cobrado sea el del pedido; si no coincide, no se confirma y queda `needs_review`.
+  5. `APPROVED` o `PROCESSED` confirman el pago (§9.3); `REJECTED` o `REFUNDED` liberan la reserva (§9.4); `PENDING` espera el próximo aviso.
+  6. Se responde 200. Ualá reintenta hasta 3 veces más ante cualquier otra respuesta, así que el 500 queda solo para "no pudimos consultar, probá de nuevo".
+- Si no se puede abrir el pago al crear el pedido, la reserva se libera en el acto y se ofrece transferencia.
+- `/pedido/[numero]` puede reabrir el pago: crea un link nuevo en vez de reusar el viejo (pueden vencer) y el pedido se reconoce igual por su referencia.
+- Cuotas: Ualá Bis permite ofrecerlas absorbiendo el costo. Queda pendiente decidirlo (§17).
 
 ### Transferencia bancaria
 
@@ -404,7 +411,7 @@ Ninguna es `security definer` salvo `private.is_admin()`, que lee `admin_users` 
 - `/pedido/[numero]` muestra alias, CBU, monto exacto y un botón para enviar el comprobante por WhatsApp.
 - La confirmación se hace manualmente desde el panel.
 
-No se guardan datos de tarjetas en ningún lugar.
+No se guardan datos de tarjetas en ningún lugar: el formulario de pago es de Ualá Bis.
 
 ## 12. Envíos
 

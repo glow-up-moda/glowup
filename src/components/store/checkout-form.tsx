@@ -20,7 +20,7 @@ export type ShippingZone = {
 };
 
 type ShippingMethod = "delivery" | "same_day" | "pickup";
-type PaymentMethod = "mercadopago" | "transfer";
+type PaymentMethod = "card" | "transfer";
 
 const emptyAddress = {
   name: "",
@@ -498,17 +498,17 @@ export function CheckoutForm({
               <input
                 type="radio"
                 name="pago"
-                checked={paymentMethod === "mercadopago"}
-                onChange={() => setPaymentMethod("mercadopago")}
+                checked={paymentMethod === "card"}
+                onChange={() => setPaymentMethod("card")}
                 className="size-5 accent-chocolate"
               />
-              Mercado Pago (tarjeta o dinero en cuenta)
+              Tarjeta de crédito o débito
             </label>
           </fieldset>
           <p className="text-sm">
             {paymentMethod === "transfer"
               ? "Te mostramos el alias y el CBU al confirmar. Guardamos tu pedido 24 horas."
-              : "Te llevamos a Mercado Pago para pagar y volvés acá con la confirmación."}
+              : "Te llevamos al pago seguro de Ualá Bis y volvés acá con la confirmación."}
           </p>
         </Step>
 

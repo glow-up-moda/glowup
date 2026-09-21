@@ -11,7 +11,7 @@ export async function getPublicOrder(number: string) {
   const { data } = await supabase
     .from("orders")
     .select(
-      "id, number, status, payment_method, email, phone, shipping_method, shipping_address, is_gift, gift_message, subtotal_cents, coupon_discount_cents, transfer_discount_cents, shipping_cents, total_cents, reserved_until, paid_at, created_at, mp_preference_id, coupons(code), shipping_zones(name, eta_text), order_items(id, parent_item_id, name_snapshot, unit_price_cents, quantity)",
+      "id, number, status, payment_method, email, phone, shipping_method, shipping_address, is_gift, gift_message, subtotal_cents, coupon_discount_cents, transfer_discount_cents, shipping_cents, total_cents, reserved_until, paid_at, created_at, payment_checkout_id, coupons(code), shipping_zones(name, eta_text), order_items(id, parent_item_id, name_snapshot, unit_price_cents, quantity)",
     )
     .eq("number", number)
     .maybeSingle();

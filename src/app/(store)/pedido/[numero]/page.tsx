@@ -7,7 +7,6 @@ import { PageShell } from "@/components/store/page-shell";
 import { buttonClass } from "@/components/ui/button";
 import { IconWhatsApp, Sparkle } from "@/components/ui/icons";
 import { formatDateTime, formatMoney } from "@/lib/format";
-import { checkoutUrl } from "@/lib/mercadopago/client";
 import { rememberedOrders } from "@/lib/orders/access";
 import { parseOrderNumber } from "@/lib/orders/number";
 import {
@@ -17,6 +16,8 @@ import {
 } from "@/lib/orders/public";
 import { addressLines, SHIPPING_LABELS } from "@/lib/admin/orders";
 import { getStoreSettings, storeWhatsappLink } from "@/lib/store/settings";
+
+import { ResumePaymentButton } from "@/components/store/resume-payment-button";
 
 import { verifyOrderEmail } from "../actions";
 
@@ -119,9 +120,8 @@ export default async function OrderPage({
 
   const pendingTransfer =
     order.status === "pending_payment" && order.payment_method === "transfer";
-  const pendingMercadoPago =
-    order.status === "pending_payment" &&
-    order.payment_method === "mercadopago";
+  const pendingCard =
+    order.status === "pending_payment" && order.payment_method === "card";
   const headline = headlines[order.status];
   const address = addressLines(order.shipping_address);
   const receipt = storeWhatsappLink(
@@ -139,25 +139,22 @@ export default async function OrderPage({
       <h1 className="mt-2 font-display text-2xl font-semibold md:text-3xl">
         {pendingTransfer
           ? "Reservamos tu pedido"
-          : pendingMercadoPago
+          : pendingCard
             ? "Estamos esperando el pago"
             : (headline?.title ?? "Tu pedido")}
       </h1>
       <p className="mt-2 max-w-[60ch]">
         {pendingTransfer
           ? "Te lo guardamos 24 horas. Apenas veamos la transferencia, lo preparamos."
-          : pendingMercadoPago
-            ? "Cuando Mercado Pago nos confirme el pago, esta misma página lo va a mostrar."
+          : pendingCard
+            ? "Cuando se acredite el pago, esta misma página lo va a mostrar."
             : (headline?.text ?? "")}
       </p>
 
-      {pendingMercadoPago && order.mp_preference_id && (
-        <a
-          href={checkoutUrl(order.mp_preference_id)}
-          className={buttonClass("primary", "mt-6")}
-        >
-          Terminar el pago
-        </a>
+      {pendingCard && (
+        <div className="mt-6">
+          <ResumePaymentButton number={order.number} />
+        </div>
       )}
 
       {pendingTransfer && (

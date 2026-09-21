@@ -30,7 +30,7 @@ export const STATUS_TONES: Record<
 };
 
 export const PAYMENT_LABELS: Record<PaymentMethod, string> = {
-  mercadopago: "Mercado Pago",
+  card: "Tarjeta",
   transfer: "Transferencia",
 };
 

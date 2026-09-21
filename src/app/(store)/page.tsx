@@ -57,7 +57,7 @@ export default async function HomePage() {
       : "Enviamos a todo el país",
     settings.transferDiscountPercent > 0
       ? `${settings.transferDiscountPercent}% de descuento pagando por transferencia`
-      : "Pagás con Mercado Pago o por transferencia",
+      : "Pagás con tarjeta o por transferencia",
     "Embalaje discreto: nadie ve qué hay adentro",
     "Cambios sin vueltas dentro de los 15 días",
   ];
