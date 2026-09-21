@@ -230,7 +230,7 @@ begin
 
     -- 4 ----------------------------------------------------------------------
     v_res := public.create_order_with_reservation(v_base || jsonb_build_object(
-      'payment_method', 'mercadopago', 'shipping_method', 'delivery', 'shipping_zone_id', v_zone,
+      'payment_method', 'card', 'shipping_method', 'delivery', 'shipping_zone_id', v_zone,
       'shipping_address', jsonb_build_object('calle', 'Inventada 123'),
       'items', jsonb_build_array(jsonb_build_object('variant_id', v_neg90, 'quantity', 2))));
     v_order := (v_res ->> 'order_id')::uuid;
@@ -243,7 +243,7 @@ begin
     end if;
     select * into r from public.orders where id = v_order;
     if r.reserved_until is distinct from now() + interval '30 minutes' then
-      raise exception 'Prueba 4c, la reserva de Mercado Pago dura 30 minutos: %', r.reserved_until;
+      raise exception 'Prueba 4c, la reserva de un pago con tarjeta dura 30 minutos: %', r.reserved_until;
     end if;
     if r.email is distinct from 'prueba@example.com' then
       raise exception 'Prueba 4d, el email se guarda normalizado: %', r.email;
@@ -341,7 +341,7 @@ begin
 
     -- 10 ---------------------------------------------------------------------
     v_res := public.create_order_with_reservation(v_base || jsonb_build_object(
-      'payment_method', 'mercadopago', 'shipping_method', 'pickup',
+      'payment_method', 'card', 'shipping_method', 'pickup',
       'items', jsonb_build_array(jsonb_build_object('variant_id', v_nat100, 'quantity', 1))));
     v_order_late := (v_res ->> 'order_id')::uuid;
     update public.orders set reserved_until = now() - interval '1 minute' where id = v_order_late;
@@ -362,7 +362,7 @@ begin
     v_msg := null;
     begin
       perform public.create_order_with_reservation(v_base || jsonb_build_object(
-        'payment_method', 'mercadopago', 'shipping_method', 'pickup', 'coupon_code', 'PRUEBAVENCIDO',
+        'payment_method', 'card', 'shipping_method', 'pickup', 'coupon_code', 'PRUEBAVENCIDO',
         'items', jsonb_build_array(jsonb_build_object('variant_id', v_nat90, 'quantity', 1))));
     exception when others then
       v_msg := sqlerrm;
@@ -378,7 +378,7 @@ begin
     v_msg := null;
     begin
       perform public.create_order_with_reservation(v_base || jsonb_build_object(
-        'payment_method', 'mercadopago', 'shipping_method', 'pickup', 'coupon_code', 'PRUEBAAGOTADO',
+        'payment_method', 'card', 'shipping_method', 'pickup', 'coupon_code', 'PRUEBAAGOTADO',
         'items', jsonb_build_array(jsonb_build_object('variant_id', v_nat90, 'quantity', 1))));
     exception when others then
       v_msg := sqlerrm;
@@ -394,7 +394,7 @@ begin
     v_msg := null;
     begin
       perform public.create_order_with_reservation(v_base || jsonb_build_object(
-        'payment_method', 'mercadopago', 'shipping_method', 'pickup', 'coupon_code', 'PRUEBA15',
+        'payment_method', 'card', 'shipping_method', 'pickup', 'coupon_code', 'PRUEBA15',
         'items', jsonb_build_array(jsonb_build_object('variant_id', v_clas_nat, 'quantity', 1))));
     exception when others then
       v_msg := sqlerrm;
@@ -408,7 +408,7 @@ begin
 
     -- 12 ---------------------------------------------------------------------
     v_res := public.create_order_with_reservation(v_base || jsonb_build_object(
-      'payment_method', 'mercadopago', 'shipping_method', 'pickup', 'coupon_code', 'pruebaunico',
+      'payment_method', 'card', 'shipping_method', 'pickup', 'coupon_code', 'pruebaunico',
       'items', jsonb_build_array(jsonb_build_object('variant_id', v_nat90, 'quantity', 1))));
     v_order_coupon := (v_res ->> 'order_id')::uuid;
     select * into r from public.orders where id = v_order_coupon;
