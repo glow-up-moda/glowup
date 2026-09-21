@@ -248,6 +248,9 @@ begin
     if r.email is distinct from 'prueba@example.com' then
       raise exception 'Prueba 4d, el email se guarda normalizado: %', r.email;
     end if;
+    if r.accepts_marketing is distinct from false then
+      raise exception 'Prueba 4d2, sin aceptar nada, el pedido no consiente novedades: %', r.accepts_marketing;
+    end if;
     select count(*) into v_count from public.stock_movements where order_id = v_order and type = 'reservation';
     if v_count is distinct from 1 then
       raise exception 'Prueba 4e, la reserva deja un movimiento: hay %', v_count;
