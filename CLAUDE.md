@@ -203,6 +203,9 @@ Cómo está hecha la tienda:
 - Los favoritos guardan solo ids: los precios y el stock se leen frescos cada vez.
 - "Avisame cuando vuelva" se guarda con una acción del servidor, porque `back_in_stock_requests` no está abierta a la API pública.
 - Mientras un producto no tenga fotos, en lugar del hueco se muestra el destello de la marca.
+- El checkout y la página del pedido corren con la clave secreta: `orders` no se lee por la API pública. Los totales se piden a `quote_cart` en cada cambio; el navegador nunca suma.
+- Los números de pedido son correlativos, así que `/pedido/[numero]` solo se abre si el pedido se hizo en este navegador (cookie `glowup-pedidos`, httpOnly) o si se escribe el email con el que se compró. El error de `/seguimiento` es siempre el mismo, para no revelar qué números existen.
+- Los formularios de la tienda que pueden fallar usan `useFormAction` (`src/lib/use-form-action.ts`), igual que el panel: React 19 borra los campos al terminar la acción.
 
 ### Inicio (orden de secciones)
 
@@ -383,13 +386,16 @@ Ninguna es `security definer` salvo `private.is_admin()`, que lee `admin_users` 
 ### Mercado Pago (Checkout Pro)
 
 - Crear la preferencia en el servidor con `external_reference = order.id`, `notification_url` apuntando al webhook y vencimiento igual a `reserved_until`.
+- La preferencia lleva **una sola línea con el total** del pedido: los descuentos y el envío ya los calculó la base (§10) y Mercado Pago exige que la suma de los ítems sea exactamente lo que se cobra. El detalle la clienta lo ve en el checkout y en `/pedido/[numero]`.
+- Si la preferencia no se puede crear, el pedido no queda reteniendo stock: se libera la reserva y se ofrece transferencia.
+- `/pedido/[numero]` ofrece "Terminar el pago" mientras la preferencia siga viva.
 - Excluir pagos en efectivo (tipo `ticket`) al menos al inicio.
 - Webhook `/api/webhooks/mercadopago`:
   1. Validar la firma (`x-signature`) con `MP_WEBHOOK_SECRET`.
   2. Registrar el evento en `payment_events`; si ya existe, responder 200 sin procesar.
   3. Consultar el pago a la API de Mercado Pago; nunca confiar solo en el contenido del aviso.
   4. Aplicar las reglas de stock según el estado.
-  5. Responder 200 rápido.
+  5. Responder 200 rápido. Siempre 200, salvo firma inválida (401): un 500 hace que Mercado Pago reintente para siempre algo que no se arregla solo.
 - `back_urls` a `/pedido/[numero]`, que muestra el estado leído de la base, no de los parámetros de la URL.
 
 ### Transferencia bancaria

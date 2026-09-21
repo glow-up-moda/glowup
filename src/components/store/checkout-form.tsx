@@ -187,6 +187,10 @@ export function CheckoutForm({
         return;
       }
       clear();
+      if (result.redirectUrl) {
+        window.location.href = result.redirectUrl;
+        return;
+      }
       router.push(`/pedido/${result.number}`);
     });
   }

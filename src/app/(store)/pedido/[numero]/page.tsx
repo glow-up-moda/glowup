@@ -7,6 +7,7 @@ import { PageShell } from "@/components/store/page-shell";
 import { buttonClass } from "@/components/ui/button";
 import { IconWhatsApp, Sparkle } from "@/components/ui/icons";
 import { formatDateTime, formatMoney } from "@/lib/format";
+import { checkoutUrl } from "@/lib/mercadopago/client";
 import { rememberedOrders } from "@/lib/orders/access";
 import { parseOrderNumber } from "@/lib/orders/number";
 import {
@@ -149,6 +150,15 @@ export default async function OrderPage({
             ? "Cuando Mercado Pago nos confirme el pago, esta misma página lo va a mostrar."
             : (headline?.text ?? "")}
       </p>
+
+      {pendingMercadoPago && order.mp_preference_id && (
+        <a
+          href={checkoutUrl(order.mp_preference_id)}
+          className={buttonClass("primary", "mt-6")}
+        >
+          Terminar el pago
+        </a>
+      )}
 
       {pendingTransfer && (
         <section className="mt-6 rounded-card bg-rosa p-4 md:p-6">

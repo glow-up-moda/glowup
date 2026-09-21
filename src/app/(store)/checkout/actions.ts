@@ -2,6 +2,7 @@
 
 import { z } from "zod";
 
+import { createPreference, isMercadoPagoReady } from "@/lib/mercadopago/client";
 import { rememberOrder } from "@/lib/orders/access";
 import {
   checkoutErrorMessage,
@@ -90,7 +91,8 @@ const orderSchema = quoteSchema
     { error: "Completá la dirección para el envío.", path: ["address"] },
   );
 
-export type PlaceOrderResult = { number: string } | { error: string };
+export type PlaceOrderResult =
+  { number: string; redirectUrl?: string } | { error: string };
 
 export async function placeOrder(input: unknown): Promise<PlaceOrderResult> {
   const parsed = orderSchema.safeParse(input);
@@ -116,7 +118,12 @@ export async function placeOrder(input: unknown): Promise<PlaceOrderResult> {
   });
   if (error || !data) return { error: checkoutErrorMessage(error) };
 
-  const created = data as { order_id: string; number: string };
+  const created = data as {
+    order_id: string;
+    number: string;
+    total_cents: number;
+    reserved_until: string | null;
+  };
 
   // El consentimiento va aparte: la función que reserva stock no se ocupa de
   // marketing (ver la migración 20260921120000).
@@ -130,5 +137,44 @@ export async function placeOrder(input: unknown): Promise<PlaceOrderResult> {
   // Este navegador puede ver el pedido sin escribir el email (§7).
   await rememberOrder(created.number);
 
-  return { number: created.number };
+  if (order.paymentMethod !== "mercadopago") {
+    return { number: created.number };
+  }
+
+  // Con Mercado Pago falta abrir el pago. Si no se puede, el pedido no queda
+  // colgado reteniendo stock: se libera la reserva (§9.4) y se avisa.
+  async function cancel(reason: string) {
+    await supabase.rpc("release_order_reservation", {
+      p_order_id: created.order_id,
+      p_reason: reason,
+    });
+  }
+
+  if (!isMercadoPagoReady()) {
+    await cancel("Mercado Pago sin configurar");
+    return {
+      error:
+        "Por ahora no podemos cobrar con Mercado Pago. Elegí transferencia y listo.",
+    };
+  }
+
+  try {
+    const preference = await createPreference({
+      id: created.order_id,
+      number: created.number,
+      email: order.email,
+      totalCents: created.total_cents,
+      reservedUntil: created.reserved_until,
+    });
+    await supabase
+      .from("orders")
+      .update({ mp_preference_id: preference.id })
+      .eq("id", created.order_id);
+    return { number: created.number, redirectUrl: preference.initPoint };
+  } catch {
+    await cancel("No se pudo abrir el pago en Mercado Pago");
+    return {
+      error: "No pudimos abrir el pago. Probá de nuevo o elegí transferencia.",
+    };
+  }
 }
