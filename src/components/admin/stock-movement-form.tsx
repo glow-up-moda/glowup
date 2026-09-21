@@ -8,7 +8,7 @@ import { Notice } from "@/components/ui/notice";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { CHANNELS } from "@/lib/admin/stock";
 
-import { clearFields, useFormAction } from "./use-form-action";
+import { clearFields, useFormAction } from "@/lib/use-form-action";
 
 type ManualType = "restock" | "manual_sale" | "adjustment" | "return";
 

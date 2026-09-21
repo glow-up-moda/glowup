@@ -1,5 +1,7 @@
 import type { Database } from "@/lib/supabase/database.types";
 
+export { parseOrderNumber } from "@/lib/orders/number";
+
 export type OrderStatus = Database["public"]["Enums"]["order_status"];
 export type PaymentMethod = Database["public"]["Enums"]["payment_method"];
 export type ShippingMethod = Database["public"]["Enums"]["shipping_method"];
@@ -134,12 +136,6 @@ export function addressLines(
   ]
     .filter(({ value }) => value != null && String(value).trim() !== "")
     .map(({ label, value }) => ({ label, value: String(value) }));
-}
-
-/** "gu-001000" -> "GU-001000"; null si no tiene la forma de un número de pedido. */
-export function parseOrderNumber(value: string): string | null {
-  const number = value.trim().toUpperCase();
-  return /^GU-\d{6,}$/.test(number) ? number : null;
 }
 
 /** La pestaña del listado donde vive un pedido, para volver a ella. */

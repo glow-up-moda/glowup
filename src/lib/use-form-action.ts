@@ -8,7 +8,15 @@ import {
   useRef,
 } from "react";
 
-import { emptyForm, type FormState } from "@/lib/admin/forms";
+/** Lo que devuelve una acción de formulario, en el panel y en la tienda. */
+export type FormState = {
+  message?: string;
+  error?: string;
+  errors?: Record<string, string>;
+  values?: Record<string, string>;
+};
+
+export const emptyForm: FormState = {};
 
 /**
  * Envía el formulario sin el reset automático de React 19. Con

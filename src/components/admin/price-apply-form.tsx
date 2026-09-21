@@ -6,7 +6,7 @@ import { SubmitButton } from "@/components/ui/submit-button";
 import type { FormState } from "@/lib/admin/forms";
 import { plural } from "@/lib/format";
 
-import { useFormAction } from "./use-form-action";
+import { useFormAction } from "@/lib/use-form-action";
 
 /**
  * Aplica el cambio que muestra la vista previa. Lleva escondidos los mismos

@@ -18,7 +18,7 @@ import { emptyForm, type FormState } from "@/lib/admin/forms";
 import { productImageUrl } from "@/lib/images";
 
 import { ConfirmAction } from "./confirm-action";
-import { useFormAction } from "./use-form-action";
+import { useFormAction } from "@/lib/use-form-action";
 
 type FormAction = (prev: FormState, formData: FormData) => Promise<FormState>;
 

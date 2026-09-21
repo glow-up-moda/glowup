@@ -8,7 +8,7 @@ import type { FormState } from "@/lib/admin/forms";
 
 import { ConfirmAction } from "./confirm-action";
 import { StockMovementForm } from "./stock-movement-form";
-import { useFormAction } from "./use-form-action";
+import { useFormAction } from "@/lib/use-form-action";
 
 type FormAction = (prev: FormState, formData: FormData) => Promise<FormState>;
 

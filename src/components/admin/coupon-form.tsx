@@ -8,7 +8,7 @@ import { SubmitButton } from "@/components/ui/submit-button";
 import { COUPON_TYPES, type CouponType } from "@/lib/admin/coupons";
 import type { FormState } from "@/lib/admin/forms";
 
-import { useFormAction } from "./use-form-action";
+import { useFormAction } from "@/lib/use-form-action";
 
 export type CouponValues = {
   code: string;

@@ -359,6 +359,7 @@ export type Database = {
       }
       orders: {
         Row: {
+          accepts_marketing: boolean
           coupon_discount_cents: number
           coupon_id: string | null
           created_at: string
@@ -387,6 +388,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          accepts_marketing?: boolean
           coupon_discount_cents?: number
           coupon_id?: string | null
           created_at?: string
@@ -415,6 +417,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          accepts_marketing?: boolean
           coupon_discount_cents?: number
           coupon_id?: string | null
           created_at?: string

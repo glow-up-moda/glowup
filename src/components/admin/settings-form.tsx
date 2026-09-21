@@ -11,7 +11,7 @@ import {
   type SettingsValues,
 } from "@/lib/admin/settings";
 
-import { useFormAction } from "./use-form-action";
+import { useFormAction } from "@/lib/use-form-action";
 
 export function SettingsForm({
   action,

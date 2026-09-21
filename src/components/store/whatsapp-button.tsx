@@ -1,24 +1,16 @@
-import { IconWhatsApp } from "@/components/ui/icons";
 import { getStoreSettings, storeWhatsappLink } from "@/lib/store/settings";
 
+import { WhatsappFab } from "./whatsapp-fab";
+
 /**
- * Botón flotante de WhatsApp (§7). No aparece en el checkout ni mientras no
- * haya número cargado en la configuración.
+ * Botón flotante de WhatsApp (§7). El número sale de la configuración, así que
+ * el link se arma en el servidor; esconderlo en el checkout lo hace el cliente,
+ * que es el que sabe en qué página está.
  */
 export async function WhatsappButton() {
   const { whatsappNumber } = await getStoreSettings();
   const link = storeWhatsappLink(whatsappNumber, "¡Hola! Tengo una consulta.");
   if (!link) return null;
 
-  return (
-    <a
-      href={link}
-      target="_blank"
-      rel="noopener noreferrer"
-      aria-label="Escribinos por WhatsApp"
-      className="fixed right-4 bottom-4 z-30 flex size-14 items-center justify-center rounded-full bg-coral text-chocolate shadow-soft transition-colors duration-150 ease-brand hover:bg-rosa"
-    >
-      <IconWhatsApp width={26} height={26} />
-    </a>
-  );
+  return <WhatsappFab href={link} />;
 }

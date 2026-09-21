@@ -1,0 +1,29 @@
+import type { Metadata } from "next";
+
+import { CheckoutForm } from "@/components/store/checkout-form";
+import { getStoreSettings } from "@/lib/store/settings";
+import { createCatalogClient } from "@/lib/supabase/catalog";
+
+export const metadata: Metadata = {
+  title: "Checkout · GLOW UP",
+  description: "Terminá tu compra en GLOW UP.",
+};
+
+export default async function CheckoutPage() {
+  const supabase = createCatalogClient();
+  const [{ data: zones }, settings] = await Promise.all([
+    supabase
+      .from("shipping_zones")
+      .select("id, name, price_cents, eta_text, same_day")
+      .order("price_cents"),
+    getStoreSettings(),
+  ]);
+
+  return (
+    <CheckoutForm
+      zones={zones ?? []}
+      transferDiscountPercent={settings.transferDiscountPercent}
+      sameDayCutoffTime={settings.sameDayCutoffTime}
+    />
+  );
+}

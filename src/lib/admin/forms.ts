@@ -2,15 +2,8 @@ import { z } from "zod";
 
 import { fromLocalInput, parsePesos } from "@/lib/format";
 
-/** Estado que devuelven las acciones de formulario del panel. */
-export type FormState = {
-  message?: string;
-  error?: string;
-  errors?: Record<string, string>;
-  values?: Record<string, string>;
-};
-
-export const emptyForm: FormState = {};
+// El estado lo comparten el panel y la tienda; vive con el hook que lo usa.
+export { emptyForm, type FormState } from "@/lib/use-form-action";
 
 /** Primer error de cada campo, para mostrarlo debajo del input. */
 export function fieldErrors(error: z.ZodError): Record<string, string> {

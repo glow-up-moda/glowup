@@ -1,12 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState, useState } from "react";
+import { useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatMoney } from "@/lib/format";
 import type { ProductDetail } from "@/lib/store/product";
+import { useFormAction } from "@/lib/use-form-action";
 
 import { AddToCartButton } from "./add-to-cart";
 
@@ -53,10 +54,13 @@ export function ProductPurchase({
     product.compareAtPriceCents != null &&
     product.compareAtPriceCents > product.priceCents;
 
-  const [notifyState, notify, notifying] = useActionState(
-    notifyAction.bind(null, variant?.id ?? ""),
-    {} as NotifyState,
-  );
+  // Con useFormAction, un email mal escrito no borra lo tecleado (§7).
+  const {
+    state: notifyState,
+    pending: notifying,
+    formRef: notifyRef,
+    onSubmit: onNotify,
+  } = useFormAction(notifyAction.bind(null, variant?.id ?? ""));
 
   const cartItem = variant?.isAvailable
     ? {
@@ -155,7 +159,11 @@ export function ProductPurchase({
       )}
 
       {variant && !variant.isAvailable ? (
-        <form action={notify} className="flex flex-col gap-2">
+        <form
+          ref={notifyRef}
+          onSubmit={onNotify}
+          className="flex flex-col gap-2"
+        >
           <p>
             Ese talle se agotó. Dejanos tu email y te avisamos apenas vuelva.
           </p>
