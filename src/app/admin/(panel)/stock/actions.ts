@@ -1,9 +1,12 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 import { z } from "zod";
 
 import { dbErrorMessage } from "@/lib/admin/errors";
+import { clearLowStockAlert, sendLowStockAlert } from "@/lib/emails/internal";
+import { pendingNotices, sendBackInStock } from "@/lib/emails/stock";
 import { type FormState, formValues, text } from "@/lib/admin/forms";
 import { CHANNELS } from "@/lib/admin/stock";
 import { requireAdmin } from "@/lib/auth/admin";
@@ -70,7 +73,7 @@ export async function recordMovement(
   }
 
   let available: number;
-  let pendingNotices = 0;
+  let pendingCount = 0;
 
   if (type === "restock") {
     const { data, error } = await supabase.rpc("restock_variant", {
@@ -85,7 +88,11 @@ export async function recordMovement(
       pending_back_in_stock: unknown[];
     };
     available = result.available;
-    pendingNotices = result.pending_back_in_stock.length;
+    const notices = pendingNotices(result.pending_back_in_stock);
+    pendingCount = notices.length;
+    after(() => sendBackInStock(variant_id, notices));
+    // Vuelve a haber stock: el próximo bajón tiene que volver a avisar.
+    after(() => clearLowStockAlert(variant_id));
   } else {
     const { data, error } = await supabase.rpc("record_stock_movement", {
       p_variant_id: variant_id,
@@ -96,13 +103,14 @@ export async function recordMovement(
     });
     if (error) return { error: dbErrorMessage(error), values };
     available = (data as { available: number }).available;
+    after(() => sendLowStockAlert([variant_id]));
   }
 
   revalidatePath("/admin", "layout");
 
   const notices =
-    pendingNotices > 0
-      ? ` Hay ${pendingNotices} ${pendingNotices === 1 ? "aviso" : "avisos"} de reposición esperando este talle.`
+    pendingCount > 0
+      ? ` Le avisamos a ${pendingCount === 1 ? "la persona que lo estaba esperando" : `las ${pendingCount} personas que lo estaban esperando`}.`
       : "";
   return {
     message: `Listo: ${available === 1 ? "queda 1 disponible" : `quedan ${available} disponibles`}.${notices}`,

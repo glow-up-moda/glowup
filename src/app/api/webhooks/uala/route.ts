@@ -1,5 +1,12 @@
-import { getUalaOrder } from "@/lib/uala/client";
+import { after } from "next/server";
+
+import {
+  sendLowStockAlertForOrder,
+  sendReviewAlert,
+} from "@/lib/emails/internal";
+import { sendPaymentApproved } from "@/lib/emails/orders";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getUalaOrder } from "@/lib/uala/client";
 
 // Webhook de Ualá Bis (§11).
 //
@@ -81,11 +88,23 @@ export async function POST(request: Request) {
           review_reason: `Ualá Bis cobró ${order.amountCents} centavos y el pedido es de ${ourOrder.total_cents}.`,
         })
         .eq("id", ourOrder.id);
+      after(() => sendReviewAlert(ourOrder.id));
     } else {
-      await supabase.rpc("confirm_order_payment", {
+      const { data: confirmed } = await supabase.rpc("confirm_order_payment", {
         p_order_id: ourOrder.id,
         p_payment_reference: order.uuid,
       });
+      // Ualá puede avisar dos veces el mismo pago (APPROVED y PROCESSED): el
+      // email sale solo con la confirmación que descontó el stock.
+      const result = confirmed as {
+        already_confirmed: boolean;
+        needs_review: boolean;
+      } | null;
+      if (result && !result.already_confirmed) {
+        after(() => sendPaymentApproved(ourOrder.id));
+        after(() => sendLowStockAlertForOrder(ourOrder.id));
+        if (result.needs_review) after(() => sendReviewAlert(ourOrder.id));
+      }
     }
   } else if (order.status === "REJECTED" || order.status === "REFUNDED") {
     await supabase.rpc("release_order_reservation", {

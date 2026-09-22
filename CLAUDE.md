@@ -56,6 +56,8 @@ UALA_CLIENT_ID=               # solo servidor
 UALA_CLIENT_SECRET=           # solo servidor
 UALA_ENVIRONMENT=test         # test | production
 RESEND_API_KEY=               # solo servidor
+EMAIL_FROM=                   # solo servidor, dominio verificado en Resend
+EMAIL_INTERNAL=               # solo servidor, destino de los avisos internos
 NEXT_PUBLIC_META_PIXEL_ID=
 NEXT_PUBLIC_GA4_ID=
 ```
@@ -430,6 +432,14 @@ Con logo, paleta y voz de marca:
 - Volvió tu talle.
 - Pedido de reseña, unos días después de la entrega.
 - Internos: stock bajo, pedido para revisar, transferencia pendiente.
+
+Cómo están hechos:
+- Las plantillas viven en `src/emails/` y comparten `layout.tsx` (paleta, tipografía y pie) y `order-summary.tsx` (qué compró y cómo lo recibe). Todo con estilos en línea y sin fuentes web: Gmail y Outlook descartan las hojas de estilo y los `@font-face`.
+- El envío es un `POST` a la API de Resend con `fetch`, sin dependencias (`src/lib/emails/send.ts`). Sin `RESEND_API_KEY` o sin `EMAIL_FROM` no se manda nada y queda anotado en la consola, así el entorno local funciona sin cuenta.
+- **Un email nunca rompe lo que lo disparó.** Los errores se registran y la función sigue: un pago confirmado vale más que un aviso.
+- Salen con `after()` de `next/server`, después de responder: la clienta no espera a Resend. Se ejecutan igual cuando la acción termina en `redirect()`.
+- `sent_emails` evita los duplicados: la clave (`enviado:<order_id>`, `resena:<order_id>`) es única y el insert falla cuando ya se mandó. El aviso de stock bajo se manda una vez por variante y la marca se borra al reponerla.
+- Los avisos internos van a `EMAIL_INTERNAL`; si no está cargada, no se mandan.
 
 ## 14. SEO, rendimiento y analítica
 

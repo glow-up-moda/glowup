@@ -2,9 +2,15 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { after } from "next/server";
 import { z } from "zod";
 
 import { dbErrorMessage } from "@/lib/admin/errors";
+import {
+  sendLowStockAlertForOrder,
+  sendReviewAlert,
+} from "@/lib/emails/internal";
+import { sendOrderShipped, sendPaymentApproved } from "@/lib/emails/orders";
 import type { FormState } from "@/lib/admin/forms";
 import type { OrderStatus } from "@/lib/admin/orders";
 import { isUuid } from "@/lib/params";
@@ -54,6 +60,14 @@ export async function confirmTransfer(orderId: string): Promise<FormState> {
     already_confirmed: boolean;
     needs_review: boolean;
   };
+
+  // Confirmar dos veces no descuenta dos veces (§8) ni vuelve a escribirle.
+  if (!result.already_confirmed) {
+    after(() => sendPaymentApproved(orderId));
+    after(() => sendLowStockAlertForOrder(orderId));
+    if (result.needs_review) after(() => sendReviewAlert(orderId));
+  }
+
   done(
     result.number,
     result.already_confirmed
@@ -117,6 +131,10 @@ export async function changeOrderStatus(
     p_status: parsed.data,
   });
   if (error) return { error: dbErrorMessage(error) };
+
+  if (parsed.data === "shipped" || parsed.data === "ready_for_pickup") {
+    after(() => sendOrderShipped(orderId));
+  }
 
   done((data as { number: string }).number, "estado");
 }

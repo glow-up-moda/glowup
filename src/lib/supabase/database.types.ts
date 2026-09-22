@@ -725,6 +725,30 @@ export type Database = {
           },
         ]
       }
+      sent_emails: {
+        Row: {
+          id: string
+          key: string
+          kind: string
+          recipient: string
+          sent_at: string
+        }
+        Insert: {
+          id?: string
+          key: string
+          kind: string
+          recipient: string
+          sent_at?: string
+        }
+        Update: {
+          id?: string
+          key?: string
+          kind?: string
+          recipient?: string
+          sent_at?: string
+        }
+        Relationships: []
+      }
       settings: {
         Row: {
           key: string

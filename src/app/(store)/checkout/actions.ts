@@ -1,8 +1,10 @@
 "use server";
 
+import { after } from "next/server";
 import { z } from "zod";
 
-import { createCheckout, isUalaReady, MIN_CARD_CENTS } from "@/lib/uala/client";
+import { sendPendingTransferAlert } from "@/lib/emails/internal";
+import { sendOrderReceived } from "@/lib/emails/orders";
 import { rememberOrder } from "@/lib/orders/access";
 import {
   checkoutErrorMessage,
@@ -10,6 +12,7 @@ import {
   toCheckoutTotals,
 } from "@/lib/store/checkout";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { createCheckout, isUalaReady, MIN_CARD_CENTS } from "@/lib/uala/client";
 
 // El checkout no tiene sesión: corre con la clave secreta del servidor (§8).
 // Los totales y la reserva de stock los calcula siempre la base (§10), nunca
@@ -137,7 +140,10 @@ export async function placeOrder(input: unknown): Promise<PlaceOrderResult> {
   // Este navegador puede ver el pedido sin escribir el email (§7).
   await rememberOrder(created.number);
 
+  // Los emails salen después de responder: la clienta no espera a Resend.
   if (order.paymentMethod !== "card") {
+    after(() => sendOrderReceived(created.order_id));
+    after(() => sendPendingTransferAlert(created.order_id));
     return { number: created.number };
   }
 
@@ -175,6 +181,7 @@ export async function placeOrder(input: unknown): Promise<PlaceOrderResult> {
       .from("orders")
       .update({ payment_checkout_id: checkout.uuid })
       .eq("id", created.order_id);
+    after(() => sendOrderReceived(created.order_id));
     return { number: created.number, redirectUrl: checkout.checkoutLink };
   } catch {
     await cancel("No se pudo abrir el pago con tarjeta");
