@@ -99,9 +99,11 @@ export type UalaOrderStatus =
   "PENDING" | "PROCESSED" | "APPROVED" | "REJECTED" | "REFUNDED";
 
 /**
- * Orden de pago de un pedido que ya reservó stock. El monto va en centavos,
- * igual que en nuestra base, y `external_reference` es el id del pedido: por
- * ahí lo reconocemos cuando vuelve el aviso.
+ * Orden de pago de un pedido que ya reservó stock. `external_reference` es el
+ * id del pedido: por ahí lo reconocemos cuando vuelve el aviso.
+ *
+ * Ojo con el monto: Ualá Bis lo toma en **pesos con dos decimales**, no en
+ * centavos como nuestra base. Mandar "2500" por $25 cobra $2.500.
  */
 export async function createCheckout(order: {
   id: string;
@@ -112,7 +114,7 @@ export async function createCheckout(order: {
   const data = (await call("/checkout", {
     method: "POST",
     body: JSON.stringify({
-      amount: String(order.totalCents),
+      amount: (order.totalCents / 100).toFixed(2),
       description: `Pedido ${order.number} · GLOW UP`,
       callback_success: `${site}/pedido/${order.number}`,
       callback_fail: `${site}/pedido/${order.number}`,
@@ -142,12 +144,16 @@ export async function getUalaOrder(uuid: string): Promise<{
     uuid: string;
     status: UalaOrderStatus;
     external_reference?: string | null;
-    amount?: number | null;
+    amount?: number | string | null;
   };
+
+  // El monto vuelve en pesos: lo pasamos a centavos para compararlo con el
+  // total del pedido.
+  const amount = data.amount == null ? Number.NaN : Number(data.amount);
   return {
     uuid: data.uuid,
     status: data.status,
     externalReference: data.external_reference ?? null,
-    amountCents: data.amount ?? null,
+    amountCents: Number.isFinite(amount) ? Math.round(amount * 100) : null,
   };
 }

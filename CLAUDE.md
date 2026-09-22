@@ -391,7 +391,7 @@ La plata de las ventas cae en la cuenta de Ualá: por eso las tarjetas se cobran
 
 - Credenciales: app o web de Ualá → Ualá Bis → Cobros online → API. Hay un juego para test y otro para producción, y no son intercambiables.
 - Autenticación: `POST {auth}/auth/token` con `username`, `client_id`, `client_secret_id` y `grant_type: client_credentials`. El token dura 24 horas y se guarda en memoria con unos minutos de margen.
-- Crear el pago: `POST {checkout}/checkout` con el monto **en centavos como texto**, `external_reference = order.id`, `notification_url` al webhook y los dos `callback` a `/pedido/[numero]`. Devuelve el `uuid` de la orden y el `checkout_link` al que se manda a la clienta.
+- Crear el pago: `POST {checkout}/checkout` con el monto **en pesos con dos decimales, como texto** (la base guarda centavos: 2500 se manda como `"25.00"`), `external_reference = order.id`, `notification_url` al webhook y los dos `callback` a `/pedido/[numero]`. Devuelve el `uuid` de la orden y el `checkout_link` al que se manda a la clienta.
 - Mínimo por pago: $25. Por debajo de eso solo queda transferencia.
 - El `uuid` se guarda en `orders.payment_checkout_id`; el pago confirmado queda en `orders.payment_reference`.
 - Webhook `/api/webhooks/uala`:
