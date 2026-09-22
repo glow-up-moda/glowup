@@ -18,7 +18,7 @@ Tienda online de **ropa interior femenina y accesorios** (gorras, anteojos de so
 ## 2. Forma de trabajo
 
 - Modificá los archivos existentes en su lugar. **No crees copias ni versiones paralelas** (`page-v2.tsx`, `hero-nuevo.tsx`, `styles-old.css`).
-- **Avanzá sin pedir confirmación.** Tomá las decisiones con criterio y contalas en dos líneas cuando ya estén hechas. Solo frená y preguntá si algo cuesta plata, borra datos, toca producción o necesita una clave o una cuenta personal (Supabase, Netlify, GitHub, Mercado Pago, etc.).
+- **Avanzá sin pedir confirmación.** Tomá las decisiones con criterio y contalas en dos líneas cuando ya estén hechas. Solo frená y preguntá si algo cuesta plata, borra datos, toca producción o necesita una clave o una cuenta personal (Supabase, Netlify, GitHub, Ualá, etc.).
 - Informes cortos: qué se hizo, qué falta, y seguir. Sin resúmenes largos ni listas de verificación en cada paso.
 - Una tarea terminada = un commit. Código, nombres y commits en inglés; textos visibles en español.
 - No agregues dependencias sin explicar para qué sirven y si existe una alternativa nativa.
@@ -72,7 +72,7 @@ src/components/ui/        botones, inputs, badges
 src/components/store/     header, carrito lateral, tarjetas de producto
 src/components/admin/     armazón, navegación y piezas del panel
 scripts/                  tareas locales (alta de administradoras)
-src/lib/                  supabase, mercadopago, pricing, stock, shipping
+src/lib/                  supabase, uala, pricing, stock, shipping
 src/emails/               plantillas de React Email
 supabase/migrations/      SQL versionado
 public/brand/             logos y favicon
@@ -247,7 +247,7 @@ Footer: links, legales, Data Fiscal, redes
 2. Entrega: envío a domicilio por zona, envío en el día (Paraná y Oro Verde) o retiro.
 3. Opción "Es para regalo": caja sin precios + mensaje en tarjeta.
 4. Cupón.
-5. Pago: Mercado Pago o transferencia bancaria con descuento.
+5. Pago: tarjeta con Ualá Bis o transferencia bancaria con descuento.
 6. Aceptación de términos y consentimiento opcional para novedades.
 
 ### Panel `/admin`
@@ -267,7 +267,7 @@ Tiene que ser cómodo de usar desde el celular.
 - **Pedidos:** filtros por estado, detalle, confirmar transferencia, cambiar estado y hoja imprimible para armar el paquete.
   - Pestañas por `?estado=`: `por-preparar` (pagados, la vista inicial), `transferencias` (pendientes por transferencia), `revisar`, `preparando`, `enviados`, `entregados`, `cancelados` y `todos`. La búsqueda recorre todos los pedidos, por número o por email.
   - Estados: pagado → preparando → enviado (o listo para retirar, si es retiro) → entregado, con un paso atrás por si hubo un error. Los aplica `set_order_status`.
-  - Las transferencias se confirman a mano, con un paso de confirmación. Una transferencia de un pedido ya cancelado también se puede confirmar: si todavía hay stock se descuenta; si no, queda para revisar (§9.6). Mercado Pago nunca se confirma desde el panel.
+  - Las transferencias se confirman a mano, con un paso de confirmación. Una transferencia de un pedido ya cancelado también se puede confirmar: si todavía hay stock se descuenta; si no, queda para revisar (§9.6). Un pago con tarjeta nunca se confirma desde el panel: lo confirma el webhook.
   - "Ya lo revisé" apaga `needs_review`, pero el motivo queda guardado en el pedido.
   - La hoja para armar (`/admin/pedidos/[numero]/hoja`) no lleva precios: puede ir dentro de la caja.
 - **Cupones:** listado con estado (activo, programado, vencido, agotado), alta y edición con vigencia en hora de Argentina, "desactivar ahora" (le corta la vigencia) y borrado solo si nunca se usó.
@@ -295,7 +295,7 @@ Montos siempre en **enteros de centavos**. Fechas guardadas en UTC y mostradas e
   - Disponible = `stock_on_hand - stock_reserved`. Ningún valor puede ser negativo, y `stock_reserved` nunca supera a `stock_on_hand`: esa restricción es la red de seguridad de §9.6.
   - `low_stock_threshold` vacío usa `low_stock_default` de `settings`.
 - `kits` (id, name, slug único, price_cents, compare_at_price_cents, is_published) y `kit_items` (kit_id, variant_id, quantity). Los kits no tienen stock propio. Si en la fase 3 se muestran en `/producto/[slug]`, hace falta unicidad de slug entre productos y kits.
-- `orders` (id, number, status, payment_method `mercadopago | transfer`, email, phone, shipping_method `delivery | same_day | pickup`, shipping_zone_id, shipping_address, is_gift, gift_message, subtotal_cents, coupon_discount_cents, transfer_discount_cents, discount_cents, shipping_cents, total_cents, coupon_id, reserved_until, mp_preference_id, mp_payment_id, needs_review, review_reason, created_at)
+- `orders` (id, number, status, payment_method `card | transfer`, email, phone, shipping_method `delivery | same_day | pickup`, shipping_zone_id, shipping_address, is_gift, gift_message, subtotal_cents, coupon_discount_cents, transfer_discount_cents, discount_cents, shipping_cents, total_cents, coupon_id, reserved_until, payment_checkout_id, payment_reference, needs_review, review_reason, created_at)
   - status: `pending_payment | paid | preparing | shipped | ready_for_pickup | delivered | cancelled`
   - number: `GU-001000` en adelante (la secuencia arranca en 1000).
   - La base exige `discount_cents = coupon_discount_cents + transfer_discount_cents` y `total_cents = subtotal_cents - discount_cents + shipping_cents`.
@@ -341,7 +341,7 @@ Ninguna es `security definer` salvo `private.is_admin()`, que lee `admin_users` 
 |---|---|---|
 | `quote_cart(payload)` | servidor | Presupuesto del carrito y el checkout. Si un producto se despublicó, lo marca en vez de fallar |
 | `create_order_with_reservation(payload)` | servidor | Crea el pedido y reserva el stock, todo o nada (§9.1) |
-| `confirm_order_payment(order_id, mp_payment_id)` | servidor y panel | Pago aprobado o transferencia confirmada (§9.3 y §9.6). Confirmar dos veces no descuenta dos veces |
+| `confirm_order_payment(order_id, payment_reference)` | servidor y panel | Pago aprobado o transferencia confirmada (§9.3 y §9.6). Confirmar dos veces no descuenta dos veces |
 | `release_order_reservation(order_id, reason)` | servidor y panel | Pago rechazado o pedido cancelado (§9.4) |
 | `release_expired_reservations()` | cron | La corre `release-expired-reservations` cada 5 minutos (§9.5) |
 | `record_stock_movement(...)` y `restock_variant(...)` | panel | Movimientos manuales (§9.8). Reponer devuelve los avisos pendientes (§9.10) |
@@ -359,7 +359,7 @@ Ninguna es `security definer` salvo `private.is_admin()`, que lee `admin_users` 
 ## 9. Reglas de stock
 
 1. **Reservar al crear el pedido** dentro de una sola función de Postgres (transacción). Si alguna variante no alcanza, se rechaza todo el pedido y se informa qué talle se agotó.
-2. Duración de la reserva: Mercado Pago 30 minutos (la preferencia vence en el mismo plazo); transferencia 24 horas.
+2. Duración de la reserva: tarjeta 30 minutos; transferencia 24 horas.
 3. **Pago aprobado:** `stock_on_hand -= qty` y `stock_reserved -= qty`, movimiento `web_sale`, estado `paid`.
 4. **Pago rechazado, cancelado o reserva vencida:** `stock_reserved -= qty`, movimiento `release`, estado `cancelled`.
 5. Un job cada 5 minutos (pg_cron en Supabase) libera las reservas vencidas.
@@ -392,7 +392,8 @@ La plata de las ventas cae en la cuenta de Ualá: por eso las tarjetas se cobran
 - Credenciales: app o web de Ualá → Ualá Bis → Cobros online → API. Hay un juego para test y otro para producción, y no son intercambiables.
 - Autenticación: `POST {auth}/auth/token` con `username`, `client_id`, `client_secret_id` y `grant_type: client_credentials`. El token dura 24 horas y se guarda en memoria con unos minutos de margen.
 - Crear el pago: `POST {checkout}/checkout` con el monto **en pesos con dos decimales, como texto** (la base guarda centavos: 2500 se manda como `"25.00"`), `external_reference = order.id`, `notification_url` al webhook y los dos `callback` a `/pedido/[numero]`. Devuelve el `uuid` de la orden y el `checkout_link` al que se manda a la clienta.
-- Mínimo por pago: $25. Por debajo de eso solo queda transferencia.
+- Mínimo por pago: $25. Por debajo de eso solo queda transferencia. Ojo: un cobro de $25 se parece a una prueba de tarjeta robada y los bancos lo rechazan, así que para probar conviene un monto normal.
+- Ualá Bis rechaza `notification_url` y `callback` que apunten a `localhost`: el webhook solo se puede probar desde una URL pública.
 - El `uuid` se guarda en `orders.payment_checkout_id`; el pago confirmado queda en `orders.payment_reference`.
 - Webhook `/api/webhooks/uala`:
   1. **El aviso no viene firmado**, así que no se le cree nada: solo dice qué orden mirar.
@@ -453,7 +454,7 @@ Con logo, paleta y voz de marca:
 1. **Base de datos:** migraciones, RLS, funciones de stock y datos de prueba (10 productos con variantes y 2 kits).
 2. **Panel admin:** login, productos, stock, precios, pedidos y configuración.
 3. **Tienda:** header, inicio, listados con filtros, producto, buscador, favoritos y carrito lateral.
-4. **Checkout:** cálculo de totales, reservas, Mercado Pago, transferencia, webhook y job de vencimiento.
+4. **Checkout:** cálculo de totales, reservas, tarjeta con Ualá Bis, transferencia, webhook y job de vencimiento.
 5. **Emails.**
 6. **Envíos y retiro.**
 7. **SEO, analítica, rendimiento y accesibilidad.**
@@ -466,6 +467,8 @@ Con logo, paleta y voz de marca:
 - [ ] Catálogo: subcategorías de ropa interior, productos, talles, colores y fotos.
 - [ ] Tabla de talles con medidas reales.
 - [ ] Monto de envío gratis y % de descuento por transferencia.
+- [ ] Credenciales de prueba de Ualá Bis: las cargadas son de producción.
+- [ ] Probar un cobro con tarjeta aprobado de punta a punta (el intento de $25 lo rechazó el banco). Queda para la fase 8.
 - [ ] Cuotas sin interés: sí o no, y cuántas.
 - [ ] ¿Cupón y descuento por transferencia se acumulan?
 - [ ] Zonas y costos de envío; punto de retiro y horarios.
