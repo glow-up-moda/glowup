@@ -488,7 +488,19 @@ Cómo están hechos:
 8. **Legales y prueba completa:** compras de prueba con cada método, pagos rechazados, reservas vencidas y webhook duplicado.
    - Probado de punta a punta: compra por transferencia (pedido → reserva → confirmación en el panel → descuento de stock → preparando → listo para retirar → entregado), pago rechazado de verdad por el webhook, aviso repetido reconocido como duplicado, reserva vencida liberada por el cron, y pago tardío sin stock marcado para revisar (§9.6, pruebas de humo 10a y 10c).
    - Falta la compra con tarjeta aprobada: el intento real lo rechazó el banco (§17).
-9. **Lanzamiento:** credenciales de producción, dominio, **quitar el `noindex` del layout**, backup periódico de la base y monitoreo de errores.
+9. **Lanzamiento:** en este orden.
+   1. Destrabar Netlify (créditos) y publicar, que hoy es lo que frena todo.
+   2. Cargar en Netlify las variables que faltan: `RESEND_API_KEY`, `EMAIL_FROM`, `EMAIL_INTERNAL`, `CRON_SECRET`, `NEXT_PUBLIC_META_PIXEL_ID`, `NEXT_PUBLIC_GA4_ID`, y `UALA_ENVIRONMENT=production` con las credenciales de producción.
+   3. En `settings`: `cron_site_url` y `cron_secret` (el mismo valor que la variable), alias, CBU, WhatsApp, punto de retiro, zonas de envío y cupón de bienvenida.
+   4. Dominio propio y `NEXT_PUBLIC_SITE_URL` apuntando ahí.
+   5. Revisar los textos legales y completar razón social, CUIT y QR de Data Fiscal.
+   6. Poner `INDEXABLE = true` en `src/lib/site.ts`: eso saca el `noindex` del layout y habilita el robots.txt y el sitemap de una sola vez.
+   7. Compra de prueba con tarjeta de punta a punta y devolución.
+   8. Rutina de backup y monitoreo (ver abajo).
+
+Backups y errores:
+- `npm run db:backup` baja todas las tablas a `backups/<fecha>/datos.json`. La lista de tablas sale de la base, así que una tabla nueva entra sola. Se corre a mano y conviene guardar el archivo fuera de la computadora; el esquema no hace falta guardarlo porque está en `supabase/migrations`. `supabase db dump` no sirve acá: necesita Docker.
+- Los errores de la tienda y del panel muestran una página con la cara de la marca (`error.tsx`) y se escriben en la consola, que en Netlify son los logs de las funciones. Un servicio de monitoreo de verdad (tipo Sentry) queda pendiente: necesita cuenta.
 
 ## 17. Pendientes
 
