@@ -6,10 +6,12 @@ import { ProductCard } from "@/components/store/product-card";
 import { ProductGallery } from "@/components/store/product-gallery";
 import { ProductPurchase } from "@/components/store/product-purchase";
 import { IconStar } from "@/components/ui/icons";
-import { formatDate } from "@/lib/format";
+import { formatDate, formatMoney } from "@/lib/format";
+import { productImageUrl } from "@/lib/images";
 import { getNavigation } from "@/lib/store/catalog";
 import { getProductBySlug, listRelatedProducts } from "@/lib/store/product";
 import { getStoreSettings, transferPrice } from "@/lib/store/settings";
+import { JsonLd, productJsonLd } from "@/lib/store/structured-data";
 
 import { notifyWhenBackInStock } from "./actions";
 
@@ -19,12 +21,32 @@ export async function generateMetadata({
   const { slug } = await params;
   const product = await getProductBySlug(slug);
   if (!product) return {};
+  const title = product.seoTitle ?? `${product.name} · GLOW UP`;
+  const description =
+    product.seoDescription ??
+    product.description?.slice(0, 160) ??
+    `${product.name} en GLOW UP. Envío a todo el país.`;
+  const photo = product.images[0];
+
   return {
-    title: product.seoTitle ?? `${product.name} · GLOW UP`,
-    description:
-      product.seoDescription ??
-      product.description?.slice(0, 160) ??
-      `${product.name} en GLOW UP. Envío a todo el país.`,
+    title,
+    description,
+    alternates: { canonical: `/producto/${product.slug}` },
+    // Compartir un producto por WhatsApp muestra la foto y el precio (§14).
+    // Sin foto no se declara nada: definir openGraph acá reemplaza el del
+    // layout entero, así que el link quedaría sin vista previa. Un producto
+    // publicado siempre tiene fotos (§7).
+    ...(photo
+      ? {
+          openGraph: {
+            type: "website" as const,
+            title,
+            description: `${formatMoney(product.priceCents)} · ${description}`,
+            url: `/producto/${product.slug}`,
+            images: [{ url: productImageUrl(photo.path), alt: photo.alt }],
+          },
+        }
+      : {}),
   };
 }
 
@@ -94,6 +116,8 @@ export default async function ProductPage({
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-6 pb-28 md:pb-10">
+      <JsonLd data={productJsonLd(product)} />
+
       <nav aria-label="Migas de pan" className="mb-4 text-sm">
         <ol className="flex flex-wrap items-center gap-1">
           <li>
