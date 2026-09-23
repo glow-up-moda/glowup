@@ -8,7 +8,7 @@ export function PageShell({
 }: {
   title: string;
   intro?: ReactNode;
-  children: ReactNode;
+  children?: ReactNode;
 }) {
   return (
     <article className="mx-auto max-w-3xl px-4 py-10">
@@ -16,7 +16,7 @@ export function PageShell({
         {title}
       </h1>
       {intro && <p className="mt-3 text-lg">{intro}</p>}
-      <div className="mt-8 flex flex-col gap-8">{children}</div>
+      {children && <div className="mt-8 flex flex-col gap-8">{children}</div>}
     </article>
   );
 }

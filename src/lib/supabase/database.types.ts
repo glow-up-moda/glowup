@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      abandoned_carts: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          items: Json
+          notified_at: string | null
+          recovered_at: string | null
+          total_cents: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          items: Json
+          notified_at?: string | null
+          recovered_at?: string | null
+          total_cents: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          items?: Json
+          notified_at?: string | null
+          recovered_at?: string | null
+          total_cents?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       admin_users: {
         Row: {
           created_at: string
@@ -268,6 +301,21 @@ export type Database = {
           price_cents?: number
           slug?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      marketing_optouts: {
+        Row: {
+          created_at: string
+          email: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
         }
         Relationships: []
       }

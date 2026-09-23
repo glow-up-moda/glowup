@@ -1,3 +1,7 @@
+import {
+  pruneAbandonedCarts,
+  sendAbandonedCarts,
+} from "@/lib/emails/abandoned";
 import { sendReviewRequests } from "@/lib/emails/reviews";
 
 // Emails que dependen del calendario (§13). Lo llama una vez por día el job
@@ -12,6 +16,9 @@ export async function POST(request: Request) {
     return new Response("no", { status: 401 });
   }
 
-  const reviews = await sendReviewRequests();
-  return Response.json({ ok: true, resenas: reviews });
+  const resenas = await sendReviewRequests();
+  const bolsas = await sendAbandonedCarts();
+  await pruneAbandonedCarts();
+
+  return Response.json({ ok: true, resenas, bolsas });
 }

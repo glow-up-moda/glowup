@@ -119,6 +119,8 @@ type CartContextValue = {
   remove: (id: string) => void;
   /** Corrige el precio con el que responde el servidor (§10). */
   setPrice: (id: string, priceCents: number) => void;
+  /** Reemplaza todo el carrito: lo usa el link del email de carrito abandonado. */
+  replace: (items: CartItem[]) => void;
   clear: () => void;
 };
 
@@ -191,6 +193,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       setQuantity,
       remove,
       setPrice,
+      replace: (next: CartItem[]) =>
+        write(
+          next.slice(0, 50).map((line) => ({
+            ...line,
+            quantity: Math.min(Math.max(1, line.quantity), MAX_PER_LINE),
+          })),
+        ),
       clear: () => write(EMPTY),
     }),
     [items, isOpen, add, setQuantity, remove, setPrice],

@@ -189,6 +189,8 @@ El logo se está redibujando para usar esta paleta (ver pendientes):
 | `/checkout` | Datos, entrega y pago en una sola página |
 | `/pedido/[numero]` | Confirmación, estado real, instrucciones de transferencia y, si ya se entregó, el formulario de reseña |
 | `/seguimiento` | Buscar pedido con número + email |
+| `/bolsa/[id]` | Link del email de carrito abandonado: devuelve la bolsa con los precios de hoy |
+| `/baja/[id]` | Baja de los avisos de carrito abandonado |
 | `/cuenta` | Opcional: historial de pedidos (ingreso con link por email) |
 | `/guia-de-talles` | Tabla de medidas y cómo medirse |
 | `/envios-y-cambios` | Zonas, costos, plazos, envío discreto, política de cambios |
@@ -303,7 +305,7 @@ Montos siempre en **enteros de centavos**. Fechas guardadas en UTC y mostradas e
   - number: `GU-001000` en adelante (la secuencia arranca en 1000).
   - La base exige `discount_cents = coupon_discount_cents + transfer_discount_cents` y `total_cents = subtotal_cents - discount_cents + shipping_cents`.
   - `coupon_id` solo se guarda si el cupón se aplicó. `review_reason` explica por qué el pedido quedó con `needs_review`.
-  - `paid_at` se completa solo al pasar a `paid`: las ventas del día se cuentan por fecha de cobro.
+  - `paid_at` se completa solo al pasar a `paid`: las ventas del día se cuentan por fecha de cobro. `delivered_at` hace lo mismo con `delivered`, y de ahí se cuentan los días para pedir la reseña.
   - `shipping_address` es un objeto con las claves `name`, `street`, `number`, `floor`, `apartment`, `city`, `province`, `postal_code` y `notes`. El panel las muestra en ese orden, porque `jsonb` no guarda el orden de las claves.
 - `order_items` (order_id, parent_item_id, variant_id, kit_id, name_snapshot, unit_price_cents, quantity)
   - Un kit entra como una línea con `kit_id` y su precio, y sus componentes como líneas hijas (`parent_item_id`) con `variant_id` y precio 0. Así el pedido guarda la composición con la que se vendió, aunque el kit cambie después. Las operaciones de stock recorren solo las líneas con variante.
@@ -318,7 +320,9 @@ Montos siempre en **enteros de centavos**. Fechas guardadas en UTC y mostradas e
 - `admin_users` (user_id, name, created_at): quién entra al panel.
 - `shipping_zones` (id, name único, provinces, postal_codes, price_cents, eta_text, same_day)
 - `back_in_stock_requests` (variant_id, email, created_at, notified_at). Un solo aviso pendiente por variante y email.
-- `reviews` (id, product_id, order_id, rating, text, name, status `pending | approved | rejected`)
+- `reviews` (id, product_id, order_id, rating, text, name, status `pending | approved | rejected`). Un índice único por (order_id, product_id) deja una sola reseña por producto y pedido.
+- `sent_emails` (id, key único, kind, recipient, sent_at): qué emails ya salieron, para no mandar dos veces (§13).
+- `abandoned_carts` (id, email único, items, total_cents, notified_at, recovered_at) y `marketing_optouts` (email): copia del carrito de quien dejó su email y aceptó novedades, y quiénes pidieron no recibir más (§13).
 - `favorites` (user_id, product_id), solo con cuenta.
 - `settings` (clave/valor jsonb: transfer_discount_percent, free_shipping_threshold_cents, discounts_stack, bank_alias, bank_cbu, low_stock_default, last_units_threshold, announcement_messages, whatsapp_number, same_day_cutoff_time)
   - Los valores iniciales están en la migración del esquema, porque producción también los necesita. Alias, CBU y WhatsApp arrancan vacíos: el repo es público.
@@ -443,6 +447,8 @@ Cómo están hechos:
 - Los avisos internos van a `EMAIL_INTERNAL`; si no está cargada, no se mandan.
 - El pedido de reseña depende del calendario, así que lo dispara el job `daily-emails` de pg_cron: la base llama con pg_net a `/api/cron/emails` con `CRON_SECRET` en una cabecera, y la app decide a quién le toca. La URL y el secreto viven en `settings` (`cron_site_url` y `cron_secret`), no en el código: el repo es público. Se pide a los 3 días de entregado y no se pide nada entregado hace más de 30.
 - La reseña se deja desde `/pedido/[numero]`, que ya sabe quién mira (§7): no hace falta cuenta. Se puede reseñar cada producto del pedido una sola vez, y entra como `pending` hasta que se apruebe en el panel.
+- El carrito abandonado sale del mismo job. El carrito vive en el navegador, así que el checkout guarda una copia en `abandoned_carts` **solo** cuando hay email válido y la casilla de novedades marcada; si la desmarca, la copia se borra (§15). Se guardan solo los ids: nombres y precios se leen frescos al mandar y al volver. Se escribe una vez, a las 4 horas del último cambio, nada de más de 7 días, y a los 30 días la copia se borra.
+- La baja (`/baja/[id]`) se confirma con un botón, no con el link: los lectores de correo abren los links solos. El email queda en `marketing_optouts`, así volver a marcar la casilla sin querer no vuelve a suscribir.
 
 ## 14. SEO, rendimiento y analítica
 
@@ -490,5 +496,6 @@ Cómo están hechos:
 - [ ] Textos legales revisados.
 - [ ] Activar en Supabase Auth la protección de contraseñas filtradas (HaveIBeenPwned), que hoy está apagada.
 - [ ] Fotos de clientas reales para el inicio.
+- [ ] ¿Mover el consentimiento de novedades al lado del email en el checkout? Hoy está al final (paso 6), así que el aviso de carrito abandonado casi nunca va a dispararse: quien se va antes de terminar rara vez llegó a marcarlo.
 - [ ] CUIT y QR de Data Fiscal de ARCA para el pie.
 - [ ] Medidas reales para la guía de talles (hoy solo dice cómo medirse y qué talles hay).

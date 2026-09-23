@@ -4,7 +4,12 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 
-import { placeOrder, quoteCheckout } from "@/app/(store)/checkout/actions";
+import {
+  forgetCart,
+  placeOrder,
+  quoteCheckout,
+  rememberCart,
+} from "@/app/(store)/checkout/actions";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { IconAlert } from "@/components/ui/icons";
 import { formatMoney } from "@/lib/format";
@@ -151,6 +156,31 @@ export function CheckoutForm({
       active = false;
     };
   }, [quoteKey, items.length, ready]);
+
+  // Copia del carrito para el aviso de carrito abandonado (§13). Se guarda
+  // solo con email válido y el consentimiento marcado, y se borra si lo
+  // desmarca (§15). Espera un momento para no escribir en cada tecla.
+  const cartEmail = email.trim().toLowerCase();
+  const validEmail = /^[^@s]+@[^@s]+.[^@s]+$/.test(cartEmail);
+  const cartLines = JSON.stringify(
+    items.map((line) => ({
+      kind: line.kind,
+      id: line.id,
+      quantity: line.quantity,
+    })),
+  );
+
+  useEffect(() => {
+    if (!validEmail) return;
+    const timer = setTimeout(() => {
+      if (acceptsMarketing) {
+        void rememberCart({ email: cartEmail, items: JSON.parse(cartLines) });
+      } else {
+        void forgetCart(cartEmail);
+      }
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, [validEmail, cartEmail, acceptsMarketing, cartLines]);
 
   const totals = quote?.key === quoteKey ? quote.totals : null;
   const quoteError = quote?.key === quoteKey ? quote.error : null;

@@ -6,6 +6,7 @@ import { z } from "zod";
 import { sendPendingTransferAlert } from "@/lib/emails/internal";
 import { sendOrderReceived } from "@/lib/emails/orders";
 import { rememberOrder } from "@/lib/orders/access";
+import { isUuid } from "@/lib/params";
 import {
   checkoutErrorMessage,
   type CheckoutTotals,
@@ -13,6 +14,7 @@ import {
 } from "@/lib/store/checkout";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createCheckout, isUalaReady, MIN_CARD_CENTS } from "@/lib/uala/client";
+import type { FormState } from "@/lib/use-form-action";
 
 // El checkout no tiene sesión: corre con la clave secreta del servidor (§8).
 // Los totales y la reserva de stock los calcula siempre la base (§10), nunca
@@ -140,6 +142,14 @@ export async function placeOrder(input: unknown): Promise<PlaceOrderResult> {
   // Este navegador puede ver el pedido sin escribir el email (§7).
   await rememberOrder(created.number);
 
+  // Compró: si había un carrito guardado, ya no hay nada que recordarle.
+  after(async () => {
+    await supabase
+      .from("abandoned_carts")
+      .update({ recovered_at: new Date().toISOString() })
+      .eq("email", order.email.toLowerCase());
+  });
+
   // Los emails salen después de responder: la clienta no espera a Resend.
   if (order.paymentMethod !== "card") {
     after(() => sendOrderReceived(created.order_id));
@@ -189,4 +199,89 @@ export async function placeOrder(input: unknown): Promise<PlaceOrderResult> {
       error: "No pudimos abrir el pago. Probá de nuevo o elegí transferencia.",
     };
   }
+}
+
+// Carrito abandonado (§13). Se guarda una copia solo si dejó el email y marcó
+// que quiere novedades (§15): el checkout llama a estas acciones cuando las dos
+// cosas se cumplen, y a `forgetCart` cuando desmarca.
+
+const rememberSchema = z.object({
+  email: z.email().max(120),
+  items: z.array(itemSchema).min(1).max(50),
+});
+
+export async function rememberCart(input: unknown): Promise<void> {
+  const parsed = rememberSchema.safeParse(input);
+  if (!parsed.success) return;
+  const email = parsed.data.email.toLowerCase();
+
+  const supabase = createAdminClient();
+
+  // Quien se dio de baja no vuelve a entrar por marcar la casilla.
+  const { data: optout } = await supabase
+    .from("marketing_optouts")
+    .select("email")
+    .eq("email", email)
+    .maybeSingle();
+  if (optout) return;
+
+  // El total lo calcula la base, como todo lo demás (§10). Sin envío elegido
+  // es el subtotal, que es lo que muestra el email.
+  const { data: totals } = await supabase.rpc("quote_cart", {
+    payload: {
+      items: toItems(parsed.data.items),
+      coupon_code: null,
+      payment_method: null,
+      shipping_method: null,
+      shipping_zone_id: null,
+    },
+  });
+  if (!totals) return;
+
+  await supabase.from("abandoned_carts").upsert(
+    {
+      email,
+      items: parsed.data.items,
+      total_cents: (totals as { subtotal_cents: number }).subtotal_cents,
+      notified_at: null,
+      recovered_at: null,
+    },
+    { onConflict: "email" },
+  );
+}
+
+export async function forgetCart(email: string): Promise<void> {
+  const parsed = z.email().max(120).safeParse(email);
+  if (!parsed.success) return;
+  const supabase = createAdminClient();
+  await supabase
+    .from("abandoned_carts")
+    .delete()
+    .eq("email", parsed.data.toLowerCase());
+}
+
+/**
+ * Baja de los avisos de marketing (§15). El email queda anotado aparte, así
+ * volver a marcar la casilla sin querer no la vuelve a suscribir.
+ */
+export async function unsubscribeFromMarketing(id: string): Promise<FormState> {
+  if (!isUuid(id)) return { error: "Ese link ya no sirve." };
+
+  const supabase = createAdminClient();
+  const { data: cart } = await supabase
+    .from("abandoned_carts")
+    .select("email")
+    .eq("id", id)
+    .maybeSingle();
+  if (!cart) return { message: "Listo: no te escribimos más." };
+
+  const { error } = await supabase
+    .from("marketing_optouts")
+    .upsert({ email: cart.email }, { onConflict: "email" });
+  if (error) {
+    return { error: "No pudimos darte de baja. Probá de nuevo en un rato." };
+  }
+
+  await supabase.from("abandoned_carts").delete().eq("id", id);
+  return { message: "Listo: no te escribimos más." };
 }
