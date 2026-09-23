@@ -22,6 +22,8 @@ export type ShippingZone = {
   price_cents: number;
   eta_text: string;
   same_day: boolean;
+  provinces: string[];
+  postal_codes: string[];
 };
 
 type ShippingMethod = "delivery" | "same_day" | "pickup";
@@ -82,6 +84,36 @@ function Step({
   );
 }
 
+/** Normaliza para comparar: sin tildes, sin mayúsculas y sin espacios de más. */
+function plain(value: string): string {
+  return value.normalize("NFD").replace(/[̀-ͯ]/g, "").trim().toLowerCase();
+}
+
+/**
+ * La zona que le toca a una dirección, si hay una sola candidata. El código
+ * postal manda sobre la provincia: es más preciso. Si dos zonas empatan, no se
+ * elige ninguna y decide la clienta.
+ */
+function matchZone(
+  zones: ShippingZone[],
+  province: string,
+  postalCode: string,
+): string {
+  const code = postalCode.trim();
+  if (code) {
+    const byCode = zones.filter((zone) => zone.postal_codes.includes(code));
+    if (byCode.length === 1) return byCode[0].id;
+    if (byCode.length > 1) return "";
+  }
+
+  const name = plain(province);
+  if (!name) return "";
+  const byProvince = zones.filter((zone) =>
+    zone.provinces.some((item: string) => plain(item) === name),
+  );
+  return byProvince.length === 1 ? byProvince[0].id : "";
+}
+
 export function CheckoutForm({
   zones,
   transferDiscountPercent,
@@ -122,8 +154,13 @@ export function CheckoutForm({
       : shippingMethod === "delivery"
         ? deliveryZones
         : [];
+  // Si la dirección alcanza para saber qué zona le toca, se elige sola. Se
+  // calcula al dibujar y no con un efecto: elegir a mano siempre gana.
+  const chosenZoneId =
+    zoneId || matchZone(zonesForMethod, address.province, address.postal_code);
+
   const needsAddress = shippingMethod !== "pickup";
-  const ready = shippingMethod === "pickup" || Boolean(zoneId);
+  const ready = shippingMethod === "pickup" || Boolean(chosenZoneId);
 
   const payload = {
     items: items.map((item) => ({
@@ -134,7 +171,7 @@ export function CheckoutForm({
     couponCode: coupon,
     paymentMethod,
     shippingMethod,
-    shippingZoneId: shippingMethod === "pickup" ? null : zoneId || null,
+    shippingZoneId: shippingMethod === "pickup" ? null : chosenZoneId || null,
   };
   const quoteKey = JSON.stringify(payload);
 
@@ -331,7 +368,7 @@ export function CheckoutForm({
             <Field label="Zona">
               <select
                 required
-                value={zoneId}
+                value={chosenZoneId}
                 onChange={(event) => setZoneId(event.target.value)}
                 className={fieldClass}
               >

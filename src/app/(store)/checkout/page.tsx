@@ -14,7 +14,9 @@ export default async function CheckoutPage() {
   const [{ data: zones }, settings] = await Promise.all([
     supabase
       .from("shipping_zones")
-      .select("id, name, price_cents, eta_text, same_day")
+      .select(
+        "id, name, price_cents, eta_text, same_day, provinces, postal_codes",
+      )
       .order("price_cents"),
     getStoreSettings(),
   ]);

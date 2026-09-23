@@ -426,7 +426,7 @@ No se guardan datos de tarjetas en ningún lugar: el formulario de pago es de Ua
 ## 12. Envíos
 
 - Métodos: envío a domicilio por zona (costo fijo configurable), envío en el día en Paraná y Oro Verde (con horario de corte configurable) y retiro en punto de entrega en Paraná.
-- Las zonas se cargan en `/admin/zonas`; el checkout las ofrece según el método elegido.
+- Las zonas se cargan en `/admin/zonas`; el checkout las ofrece según el método elegido y, si la dirección alcanza para saber cuál le toca (por código postal o por provincia), la elige sola. La sugerencia se calcula al dibujar, no con un efecto, así elegir a mano siempre gana; si empatan dos zonas, no se elige ninguna.
 - **El horario de corte se aplica, no solo se muestra:** pasada esa hora el envío en el día no aparece en el checkout, y `calculate_order_totals` lo rechaza con `same_day_closed` si igual llega. La hora es la de Argentina y la mira la base.
 - El punto de retiro (`pickup_address` y `pickup_hours` en `settings`) se muestra en el checkout, en la página del pedido, en los emails y en `/envios-y-cambios`. Es una dirección real, así que vive en la base y no en el código (§2).
 - Embalaje discreto para ropa interior, mencionado en producto y checkout.
