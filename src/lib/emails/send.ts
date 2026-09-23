@@ -3,6 +3,7 @@ import "server-only";
 import { render } from "@react-email/components";
 import type { ReactElement } from "react";
 
+import { siteUrl } from "@/lib/site";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 // Envío de emails con Resend (§13).
@@ -21,13 +22,6 @@ const from = process.env.EMAIL_FROM;
 /** Adónde van los avisos internos (§13). Sin esto, no se mandan. */
 export function internalRecipient(): string | null {
   return process.env.EMAIL_INTERNAL?.trim() || null;
-}
-
-export function siteUrl(): string {
-  return (
-    process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ??
-    "http://localhost:3000"
-  );
 }
 
 export type SendEmail = {
@@ -104,3 +98,5 @@ export async function sendEmail({
     return false;
   }
 }
+
+export { siteUrl };

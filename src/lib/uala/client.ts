@@ -1,5 +1,7 @@
 import "server-only";
 
+import { siteUrl } from "@/lib/site";
+
 // Cobros con tarjeta por la API Cobros Online v2 de Ualá Bis (§11).
 //
 // El flujo es: pedir un token (dura 24 horas), crear una orden de pago que
@@ -32,13 +34,6 @@ function urls() {
 
 export function isUalaReady(): boolean {
   return Boolean(username && clientId && clientSecret);
-}
-
-export function siteUrl(): string {
-  return (
-    process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ??
-    "http://localhost:3000"
-  );
 }
 
 // El token vive 24 horas: se guarda en memoria y se renueva un rato antes.
