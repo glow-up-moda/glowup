@@ -8,6 +8,7 @@ import {
   IconSettings,
   IconTag,
   IconTicket,
+  IconTruck,
 } from "@/components/ui/icons";
 import { requireAdmin } from "@/lib/auth/admin";
 
@@ -27,6 +28,12 @@ const links = [
     label: "Cupones",
     description: "Crear, pausar y ver usos",
     icon: IconTicket,
+  },
+  {
+    href: "/admin/zonas",
+    label: "Zonas de envío",
+    description: "Costos, plazos y envío en el día",
+    icon: IconTruck,
   },
   {
     href: "/admin/configuracion",

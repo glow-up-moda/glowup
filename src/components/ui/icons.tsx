@@ -177,6 +177,18 @@ export function IconLogOut(props: IconProps) {
   );
 }
 
+export function IconTruck(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path d="M3 16.5V6.5h11v10" />
+      <path d="M14 10h3.5l3 3.5v3H20" />
+      <path d="M8 16.5h4" />
+      <circle cx="6" cy="17.5" r="1.8" />
+      <circle cx="17.5" cy="17.5" r="1.8" />
+    </Svg>
+  );
+}
+
 export function IconPrinter(props: IconProps) {
   return (
     <Svg {...props}>

@@ -277,7 +277,8 @@ Tiene que ser cómodo de usar desde el celular.
   - La hoja para armar (`/admin/pedidos/[numero]/hoja`) no lleva precios: puede ir dentro de la caja.
 - **Cupones:** listado con estado (activo, programado, vencido, agotado), alta y edición con vigencia en hora de Argentina, "desactivar ahora" (le corta la vigencia) y borrado solo si nunca se usó.
   - Desactivar un cupón programado también le borra la fecha de inicio: la base exige que el inicio sea anterior al fin.
-- **Kits, reseñas (moderación), avisos de reposición y zonas de envío.**
+- **Zonas de envío:** alta, edición y borrado (`/admin/zonas`). Nombre, costo, plazo, si es zona de envío en el día, y las provincias y códigos postales que abarca, uno por línea. Una zona que ya viajó en un pedido no se puede borrar: la base lo impide y el panel lo explica.
+- **Kits, reseñas (moderación) y avisos de reposición.**
 - **Reportes:** más vendidos, talles más vendidos, avisos de reposición por variante y margen.
 - **Configuración:** % de descuento por transferencia, monto de envío gratis, alias y CBU, umbral de stock bajo, mensajes de la barra de anuncios, número de WhatsApp y código del cupón de bienvenida.
   - Una sola pantalla con todo, validado: CBU de 22 números, alias de 6 a 20 caracteres, WhatsApp solo números, horario de corte HH:MM y hasta 5 mensajes de anuncio de 80 caracteres, uno por línea.
@@ -425,6 +426,9 @@ No se guardan datos de tarjetas en ningún lugar: el formulario de pago es de Ua
 ## 12. Envíos
 
 - Métodos: envío a domicilio por zona (costo fijo configurable), envío en el día en Paraná y Oro Verde (con horario de corte configurable) y retiro en punto de entrega en Paraná.
+- Las zonas se cargan en `/admin/zonas`; el checkout las ofrece según el método elegido.
+- **El horario de corte se aplica, no solo se muestra:** pasada esa hora el envío en el día no aparece en el checkout, y `calculate_order_totals` lo rechaza con `same_day_closed` si igual llega. La hora es la de Argentina y la mira la base.
+- El punto de retiro (`pickup_address` y `pickup_hours` en `settings`) se muestra en el checkout, en la página del pedido, en los emails y en `/envios-y-cambios`. Es una dirección real, así que vive en la base y no en el código (§2).
 - Embalaje discreto para ropa interior, mencionado en producto y checkout.
 - Fase posterior: cotización automática con Andreani o Correo Argentino.
 
@@ -492,7 +496,7 @@ Cómo están hechos:
 - [ ] Probar un cobro con tarjeta aprobado de punta a punta (el intento de $25 lo rechazó el banco). Queda para la fase 8.
 - [ ] Cuotas sin interés: sí o no, y cuántas.
 - [ ] ¿Cupón y descuento por transferencia se acumulan?
-- [ ] Zonas y costos de envío; punto de retiro y horarios.
+- [ ] Cargar las zonas y costos de envío reales en `/admin/zonas` (las que hay son de prueba) y el punto de retiro con sus horarios en Configuración.
 - [ ] Alias, CBU y número de WhatsApp.
 - [ ] Dominio, usuario de Instagram y registro de marca en el INPI.
 - [ ] Textos legales revisados.

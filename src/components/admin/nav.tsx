@@ -12,6 +12,7 @@ import {
   IconStock,
   IconTag,
   IconTicket,
+  IconTruck,
 } from "@/components/ui/icons";
 
 type Item = {
@@ -38,6 +39,7 @@ const items: Item[] = [
   { href: "/admin/stock", label: "Stock", icon: IconStock, inBottomBar: true },
   { href: "/admin/precios", label: "Precios", icon: IconTag },
   { href: "/admin/cupones", label: "Cupones", icon: IconTicket },
+  { href: "/admin/zonas", label: "Zonas de envío", icon: IconTruck },
   { href: "/admin/configuracion", label: "Configuración", icon: IconSettings },
 ];
 
