@@ -1,6 +1,6 @@
 "use client";
 
-import { unsubscribeFromMarketing } from "@/app/(store)/checkout/actions";
+import { unsubscribeFromMarketing } from "@/app/(store)/actions";
 import { Button } from "@/components/ui/button";
 import { IconAlert, IconCheck } from "@/components/ui/icons";
 import { useFormAction } from "@/lib/use-form-action";

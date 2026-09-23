@@ -1,8 +1,12 @@
 "use server";
 
+import { after } from "next/server";
 import { z } from "zod";
 
+import { sendNewsletterWelcome } from "@/lib/emails/newsletter";
+import { isUuid } from "@/lib/params";
 import { createAdminClient } from "@/lib/supabase/admin";
+import type { FormState } from "@/lib/use-form-action";
 
 // El carrito se guarda en el navegador, así que antes de mostrarlo se revisa
 // contra la base (§7): los precios y el stock mandan siempre del lado del
@@ -70,4 +74,84 @@ export async function quoteCart(items: unknown): Promise<CartQuote | null> {
       outOfStock: !line.unavailable && line.in_stock === false,
     })),
   };
+}
+
+// Novedades por email (§7, inicio, y §15). El consentimiento es explícito: se
+// escribe el email en un formulario que dice para qué es, y cada email lleva
+// el link de baja.
+
+const emailSchema = z.email({ error: "Revisá el email." }).max(120);
+
+export async function subscribeToNewsletter(
+  _prev: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  const parsed = emailSchema.safeParse(String(formData.get("email") ?? ""));
+  if (!parsed.success) return { error: "Revisá el email." };
+  const email = parsed.data.toLowerCase();
+
+  const supabase = createAdminClient();
+
+  // Quien se dio de baja no vuelve por un formulario: que lo pida de nuevo por
+  // WhatsApp es más honesto que reactivarla sola.
+  const { data: optout } = await supabase
+    .from("marketing_optouts")
+    .select("email")
+    .eq("email", email)
+    .maybeSingle();
+  if (optout) {
+    return { message: "¡Listo! Ya estás en la lista." };
+  }
+
+  const { data: subscriber, error } = await supabase
+    .from("newsletter_subscribers")
+    .upsert({ email }, { onConflict: "email" })
+    .select("id, welcomed_at")
+    .maybeSingle();
+  if (error || !subscriber) {
+    return { error: "No pudimos anotarte. Probá de nuevo en un momento." };
+  }
+
+  // La bienvenida sale una sola vez: anotarse dos veces no manda dos cupones.
+  if (!subscriber.welcomed_at) {
+    after(() => sendNewsletterWelcome(subscriber.id));
+  }
+
+  return { message: "¡Listo! Mirá tu correo: te mandamos el descuento." };
+}
+
+/**
+ * Baja de los emails de marketing (§15): vale para el link del carrito
+ * abandonado y para el del newsletter. El email queda anotado aparte, así
+ * volver a anotarse sin querer no la vuelve a suscribir.
+ */
+export async function unsubscribeFromMarketing(id: string): Promise<FormState> {
+  if (!isUuid(id)) return { error: "Ese link ya no sirve." };
+
+  const supabase = createAdminClient();
+  const [{ data: cart }, { data: subscriber }] = await Promise.all([
+    supabase.from("abandoned_carts").select("email").eq("id", id).maybeSingle(),
+    supabase
+      .from("newsletter_subscribers")
+      .select("email")
+      .eq("id", id)
+      .maybeSingle(),
+  ]);
+
+  const email = cart?.email ?? subscriber?.email;
+  if (!email) return { message: "Listo: no te escribimos más." };
+
+  const { error } = await supabase
+    .from("marketing_optouts")
+    .upsert({ email }, { onConflict: "email" });
+  if (error) {
+    return { error: "No pudimos darte de baja. Probá de nuevo en un rato." };
+  }
+
+  await Promise.all([
+    supabase.from("abandoned_carts").delete().eq("email", email),
+    supabase.from("newsletter_subscribers").delete().eq("email", email),
+  ]);
+
+  return { message: "Listo: no te escribimos más." };
 }

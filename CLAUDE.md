@@ -225,7 +225,7 @@ Lo nuevo (carrusel horizontal; pasa a "Lo más vendido" cuando haya ventas para 
 Kits: Kit playa, Kit básicos, Kit regalo
 Beneficios: envío en el día en Paraná y Oro Verde, cuotas, transferencia, envío discreto, cambios
 Clientas reales (fotos elegidas a mano; pendiente, ver §17)
-Newsletter con cupón de primera compra (entra con los emails, fase 5)
+Newsletter con cupón de primera compra
 Footer: links, legales, Data Fiscal, redes
 ```
 
@@ -279,7 +279,7 @@ Tiene que ser cómodo de usar desde el celular.
   - Desactivar un cupón programado también le borra la fecha de inicio: la base exige que el inicio sea anterior al fin.
 - **Kits, reseñas (moderación), avisos de reposición y zonas de envío.**
 - **Reportes:** más vendidos, talles más vendidos, avisos de reposición por variante y margen.
-- **Configuración:** % de descuento por transferencia, monto de envío gratis, alias y CBU, umbral de stock bajo, mensajes de la barra de anuncios, número de WhatsApp.
+- **Configuración:** % de descuento por transferencia, monto de envío gratis, alias y CBU, umbral de stock bajo, mensajes de la barra de anuncios, número de WhatsApp y código del cupón de bienvenida.
   - Una sola pantalla con todo, validado: CBU de 22 números, alias de 6 a 20 caracteres, WhatsApp solo números, horario de corte HH:MM y hasta 5 mensajes de anuncio de 80 caracteres, uno por línea.
   - Un campo opcional vacío se guarda como el null de JSON. Escribir algo inválido nunca lo borra en silencio: vuelve con el error.
 - **Acceso:** solo usuarios con rol admin y verificación en dos pasos.
@@ -323,8 +323,9 @@ Montos siempre en **enteros de centavos**. Fechas guardadas en UTC y mostradas e
 - `reviews` (id, product_id, order_id, rating, text, name, status `pending | approved | rejected`). Un índice único por (order_id, product_id) deja una sola reseña por producto y pedido.
 - `sent_emails` (id, key único, kind, recipient, sent_at): qué emails ya salieron, para no mandar dos veces (§13).
 - `abandoned_carts` (id, email único, items, total_cents, notified_at, recovered_at) y `marketing_optouts` (email): copia del carrito de quien dejó su email y aceptó novedades, y quiénes pidieron no recibir más (§13).
+- `newsletter_subscribers` (id, email único, welcomed_at): quienes se anotaron desde el inicio.
 - `favorites` (user_id, product_id), solo con cuenta.
-- `settings` (clave/valor jsonb: transfer_discount_percent, free_shipping_threshold_cents, discounts_stack, bank_alias, bank_cbu, low_stock_default, last_units_threshold, announcement_messages, whatsapp_number, same_day_cutoff_time)
+- `settings` (clave/valor jsonb: transfer_discount_percent, free_shipping_threshold_cents, discounts_stack, bank_alias, bank_cbu, low_stock_default, last_units_threshold, announcement_messages, whatsapp_number, same_day_cutoff_time, welcome_coupon_code, y `cron_site_url` y `cron_secret`, que no se editan desde el panel)
   - Los valores iniciales están en la migración del esquema, porque producción también los necesita. Alias, CBU y WhatsApp arrancan vacíos: el repo es público.
   - `value` es jsonb `not null` y un valor sin configurar es el null de JSON. El panel guarda con `set_settings`, no con un upsert: PostgREST convertiría ese null en NULL de SQL y la columna lo rechaza.
 
@@ -448,7 +449,8 @@ Cómo están hechos:
 - El pedido de reseña depende del calendario, así que lo dispara el job `daily-emails` de pg_cron: la base llama con pg_net a `/api/cron/emails` con `CRON_SECRET` en una cabecera, y la app decide a quién le toca. La URL y el secreto viven en `settings` (`cron_site_url` y `cron_secret`), no en el código: el repo es público. Se pide a los 3 días de entregado y no se pide nada entregado hace más de 30.
 - La reseña se deja desde `/pedido/[numero]`, que ya sabe quién mira (§7): no hace falta cuenta. Se puede reseñar cada producto del pedido una sola vez, y entra como `pending` hasta que se apruebe en el panel.
 - El carrito abandonado sale del mismo job. El carrito vive en el navegador, así que el checkout guarda una copia en `abandoned_carts` **solo** cuando hay email válido y la casilla de novedades marcada; si la desmarca, la copia se borra (§15). Se guardan solo los ids: nombres y precios se leen frescos al mandar y al volver. Se escribe una vez, a las 4 horas del último cambio, nada de más de 7 días, y a los 30 días la copia se borra.
-- La baja (`/baja/[id]`) se confirma con un botón, no con el link: los lectores de correo abren los links solos. El email queda en `marketing_optouts`, así volver a marcar la casilla sin querer no vuelve a suscribir.
+- La baja (`/baja/[id]`) se confirma con un botón, no con el link: los lectores de correo abren los links solos. El email queda en `marketing_optouts`, así volver a marcar la casilla sin querer no vuelve a suscribir. El mismo link sirve para el newsletter.
+- El newsletter del inicio manda la bienvenida en el momento, no con el job: el cupón es la razón por la que dejó el email. El código no se genera por persona: se manda el que esté en `welcome_coupon_code`, que se carga en Configuración y se crea como cualquier cupón. Sin código, el email es una bienvenida sin descuento.
 
 ## 14. SEO, rendimiento y analítica
 
@@ -496,6 +498,7 @@ Cómo están hechos:
 - [ ] Textos legales revisados.
 - [ ] Activar en Supabase Auth la protección de contraseñas filtradas (HaveIBeenPwned), que hoy está apagada.
 - [ ] Fotos de clientas reales para el inicio.
+- [ ] Crear el cupón de bienvenida en el panel y cargar su código en Configuración: hasta entonces el newsletter manda un email sin descuento.
 - [ ] ¿Mover el consentimiento de novedades al lado del email en el checkout? Hoy está al final (paso 6), así que el aviso de carrito abandonado casi nunca va a dispararse: quien se va antes de terminar rara vez llegó a marcarlo.
 - [ ] CUIT y QR de Data Fiscal de ARCA para el pie.
 - [ ] Medidas reales para la guía de talles (hoy solo dice cómo medirse y qué talles hay).

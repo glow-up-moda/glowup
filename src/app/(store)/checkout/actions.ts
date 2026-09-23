@@ -6,7 +6,6 @@ import { z } from "zod";
 import { sendPendingTransferAlert } from "@/lib/emails/internal";
 import { sendOrderReceived } from "@/lib/emails/orders";
 import { rememberOrder } from "@/lib/orders/access";
-import { isUuid } from "@/lib/params";
 import {
   checkoutErrorMessage,
   type CheckoutTotals,
@@ -14,7 +13,6 @@ import {
 } from "@/lib/store/checkout";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createCheckout, isUalaReady, MIN_CARD_CENTS } from "@/lib/uala/client";
-import type { FormState } from "@/lib/use-form-action";
 
 // El checkout no tiene sesión: corre con la clave secreta del servidor (§8).
 // Los totales y la reserva de stock los calcula siempre la base (§10), nunca
@@ -258,30 +256,4 @@ export async function forgetCart(email: string): Promise<void> {
     .from("abandoned_carts")
     .delete()
     .eq("email", parsed.data.toLowerCase());
-}
-
-/**
- * Baja de los avisos de marketing (§15). El email queda anotado aparte, así
- * volver a marcar la casilla sin querer no la vuelve a suscribir.
- */
-export async function unsubscribeFromMarketing(id: string): Promise<FormState> {
-  if (!isUuid(id)) return { error: "Ese link ya no sirve." };
-
-  const supabase = createAdminClient();
-  const { data: cart } = await supabase
-    .from("abandoned_carts")
-    .select("email")
-    .eq("id", id)
-    .maybeSingle();
-  if (!cart) return { message: "Listo: no te escribimos más." };
-
-  const { error } = await supabase
-    .from("marketing_optouts")
-    .upsert({ email: cart.email }, { onConflict: "email" });
-  if (error) {
-    return { error: "No pudimos darte de baja. Probá de nuevo en un rato." };
-  }
-
-  await supabase.from("abandoned_carts").delete().eq("id", id);
-  return { message: "Listo: no te escribimos más." };
 }

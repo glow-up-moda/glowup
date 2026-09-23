@@ -126,6 +126,15 @@ export function SettingsForm({
             error={state.errors?.whatsapp_number}
             className="sm:max-w-xs"
           />
+          <TextField
+            label="Cupón de bienvenida"
+            name="welcome_coupon_code"
+            defaultValue={initial.welcome_coupon_code}
+            autoComplete="off"
+            hint="El código que se manda a quien se anota en el newsletter. Crealo antes en Cupones; si lo dejás vacío, el email va sin descuento."
+            error={state.errors?.welcome_coupon_code}
+            className="sm:max-w-xs"
+          />
         </div>
       </Section>
 
