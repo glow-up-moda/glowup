@@ -499,6 +499,8 @@ Cómo están hechos:
 - [ ] Cargar las zonas y costos de envío reales en `/admin/zonas` (las que hay son de prueba) y el punto de retiro con sus horarios en Configuración.
 - [ ] Alias, CBU y número de WhatsApp.
 - [ ] Dominio, usuario de Instagram y registro de marca en el INPI.
+- [ ] Cuenta de Resend con un dominio verificado, y cargar `RESEND_API_KEY`, `EMAIL_FROM` y `EMAIL_INTERNAL`: hasta entonces no sale ningún email y cada intento queda anotado en la consola.
+- [ ] Para que corra el job diario (reseñas y carrito abandonado): `CRON_SECRET` en las variables de entorno y el mismo valor en `cron_secret`, más `cron_site_url`, en la tabla `settings`.
 - [ ] Textos legales revisados.
 - [ ] Activar en Supabase Auth la protección de contraseñas filtradas (HaveIBeenPwned), que hoy está apagada.
 - [ ] Fotos de clientas reales para el inicio.
