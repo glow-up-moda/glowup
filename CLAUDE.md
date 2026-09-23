@@ -504,7 +504,7 @@ Backups y errores:
 
 ## 17. Pendientes
 
-- [ ] Logo ajustado a la paleta en SVG, con todas las versiones.
+- [ ] Logo ajustado a la paleta en SVG, con todas las versiones. Mientras tanto, el favicon (`src/app/icon.svg`) y la imagen que se ve al compartir un link (`src/app/(store)/opengraph-image.tsx`) son provisorios: una "G" y el nombre escrito, sin el logo.
 - [ ] Catálogo: subcategorías de ropa interior, productos, talles, colores y fotos.
 - [ ] Tabla de talles con medidas reales.
 - [ ] Monto de envío gratis y % de descuento por transferencia.
@@ -519,7 +519,9 @@ Backups y errores:
 - [ ] Para que corra el job diario (reseñas y carrito abandonado): `CRON_SECRET` en las variables de entorno y el mismo valor en `cron_secret`, más `cron_site_url`, en la tabla `settings`.
 - [ ] Textos legales revisados.
 - [ ] Activar en Supabase Auth la protección de contraseñas filtradas (HaveIBeenPwned), que hoy está apagada.
-- [ ] Fotos de clientas reales para el inicio.
+- [ ] Fotos de clientas reales para el inicio, y la foto del hero (hoy hay un destello en su lugar).
+- [ ] Cuentas de Meta Pixel y Google Analytics, y cargar `NEXT_PUBLIC_META_PIXEL_ID` y `NEXT_PUBLIC_GA4_ID`: sin eso no se mide nada.
+- [ ] Servicio de monitoreo de errores (tipo Sentry). Hoy los errores solo quedan en los logs de Netlify.
 - [ ] Crear el cupón de bienvenida en el panel y cargar su código en Configuración: hasta entonces el newsletter manda un email sin descuento.
 - [ ] ¿Mover el consentimiento de novedades al lado del email en el checkout? Hoy está al final (paso 6), así que el aviso de carrito abandonado casi nunca va a dispararse: quien se va antes de terminar rara vez llegó a marcarlo.
 - [ ] CUIT y QR de Data Fiscal de ARCA para el pie.
