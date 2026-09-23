@@ -188,6 +188,39 @@ begin
       raise exception 'Prueba 3b, envío a domicilio a una zona de envío en el día: motivo %', v_detail;
     end if;
 
+    -- 3d ---------------------------------------------------------------------
+    -- Corte del envío en el día (§12). La hora se fija acá adentro, así la
+    -- prueba no depende de a qué hora se corra: la transacción se deshace.
+    update public.settings set value = to_jsonb('00:00:00'::text)
+      where key = 'same_day_cutoff_time';
+
+    v_msg := null;
+    begin
+      perform public.quote_cart(jsonb_build_object(
+        'items', jsonb_build_array(jsonb_build_object('variant_id', v_neg90, 'quantity', 1)),
+        'shipping_method', 'same_day', 'shipping_zone_id', v_zone_same_day));
+    exception when others then
+      v_msg := sqlerrm;
+      get stacked diagnostics v_detail = pg_exception_detail;
+    end;
+    if v_msg is distinct from 'invalid_shipping' then
+      raise exception 'Prueba 3d, envío en el día pasada la hora de corte: esperaba invalid_shipping y vino %', coalesce(v_msg, 'ningún error');
+    elsif nullif(v_detail, '')::jsonb ->> 'reason' is distinct from 'same_day_closed' then
+      raise exception 'Prueba 3d, envío en el día pasada la hora de corte: motivo %', v_detail;
+    end if;
+
+    -- 3e ---------------------------------------------------------------------
+    -- Antes de la hora de corte sí se puede.
+    update public.settings set value = to_jsonb('23:59:59.999999'::text)
+      where key = 'same_day_cutoff_time';
+
+    v_res := public.quote_cart(jsonb_build_object(
+      'items', jsonb_build_array(jsonb_build_object('variant_id', v_neg90, 'quantity', 1)),
+      'shipping_method', 'same_day', 'shipping_zone_id', v_zone_same_day));
+    if (v_res ->> 'shipping_cents') is null then
+      raise exception 'Prueba 3e, envío en el día antes de la hora de corte: %', v_res;
+    end if;
+
     -- 3c ---------------------------------------------------------------------
     v_msg := null;
     begin
