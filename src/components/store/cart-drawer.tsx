@@ -24,10 +24,20 @@ function missingForFreeShipping(
   return Math.max(0, thresholdCents - subtotalCents);
 }
 
+/** Un accesorio para sumar antes de pagar (§7, carrito lateral). */
+export type Suggestion = {
+  name: string;
+  slug: string;
+  priceCents: number;
+  imagePath: string | null;
+};
+
 export function CartDrawer({
   freeShippingThresholdCents,
+  suggestions = [],
 }: {
   freeShippingThresholdCents: number | null;
+  suggestions?: Suggestion[];
 }) {
   const { items, subtotalCents, isOpen, close, setQuantity, remove, setPrice } =
     useCart();
@@ -91,6 +101,12 @@ export function CartDrawer({
   const missing = missingForFreeShipping(
     subtotalCents,
     freeShippingThresholdCents,
+  );
+
+  // El primero que no esté ya en la bolsa. Lleva a la ficha en vez de sumarlo
+  // de una: un accesorio puede tener más de un color o talle para elegir.
+  const suggestion = suggestions.find(
+    (item) => !items.some((line) => line.href === `/producto/${item.slug}`),
   );
   const progress =
     freeShippingThresholdCents && freeShippingThresholdCents > 0
@@ -249,6 +265,34 @@ export function CartDrawer({
                   </div>
                 </div>
               )}
+              {suggestion && (
+                <Link
+                  href={`/producto/${suggestion.slug}`}
+                  onClick={close}
+                  className="mb-3 flex items-center gap-3 rounded-card bg-crema-oscuro/60 p-2"
+                >
+                  <span className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-input bg-crema-oscuro">
+                    {suggestion.imagePath ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={productImageUrl(suggestion.imagePath, "thumb")}
+                        alt=""
+                        className="size-full object-cover"
+                      />
+                    ) : (
+                      <Sparkle className="size-5 text-rosa" />
+                    )}
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-sm">¿Le sumás esto?</span>
+                    <span className="block font-medium">{suggestion.name}</span>
+                    <span className="block text-sm">
+                      {formatMoney(suggestion.priceCents)}
+                    </span>
+                  </span>
+                </Link>
+              )}
+
               <div className="flex items-baseline justify-between">
                 <span>Subtotal</span>
                 <span className="font-display text-xl font-semibold">

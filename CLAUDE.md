@@ -244,6 +244,7 @@ Footer: links, legales, Data Fiscal, redes
 
 - Se abre desde cualquier página; no hay página de carrito aparte.
 - Productos con cantidad editable, subtotal, barra "Te faltan $X para el envío gratis", un accesorio sugerido y botón "Ir a pagar".
+- El accesorio sugerido es el primero de la categoría Accesorios que no esté ya en la bolsa, y lleva a su ficha en vez de sumarse de una: puede tener más de un color o talle para elegir.
 - Se guarda en el navegador y, al abrirlo, se revalidan precios y stock contra la base.
 
 ### Checkout (sin registro obligatorio)
