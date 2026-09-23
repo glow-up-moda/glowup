@@ -58,6 +58,7 @@ UALA_ENVIRONMENT=test         # test | production
 RESEND_API_KEY=               # solo servidor
 EMAIL_FROM=                   # solo servidor, dominio verificado en Resend
 EMAIL_INTERNAL=               # solo servidor, destino de los avisos internos
+CRON_SECRET=                  # solo servidor, con el que la base llama al cron
 NEXT_PUBLIC_META_PIXEL_ID=
 NEXT_PUBLIC_GA4_ID=
 ```
@@ -186,7 +187,7 @@ El logo se está redibujando para usar esta paleta (ver pendientes):
 | `/buscar` | Resultados; el buscador del header sugiere mientras se escribe |
 | `/favoritos` | Guardados en el navegador; se sincronizan si hay cuenta |
 | `/checkout` | Datos, entrega y pago en una sola página |
-| `/pedido/[numero]` | Confirmación, estado real e instrucciones de transferencia |
+| `/pedido/[numero]` | Confirmación, estado real, instrucciones de transferencia y, si ya se entregó, el formulario de reseña |
 | `/seguimiento` | Buscar pedido con número + email |
 | `/cuenta` | Opcional: historial de pedidos (ingreso con link por email) |
 | `/guia-de-talles` | Tabla de medidas y cómo medirse |
@@ -440,6 +441,8 @@ Cómo están hechos:
 - Salen con `after()` de `next/server`, después de responder: la clienta no espera a Resend. Se ejecutan igual cuando la acción termina en `redirect()`.
 - `sent_emails` evita los duplicados: la clave (`enviado:<order_id>`, `resena:<order_id>`) es única y el insert falla cuando ya se mandó. El aviso de stock bajo se manda una vez por variante y la marca se borra al reponerla.
 - Los avisos internos van a `EMAIL_INTERNAL`; si no está cargada, no se mandan.
+- El pedido de reseña depende del calendario, así que lo dispara el job `daily-emails` de pg_cron: la base llama con pg_net a `/api/cron/emails` con `CRON_SECRET` en una cabecera, y la app decide a quién le toca. La URL y el secreto viven en `settings` (`cron_site_url` y `cron_secret`), no en el código: el repo es público. Se pide a los 3 días de entregado y no se pide nada entregado hace más de 30.
+- La reseña se deja desde `/pedido/[numero]`, que ya sabe quién mira (§7): no hace falta cuenta. Se puede reseñar cada producto del pedido una sola vez, y entra como `pending` hasta que se apruebe en el panel.
 
 ## 14. SEO, rendimiento y analítica
 

@@ -3,12 +3,14 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { OrderEmailForm } from "@/components/store/order-email-form";
+import { ReviewForm } from "@/components/store/review-form";
 import { PageShell } from "@/components/store/page-shell";
 import { buttonClass } from "@/components/ui/button";
 import { IconWhatsApp, Sparkle } from "@/components/ui/icons";
 import { formatDateTime, formatMoney } from "@/lib/format";
 import { rememberedOrders } from "@/lib/orders/access";
 import { parseOrderNumber } from "@/lib/orders/number";
+import { reviewableProducts } from "@/lib/orders/reviews";
 import {
   getBankDetails,
   getPublicOrder,
@@ -19,7 +21,7 @@ import { getStoreSettings, storeWhatsappLink } from "@/lib/store/settings";
 
 import { ResumePaymentButton } from "@/components/store/resume-payment-button";
 
-import { verifyOrderEmail } from "../actions";
+import { leaveReview, verifyOrderEmail } from "../actions";
 
 export async function generateMetadata({
   params,
@@ -124,6 +126,8 @@ export default async function OrderPage({
     order.status === "pending_payment" && order.payment_method === "card";
   const headline = headlines[order.status];
   const address = addressLines(order.shipping_address);
+  const reviewable =
+    order.status === "delivered" ? await reviewableProducts(order.id) : [];
   const receipt = storeWhatsappLink(
     settings.whatsappNumber,
     `¡Hola! Te mando el comprobante del pedido ${order.number} por ${formatMoney(order.total_cents)}.`,
@@ -282,6 +286,23 @@ export default async function OrderPage({
           paso.
         </p>
       </section>
+
+      {reviewable.length > 0 && (
+        <section id="resena" className="mt-8">
+          <h2 className="font-display text-xl font-semibold">
+            ¿Cómo te quedó?
+          </h2>
+          <p className="mt-2 max-w-[60ch]">
+            Contanos qué tal: ayuda un montón a quien está eligiendo talle. La
+            publicamos apenas la leamos.
+          </p>
+          <ReviewForm
+            number={order.number}
+            products={reviewable}
+            action={leaveReview.bind(null, order.number)}
+          />
+        </section>
+      )}
 
       <p className="mt-8 text-sm">
         ¿Necesitás una mano?{" "}

@@ -1,12 +1,15 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { rememberedOrders, rememberOrder } from "@/lib/orders/access";
 import { parseOrderNumber } from "@/lib/orders/number";
+import { reviewableProducts } from "@/lib/orders/reviews";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createCheckout, isUalaReady } from "@/lib/uala/client";
+import type { FormState } from "@/lib/use-form-action";
 
 // Para ver un pedido que no se hizo en este navegador hay que saber el número
 // y el email con el que se compró (§7). El mensaje de error es siempre el
@@ -126,4 +129,83 @@ export async function resumeCardPayment(
   }
 
   redirect(link);
+}
+
+// Reseñas (§13). Se dejan desde la página del pedido, que ya controla quién
+// puede verla: la cookie del navegador o el email con el que se compró (§7).
+// La tabla `reviews` no se escribe por la API pública, así que va por acá.
+
+const reviewSchema = z.object({
+  productId: z.uuid(),
+  rating: z.coerce.number().int().min(1).max(5),
+  name: z.string().trim().min(2, "Escribí tu nombre.").max(60),
+  text: z
+    .string()
+    .trim()
+    .min(10, "Contanos un poco más: al menos 10 caracteres.")
+    .max(600, "Hasta 600 caracteres."),
+});
+
+export async function leaveReview(
+  number: string,
+  _prev: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  const orderNumber = parseOrderNumber(number);
+  const remembered = await rememberedOrders();
+  if (!orderNumber || !remembered.includes(orderNumber)) {
+    return { error: "Volvé a entrar a tu pedido y probá de nuevo." };
+  }
+
+  const parsed = reviewSchema.safeParse({
+    productId: String(formData.get("producto") ?? ""),
+    rating: String(formData.get("puntaje") ?? ""),
+    name: String(formData.get("nombre") ?? ""),
+    text: String(formData.get("texto") ?? ""),
+  });
+  if (!parsed.success) {
+    const issue = parsed.error.issues[0];
+    return {
+      error:
+        issue?.path[0] === "rating"
+          ? "Elegí cuántas estrellas le ponés."
+          : (issue?.message ?? "Revisá lo que escribiste."),
+    };
+  }
+
+  const supabase = createAdminClient();
+  const { data: order } = await supabase
+    .from("orders")
+    .select("id, status")
+    .eq("number", orderNumber)
+    .maybeSingle();
+  if (!order || order.status !== "delivered") {
+    return { error: "Podés dejar tu reseña cuando el pedido esté entregado." };
+  }
+
+  // Que el producto sea de este pedido: si no, cualquiera reseñaría cualquier
+  // cosa desde un pedido propio.
+  const reviewable = await reviewableProducts(order.id);
+  const product = reviewable.find((item) => item.id === parsed.data.productId);
+  if (!product) return { error: "Ese producto no está en este pedido." };
+  if (product.done) return { error: "Ya dejaste tu reseña de este producto." };
+
+  const { error } = await supabase.from("reviews").insert({
+    product_id: parsed.data.productId,
+    order_id: order.id,
+    rating: parsed.data.rating,
+    name: parsed.data.name,
+    text: parsed.data.text,
+  });
+  if (error) {
+    return {
+      error:
+        error.code === "23505"
+          ? "Ya dejaste tu reseña de este producto."
+          : "No pudimos guardar tu reseña. Probá de nuevo.",
+    };
+  }
+
+  revalidatePath(`/pedido/${orderNumber}`);
+  return { message: "¡Gracias! La publicamos apenas la leamos." };
 }

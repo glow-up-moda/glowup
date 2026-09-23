@@ -58,8 +58,9 @@ export async function sendEmail({
 
   const supabase = createAdminClient();
 
-  // La marca se guarda antes de mandar: si el envío falla, el email no se
-  // reintenta solo, pero tampoco se duplica cuando la acción se repite.
+  // La marca se toma antes de mandar, así dos disparos a la vez no mandan dos
+  // veces; si el envío falla se suelta, y el próximo intento lo vuelve a
+  // agarrar. Un 23505 quiere decir que ya está mandado.
   if (key) {
     const { error } = await supabase
       .from("sent_emails")
@@ -69,6 +70,10 @@ export async function sendEmail({
         console.error("[email] no se pudo anotar", error);
       return false;
     }
+  }
+
+  async function release() {
+    if (key) await supabase.from("sent_emails").delete().eq("key", key);
   }
 
   try {
@@ -89,11 +94,13 @@ export async function sendEmail({
       console.error(
         `[email] Resend ${response.status}: ${await response.text()}`,
       );
+      await release();
       return false;
     }
     return true;
   } catch (error) {
     console.error("[email] no se pudo enviar", error);
+    await release();
     return false;
   }
 }
