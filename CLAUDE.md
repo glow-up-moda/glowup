@@ -486,6 +486,8 @@ Cómo están hechos:
 6. **Envíos y retiro.**
 7. **SEO, analítica, rendimiento y accesibilidad.**
 8. **Legales y prueba completa:** compras de prueba con cada método, pagos rechazados, reservas vencidas y webhook duplicado.
+   - Probado de punta a punta: compra por transferencia (pedido → reserva → confirmación en el panel → descuento de stock → preparando → listo para retirar → entregado), pago rechazado de verdad por el webhook, aviso repetido reconocido como duplicado, reserva vencida liberada por el cron, y pago tardío sin stock marcado para revisar (§9.6, pruebas de humo 10a y 10c).
+   - Falta la compra con tarjeta aprobada: el intento real lo rechazó el banco (§17).
 9. **Lanzamiento:** credenciales de producción, dominio, **quitar el `noindex` del layout**, backup periódico de la base y monitoreo de errores.
 
 ## 17. Pendientes
