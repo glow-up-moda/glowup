@@ -1,16 +1,18 @@
-import { IconInfo } from "@/components/ui/icons";
+import { IconAlert } from "@/components/ui/icons";
 
 /**
- * Los textos legales se publican recién después de una revisión profesional
- * (§15). Hasta entonces la página lo dice, en vez de mostrar un texto a medias.
+ * Los textos legales son un borrador hasta que los revise alguien del rubro
+ * (§15). El cartel lo dice con todas las letras: es preferible que una clienta
+ * sepa que esto todavía no está revisado a que lo lea como si lo estuviera.
  */
 export function LegalDraft() {
   return (
-    <div className="flex gap-3 rounded-card bg-rosa px-4 py-3">
-      <IconInfo className="mt-0.5 shrink-0" />
+    <div className="flex gap-3 rounded-card border border-error bg-crema-oscuro px-4 py-3 text-error">
+      <IconAlert className="mt-0.5 shrink-0" />
       <p>
-        Estamos terminando de redactar este texto con asesoramiento legal. Si
-        necesitás algo puntual mientras tanto, escribinos y te respondemos.
+        <strong>Pendiente de revisión.</strong> Este texto es un borrador que
+        todavía no revisó un profesional. Si necesitás algo puntual, escribinos
+        y te respondemos.
       </p>
     </div>
   );
