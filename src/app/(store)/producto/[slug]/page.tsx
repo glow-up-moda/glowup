@@ -135,7 +135,10 @@ export default async function ProductPage({
       <nav aria-label="Migas de pan" className="mb-4 text-sm">
         <ol className="flex flex-wrap items-center gap-1">
           <li>
-            <Link href="/" className="underline underline-offset-4">
+            <Link
+              href="/"
+              className="inline-flex min-h-11 items-center underline underline-offset-4"
+            >
               Inicio
             </Link>
           </li>
@@ -144,7 +147,7 @@ export default async function ProductPage({
               <span aria-hidden="true">/</span>
               <Link
                 href={`/${category.slug}`}
-                className="underline underline-offset-4"
+                className="inline-flex min-h-11 items-center underline underline-offset-4"
               >
                 {category.name}
               </Link>
@@ -155,7 +158,7 @@ export default async function ProductPage({
               <span aria-hidden="true">/</span>
               <Link
                 href={`/${category.slug}/${subcategory.slug}`}
-                className="underline underline-offset-4"
+                className="inline-flex min-h-11 items-center underline underline-offset-4"
               >
                 {subcategory.name}
               </Link>
@@ -174,7 +177,10 @@ export default async function ProductPage({
           {product.rating && (
             <p className="mt-2 flex items-center gap-2 text-sm">
               <Stars rating={product.rating.average} />
-              <a href="#resenas" className="underline underline-offset-4">
+              <a
+                href="#resenas"
+                className="inline-flex min-h-11 items-center underline underline-offset-4"
+              >
                 {product.rating.count === 1
                   ? "1 reseña"
                   : `${product.rating.count} reseñas`}
@@ -220,7 +226,7 @@ export default async function ProductPage({
               <p className="mt-2">
                 <Link
                   href="/envios-y-cambios"
-                  className="underline underline-offset-4"
+                  className="inline-flex min-h-11 items-center underline underline-offset-4"
                 >
                   Ver zonas, costos y cómo hacer un cambio
                 </Link>

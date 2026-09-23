@@ -126,7 +126,7 @@ export function ProductPurchase({
           <legend className="font-medium">Talle</legend>
           <Link
             href="/guia-de-talles"
-            className="text-sm underline underline-offset-4"
+            className="inline-flex min-h-11 items-center text-sm underline underline-offset-4"
           >
             Guía de talles
           </Link>

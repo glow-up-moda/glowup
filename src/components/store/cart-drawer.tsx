@@ -141,9 +141,13 @@ export function CartDrawer({
             <ul className="flex-1 divide-y divide-crema-oscuro overflow-y-auto px-4">
               {items.map((item) => (
                 <li key={item.id} className="flex gap-3 py-4">
+                  {/* Repite el link del nombre que está al lado, así que para
+                      un lector de pantalla y para el teclado no existe. */}
                   <Link
                     href={item.href}
                     onClick={close}
+                    aria-hidden="true"
+                    tabIndex={-1}
                     className="flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-input bg-crema-oscuro"
                   >
                     {item.imagePath ? (

@@ -17,7 +17,7 @@ export async function StoreHeader() {
 
         <Link
           href="/"
-          className="font-display text-2xl font-semibold whitespace-nowrap"
+          className="flex min-h-11 items-center font-display text-2xl font-semibold whitespace-nowrap"
         >
           GLOW UP
         </Link>

@@ -467,7 +467,9 @@ Cómo están hechos:
 
 ## 15. Accesibilidad y legales
 
-- Texto alternativo en todas las fotos, labels en todos los campos, navegación con teclado y áreas táctiles de al menos 44px.
+- Texto alternativo en todas las fotos, labels en todos los campos, navegación con teclado y áreas táctiles de al menos 44px de alto. Un link corto puede medir menos de ancho: lo que importa es que se pueda tocar.
+- Cada página tiene un solo `h1` y los títulos no saltan niveles. En el checkout el `h1` es `sr-only`: la página se lee como pasos numerados y un título arriba solo ocuparía pantalla en el celular.
+- Un link que repite a otro que está al lado (la miniatura del carrito) va con `aria-hidden` y fuera del tabulador: si no, se anuncia como un enlace sin nombre.
 - Foco visible: anillo chocolate de 2px con separación (el coral no tiene contraste suficiente sobre crema).
 - Footer en todas las páginas: link a Defensa del Consumidor, botón de arrepentimiento, QR de Data Fiscal de ARCA, términos y privacidad.
 - Los textos legales se redactan como borrador marcado **"PENDIENTE DE REVISIÓN"** y no se publican sin revisión profesional. Incluye la política de cambios de ropa interior por higiene.

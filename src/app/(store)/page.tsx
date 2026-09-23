@@ -31,7 +31,10 @@ function Section({
       <div className="mb-5 flex flex-wrap items-baseline justify-between gap-3">
         <h2 className="font-display text-2xl font-semibold">{title}</h2>
         {href && linkLabel && (
-          <Link href={href} className="underline underline-offset-4">
+          <Link
+            href={href}
+            className="flex min-h-11 items-center underline underline-offset-4"
+          >
             {linkLabel}
           </Link>
         )}

@@ -275,6 +275,11 @@ export function CheckoutForm({
       }}
       className="mx-auto grid max-w-6xl gap-6 px-4 py-8 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start"
     >
+      {/* El checkout se lee como una lista de pasos numerados, sin un título
+          arriba que ocupe pantalla en el celular. Para un lector de pantalla
+          igual tiene que haber uno (§15). */}
+      <h1 className="sr-only">Terminar tu compra</h1>
+
       <TrackEvent
         event={{
           name: "InitiateCheckout",
