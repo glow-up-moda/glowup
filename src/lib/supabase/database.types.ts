@@ -363,6 +363,7 @@ export type Database = {
           coupon_discount_cents: number
           coupon_id: string | null
           created_at: string
+          delivered_at: string | null
           discount_cents: number
           email: string
           gift_message: string | null
@@ -392,6 +393,7 @@ export type Database = {
           coupon_discount_cents?: number
           coupon_id?: string | null
           created_at?: string
+          delivered_at?: string | null
           discount_cents?: number
           email: string
           gift_message?: string | null
@@ -421,6 +423,7 @@ export type Database = {
           coupon_discount_cents?: number
           coupon_id?: string | null
           created_at?: string
+          delivered_at?: string | null
           discount_cents?: number
           email?: string
           gift_message?: string | null
@@ -1024,6 +1027,7 @@ export type Database = {
         }
         Returns: Json
       }
+      run_daily_emails: { Args: never; Returns: undefined }
       set_order_status: {
         Args: {
           p_order_id: string
