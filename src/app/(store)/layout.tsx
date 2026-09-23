@@ -1,3 +1,4 @@
+import { Analytics } from "@/components/store/analytics";
 import { AnnouncementBar } from "@/components/store/announcement-bar";
 import { CartDrawer } from "@/components/store/cart-drawer";
 import { StoreFooter } from "@/components/store/footer";
@@ -25,6 +26,7 @@ export default async function StoreLayout({ children }: LayoutProps<"/">) {
       <CartDrawer
         freeShippingThresholdCents={settings.freeShippingThresholdCents}
       />
+      <Analytics />
     </CartProvider>
   );
 }

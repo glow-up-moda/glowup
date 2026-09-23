@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 
 import { OrderEmailForm } from "@/components/store/order-email-form";
 import { ReviewForm } from "@/components/store/review-form";
+import { TrackEvent } from "@/components/store/track-event";
 import { PageShell } from "@/components/store/page-shell";
 import { buttonClass } from "@/components/ui/button";
 import { IconWhatsApp, Sparkle } from "@/components/ui/icons";
@@ -128,6 +129,11 @@ export default async function OrderPage({
   const address = addressLines(order.shipping_address);
   const reviewable =
     order.status === "delivered" ? await reviewableProducts(order.id) : [];
+
+  // La compra se cuenta solo con el pago confirmado (§14), y el número de
+  // pedido es el id del evento: recargar esta página no suma otra venta.
+  const paid =
+    order.status !== "pending_payment" && order.status !== "cancelled";
   const receipt = storeWhatsappLink(
     settings.whatsappNumber,
     `¡Hola! Te mando el comprobante del pedido ${order.number} por ${formatMoney(order.total_cents)}.`,
@@ -135,6 +141,24 @@ export default async function OrderPage({
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-10">
+      {paid && (
+        <TrackEvent
+          event={{
+            name: "Purchase",
+            orderId: order.number,
+            totalCents: order.total_cents,
+            items: order.order_items
+              .filter((item) => !item.parent_item_id)
+              .map((item) => ({
+                id: item.id,
+                name: item.name_snapshot,
+                quantity: item.quantity,
+                priceCents: item.unit_price_cents,
+              })),
+          }}
+        />
+      )}
+
       <div className="flex items-center gap-3">
         <Sparkle className="size-8 text-coral" />
         <p className="text-sm">Pedido {order.number}</p>

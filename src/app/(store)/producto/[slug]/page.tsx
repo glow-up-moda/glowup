@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { ProductCard } from "@/components/store/product-card";
 import { ProductGallery } from "@/components/store/product-gallery";
 import { ProductPurchase } from "@/components/store/product-purchase";
+import { TrackEvent } from "@/components/store/track-event";
 import { IconStar } from "@/components/ui/icons";
 import { formatDate, formatMoney } from "@/lib/format";
 import { productImageUrl } from "@/lib/images";
@@ -117,6 +118,19 @@ export default async function ProductPage({
   return (
     <div className="mx-auto max-w-6xl px-4 py-6 pb-28 md:pb-10">
       <JsonLd data={productJsonLd(product)} />
+      <TrackEvent
+        event={{
+          name: "ViewContent",
+          items: [
+            {
+              id: product.id,
+              name: product.name,
+              quantity: 1,
+              priceCents: product.priceCents,
+            },
+          ],
+        }}
+      />
 
       <nav aria-label="Migas de pan" className="mb-4 text-sm">
         <ol className="flex flex-wrap items-center gap-1">

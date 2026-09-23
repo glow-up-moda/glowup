@@ -12,6 +12,7 @@ import {
 } from "@/app/(store)/checkout/actions";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { IconAlert } from "@/components/ui/icons";
+import { TrackEvent } from "@/components/store/track-event";
 import { formatMoney } from "@/lib/format";
 import { useCart } from "@/lib/store/cart";
 import { type CheckoutTotals, couponMessage } from "@/lib/store/checkout";
@@ -274,6 +275,18 @@ export function CheckoutForm({
       }}
       className="mx-auto grid max-w-6xl gap-6 px-4 py-8 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start"
     >
+      <TrackEvent
+        event={{
+          name: "InitiateCheckout",
+          items: items.map((line) => ({
+            id: line.id,
+            name: line.name,
+            quantity: line.quantity,
+            priceCents: line.priceCents,
+          })),
+        }}
+      />
+
       <div className="flex flex-col gap-4">
         <Step number={1} title="Tus datos">
           <div className="grid gap-4 sm:grid-cols-2">

@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { IconCheck, Sparkle } from "@/components/ui/icons";
+import { track } from "@/lib/store/analytics";
 import { type CartItem, useCart } from "@/lib/store/cart";
 
 /**
@@ -29,6 +30,17 @@ export function AddToCartButton({
       onClick={() => {
         if (!item) return;
         add(item);
+        track({
+          name: "AddToCart",
+          items: [
+            {
+              id: item.id,
+              name: item.name,
+              quantity: 1,
+              priceCents: item.priceCents,
+            },
+          ],
+        });
         setAdded(true);
         setTimeout(() => setAdded(false), 1200);
       }}
