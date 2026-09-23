@@ -86,10 +86,14 @@ export function CheckoutForm({
   zones,
   transferDiscountPercent,
   sameDayCutoffTime,
+  sameDayOpen,
+  pickup,
 }: {
   zones: ShippingZone[];
   transferDiscountPercent: number;
   sameDayCutoffTime: string | null;
+  sameDayOpen: boolean;
+  pickup: { address: string | null; hours: string | null };
 }) {
   const router = useRouter();
   const { items, clear } = useCart();
@@ -283,7 +287,8 @@ export function CheckoutForm({
                   label: sameDayCutoffTime
                     ? `Envío en el día (comprando antes de las ${sameDayCutoffTime})`
                     : "Envío en el día",
-                  available: sameDayZones.length > 0,
+                  // Pasada la hora de corte no se ofrece: ya no llega hoy (§12).
+                  available: sameDayZones.length > 0 && sameDayOpen,
                 },
                 {
                   value: "pickup",
@@ -313,6 +318,14 @@ export function CheckoutForm({
                 </label>
               ))}
           </fieldset>
+
+          {shippingMethod === "pickup" && (pickup.address || pickup.hours) && (
+            <div className="rounded-card bg-crema-oscuro px-4 py-3 text-sm">
+              <p className="font-medium">Dónde lo retirás</p>
+              {pickup.address && <p>{pickup.address}</p>}
+              {pickup.hours && <p>{pickup.hours}</p>}
+            </div>
+          )}
 
           {zonesForMethod.length > 0 && (
             <Field label="Zona">

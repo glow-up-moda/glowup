@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 import { CheckoutForm } from "@/components/store/checkout-form";
-import { getStoreSettings } from "@/lib/store/settings";
+import { getStoreSettings, isSameDayOpen } from "@/lib/store/settings";
 import { createCatalogClient } from "@/lib/supabase/catalog";
 
 export const metadata: Metadata = {
@@ -24,6 +24,11 @@ export default async function CheckoutPage() {
       zones={zones ?? []}
       transferDiscountPercent={settings.transferDiscountPercent}
       sameDayCutoffTime={settings.sameDayCutoffTime}
+      sameDayOpen={isSameDayOpen(settings.sameDayCutoffTime)}
+      pickup={{
+        address: settings.pickupAddress,
+        hours: settings.pickupHours,
+      }}
     />
   );
 }

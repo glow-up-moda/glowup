@@ -110,6 +110,8 @@ export async function saveSettings(
     bank_cbu: text(formData, "bank_cbu"),
     whatsapp_number: text(formData, "whatsapp_number"),
     welcome_coupon_code: text(formData, "welcome_coupon_code"),
+    pickup_address: text(formData, "pickup_address"),
+    pickup_hours: text(formData, "pickup_hours"),
   });
   if (!parsed.success) return { errors: fieldErrors(parsed.error) };
 

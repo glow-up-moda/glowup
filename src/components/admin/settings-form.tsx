@@ -127,6 +127,22 @@ export function SettingsForm({
             className="sm:max-w-xs"
           />
           <TextField
+            label="Punto de retiro"
+            name="pickup_address"
+            defaultValue={initial.pickup_address}
+            autoComplete="off"
+            hint="La dirección donde retiran. Se muestra en la tienda, así que no pongas nada que no quieras publicar."
+            error={state.errors?.pickup_address}
+          />
+          <TextField
+            label="Horarios del retiro"
+            name="pickup_hours"
+            defaultValue={initial.pickup_hours}
+            autoComplete="off"
+            hint="Cuándo pueden pasar. Ejemplo: lunes a viernes de 10 a 18."
+            error={state.errors?.pickup_hours}
+          />
+          <TextField
             label="Cupón de bienvenida"
             name="welcome_coupon_code"
             defaultValue={initial.welcome_coupon_code}

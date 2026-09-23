@@ -1,5 +1,6 @@
 import { cache } from "react";
 
+import { TIME_ZONE } from "@/lib/format";
 import { createCatalogClient } from "@/lib/supabase/catalog";
 
 // Configuración que muestra la tienda. Sale de la vista `public_settings`
@@ -11,6 +12,8 @@ export type StoreSettings = {
   announcementMessages: string[];
   whatsappNumber: string | null;
   sameDayCutoffTime: string | null;
+  pickupAddress: string | null;
+  pickupHours: string | null;
 };
 
 const defaults: StoreSettings = {
@@ -19,6 +22,8 @@ const defaults: StoreSettings = {
   announcementMessages: [],
   whatsappNumber: null,
   sameDayCutoffTime: null,
+  pickupAddress: null,
+  pickupHours: null,
 };
 
 function number(value: unknown): number | null {
@@ -52,6 +57,8 @@ export const getStoreSettings = cache(async (): Promise<StoreSettings> => {
       : [],
     whatsappNumber: text(stored.get("whatsapp_number")),
     sameDayCutoffTime: text(stored.get("same_day_cutoff_time")),
+    pickupAddress: text(stored.get("pickup_address")),
+    pickupHours: text(stored.get("pickup_hours")),
   };
 });
 
@@ -71,4 +78,21 @@ export function storeWhatsappLink(
   if (digits.startsWith("0")) digits = digits.slice(1);
   if (!digits.startsWith("54")) digits = `549${digits}`;
   return `https://wa.me/${digits}?text=${encodeURIComponent(text)}`;
+}
+
+const clock = new Intl.DateTimeFormat("es-AR", {
+  timeZone: TIME_ZONE,
+  hour: "2-digit",
+  minute: "2-digit",
+  hourCycle: "h23",
+});
+
+/**
+ * Si todavía se puede pedir envío en el día (§12). La hora es la de Argentina
+ * y la calcula el servidor: el reloj de la clienta no decide. La base vuelve a
+ * mirarlo al crear el pedido.
+ */
+export function isSameDayOpen(cutoff: string | null): boolean {
+  if (!cutoff) return true;
+  return clock.format(new Date()) <= cutoff.slice(0, 5);
 }

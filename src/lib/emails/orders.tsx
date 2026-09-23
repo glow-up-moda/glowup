@@ -12,6 +12,7 @@ import PaymentApproved, {
 } from "@/emails/payment-approved";
 import { addressLines, SHIPPING_LABELS } from "@/lib/admin/orders";
 import { getBankDetails } from "@/lib/orders/public";
+import { getStoreSettings } from "@/lib/store/settings";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 import { sendEmail, siteUrl } from "./send";
@@ -29,11 +30,10 @@ async function loadOrder(
   orderId: string,
 ): Promise<{ email: string; order: OrderEmailData } | null> {
   const supabase = createAdminClient();
-  const { data } = await supabase
-    .from("orders")
-    .select(SELECT)
-    .eq("id", orderId)
-    .maybeSingle();
+  const [{ data }, settings] = await Promise.all([
+    supabase.from("orders").select(SELECT).eq("id", orderId).maybeSingle(),
+    getStoreSettings(),
+  ]);
   if (!data) return null;
 
   // Un kit es una línea con sus componentes colgando (§8): en el email se
@@ -53,6 +53,10 @@ async function loadOrder(
       zoneName: data.shipping_zones?.name ?? null,
       etaText: data.shipping_zones?.eta_text ?? null,
       address: addressLines(data.shipping_address),
+      pickup:
+        data.shipping_method === "pickup"
+          ? { address: settings.pickupAddress, hours: settings.pickupHours }
+          : null,
       isGift: data.is_gift,
       giftMessage: data.gift_message,
       lines: parents.map((line) => ({

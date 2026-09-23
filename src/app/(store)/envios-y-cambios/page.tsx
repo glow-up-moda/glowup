@@ -77,6 +77,8 @@ export default async function ShippingPage() {
           Podés retirar sin cargo en nuestro punto de entrega en Paraná. Te
           avisamos por email y por WhatsApp cuando tu pedido esté listo.
         </p>
+        {settings.pickupAddress && <p>{settings.pickupAddress}</p>}
+        {settings.pickupHours && <p>{settings.pickupHours}</p>}
       </Block>
 
       <Block title="Embalaje discreto">

@@ -265,6 +265,14 @@ export default async function OrderPage({
         {order.shipping_zones?.eta_text && (
           <p className="text-sm">{order.shipping_zones.eta_text}</p>
         )}
+        {order.shipping_method === "pickup" &&
+          (settings.pickupAddress || settings.pickupHours) && (
+            <div className="mt-3 rounded-card bg-crema-oscuro px-4 py-3 text-sm">
+              <p className="font-medium">Dónde lo retirás</p>
+              {settings.pickupAddress && <p>{settings.pickupAddress}</p>}
+              {settings.pickupHours && <p>{settings.pickupHours}</p>}
+            </div>
+          )}
         {address.length > 0 && (
           <dl className="mt-3 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-sm">
             {address.map((line) => (

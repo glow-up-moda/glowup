@@ -28,6 +28,8 @@ const shippingReasons: Record<string, string> = {
   zone_not_same_day:
     "Esa zona no tiene envío en el día. Elegí envío a domicilio.",
   zone_is_same_day: "Esa zona es de envío en el día. Elegí esa opción arriba.",
+  same_day_closed:
+    "Por hoy ya cerramos el envío en el día. Elegí envío a domicilio o retiro.",
   pickup_has_zone: "El retiro no lleva zona de envío.",
   address_required: "Completá la dirección para el envío.",
 };

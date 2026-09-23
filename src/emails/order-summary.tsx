@@ -24,6 +24,8 @@ export type OrderEmailData = {
   zoneName: string | null;
   etaText: string | null;
   address: { label: string; value: string }[];
+  /** Dónde y cuándo se retira, cuando el pedido es de retiro (§12). */
+  pickup: { address: string | null; hours: string | null } | null;
   isGift: boolean;
   giftMessage: string | null;
   lines: OrderLine[];
@@ -123,6 +125,25 @@ export function OrderSummary({ order }: { order: OrderEmailData }) {
           </span>
         ) : null}
       </Text>
+
+      {order.pickup && (order.pickup.address || order.pickup.hours) && (
+        <Section
+          style={{
+            backgroundColor: colors.cremaOscuro,
+            borderRadius: "20px",
+            margin: "12px 0",
+            padding: "12px 16px",
+          }}
+        >
+          <Text style={{ fontWeight: 500, margin: 0 }}>Dónde lo retirás</Text>
+          {order.pickup.address && (
+            <Text style={{ margin: 0 }}>{order.pickup.address}</Text>
+          )}
+          {order.pickup.hours && (
+            <Text style={{ margin: 0 }}>{order.pickup.hours}</Text>
+          )}
+        </Section>
+      )}
 
       {order.address.length > 0 && (
         <table
