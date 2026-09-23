@@ -177,6 +177,17 @@ export function IconLogOut(props: IconProps) {
   );
 }
 
+export function IconChart(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path d="M4 20h16" />
+      <path d="M7 20v-6" />
+      <path d="M12 20V7" />
+      <path d="M17 20v-9" />
+    </Svg>
+  );
+}
+
 export function IconTruck(props: IconProps) {
   return (
     <Svg {...props}>

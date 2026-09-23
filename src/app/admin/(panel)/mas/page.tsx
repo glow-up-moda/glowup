@@ -3,9 +3,13 @@ import Link from "next/link";
 
 import { PageHeader } from "@/components/admin/page-header";
 import {
+  IconBag,
+  IconChart,
   IconChevronRight,
+  IconInfo,
   IconLogOut,
   IconSettings,
+  IconStar,
   IconTag,
   IconTicket,
   IconTruck,
@@ -28,6 +32,30 @@ const links = [
     label: "Cupones",
     description: "Crear, pausar y ver usos",
     icon: IconTicket,
+  },
+  {
+    href: "/admin/kits",
+    label: "Kits",
+    description: "Combos armados: qué traen y a qué precio",
+    icon: IconBag,
+  },
+  {
+    href: "/admin/reportes",
+    label: "Reportes",
+    description: "Más vendidos, talles y margen",
+    icon: IconChart,
+  },
+  {
+    href: "/admin/reposiciones",
+    label: "Avisos de reposición",
+    description: "Quién está esperando un talle agotado",
+    icon: IconInfo,
+  },
+  {
+    href: "/admin/resenas",
+    label: "Reseñas",
+    description: "Publicar o rechazar lo que escriben las clientas",
+    icon: IconStar,
   },
   {
     href: "/admin/zonas",

@@ -4,11 +4,15 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import {
+  IconBag,
+  IconChart,
   IconHome,
+  IconInfo,
   IconMore,
   IconOrders,
   IconProducts,
   IconSettings,
+  IconStar,
   IconStock,
   IconTag,
   IconTicket,
@@ -39,6 +43,10 @@ const items: Item[] = [
   { href: "/admin/stock", label: "Stock", icon: IconStock, inBottomBar: true },
   { href: "/admin/precios", label: "Precios", icon: IconTag },
   { href: "/admin/cupones", label: "Cupones", icon: IconTicket },
+  { href: "/admin/kits", label: "Kits", icon: IconBag },
+  { href: "/admin/resenas", label: "Reseñas", icon: IconStar },
+  { href: "/admin/reposiciones", label: "Reposiciones", icon: IconInfo },
+  { href: "/admin/reportes", label: "Reportes", icon: IconChart },
   { href: "/admin/zonas", label: "Zonas de envío", icon: IconTruck },
   { href: "/admin/configuracion", label: "Configuración", icon: IconSettings },
 ];

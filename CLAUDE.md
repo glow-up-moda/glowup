@@ -278,8 +278,10 @@ Tiene que ser cómodo de usar desde el celular.
 - **Cupones:** listado con estado (activo, programado, vencido, agotado), alta y edición con vigencia en hora de Argentina, "desactivar ahora" (le corta la vigencia) y borrado solo si nunca se usó.
   - Desactivar un cupón programado también le borra la fecha de inicio: la base exige que el inicio sea anterior al fin.
 - **Zonas de envío:** alta, edición y borrado (`/admin/zonas`). Nombre, costo, plazo, si es zona de envío en el día, y las provincias y códigos postales que abarca, uno por línea. Una zona que ya viajó en un pedido no se puede borrar: la base lo impide y el panel lo explica.
-- **Kits, reseñas (moderación) y avisos de reposición.**
-- **Reportes:** más vendidos, talles más vendidos, avisos de reposición por variante y margen.
+- **Kits** (`/admin/kits`): nombre, dirección, precio, precio tachado, publicado y qué trae (variante + cantidad, una línea por producto). No tienen stock propio: el disponible sale de los componentes (§9.7). Un kit publicado tiene que traer al menos un producto, y uno ya vendido no se puede borrar: se despublica.
+- **Reseñas** (`/admin/resenas`): entran como `pending` y no se ven en la tienda hasta publicarlas. Rechazarlas las esconde sin borrarlas, y desde cualquiera de los dos estados se pueden devolver a la cola.
+- **Avisos de reposición** (`/admin/reposiciones`): quién está esperando cada talle agotado, agrupado por variante y ordenado por cuántas esperan. Al reponer desde Stock, el email sale solo (§9.10).
+- **Reportes** (`/admin/reportes`): facturado, costo y margen, más vendidos y talles más vendidos, por 30 días, 90 o todo. Solo cuenta pedidos cobrados. Las unidades salen de las líneas con variante, así lo que viajó dentro de un kit también cuenta, y la facturación de las líneas de arriba, para no contar dos veces. Las cuentas se hacen en la app y no en la base: con el volumen de una tienda chica alcanza, y si algún día se pone lento se mudan a SQL.
 - **Configuración:** % de descuento por transferencia, monto de envío gratis, alias y CBU, umbral de stock bajo, mensajes de la barra de anuncios, número de WhatsApp y código del cupón de bienvenida.
   - Una sola pantalla con todo, validado: CBU de 22 números, alias de 6 a 20 caracteres, WhatsApp solo números, horario de corte HH:MM y hasta 5 mensajes de anuncio de 80 caracteres, uno por línea.
   - Un campo opcional vacío se guarda como el null de JSON. Escribir algo inválido nunca lo borra en silencio: vuelve con el error.
