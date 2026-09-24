@@ -1,3 +1,6 @@
 [build]
   command = "npm run build"
   publish = ".next"
+  # Decide si este commit se publica o no (§16). Por defecto no: los créditos
+  # del plan gratis se gastan en cada build.
+  ignore = "node scripts/netlify-ignore.mjs"

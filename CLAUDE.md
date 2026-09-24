@@ -41,7 +41,7 @@ Tienda online de **ropa interior femenina y accesorios** (gorras, anteojos de so
 | Validación | Zod |
 | Imágenes | `sharp` en el servidor: las fotos se suben convertidas a WebP (las transformaciones de Supabase son pagas y Safari no codifica WebP) |
 | Formato | Prettier + `prettier-plugin-tailwindcss` (ordena las clases) |
-| Hosting | Netlify (`glowupind.netlify.app` hasta tener dominio propio) |
+| Hosting | Netlify (`glowupind.netlify.app` hasta tener dominio propio). No publica en cada push: ver §16 |
 | Analítica | Meta Pixel + Google Analytics 4 |
 
 Variables de entorno (`.env.local` local; `.env.example` sin valores en el repo). Nombres verificados con la documentación de Supabase en septiembre de 2026. Las claves viejas `anon` y `service_role` se retiran a fines de 2026: usamos siempre la publicable y la secreta.
@@ -500,6 +500,10 @@ Cómo están hechos:
    6. Poner `INDEXABLE = true` en `src/lib/site.ts`: eso saca el `noindex` del layout y habilita el robots.txt y el sitemap de una sola vez.
    7. Compra de prueba con tarjeta de punta a punta y devolución.
    8. Rutina de backup y monitoreo (ver abajo).
+
+Publicar:
+- **Netlify no construye en cada push.** Cada build se come varios de los 300 créditos que trae el plan gratis por mes, y el ciclo de esta cuenta va del 16 al 16. `netlify.toml` llama a `scripts/netlify-ignore.mjs`, que saltea el build salvo que el mensaje del commit diga `[deploy]` o que lo haya pedido un hook. Ojo con el código de salida: en Netlify, 0 significa saltear y cualquier otro, construir.
+- Para publicar: `npm run deploy`, que dispara el hook con la dirección guardada en `NETLIFY_BUILD_HOOK` (`.env.local`; quien la tenga puede publicar, así que no va al repo). Publica lo último que haya en `main`.
 
 Backups y errores:
 - `npm run db:backup` baja todas las tablas a `backups/<fecha>/datos.json`. La lista de tablas sale de la base, así que una tabla nueva entra sola. Se corre a mano y conviene guardar el archivo fuera de la computadora; el esquema no hace falta guardarlo porque está en `supabase/migrations`. `supabase db dump` no sirve acá: necesita Docker.
