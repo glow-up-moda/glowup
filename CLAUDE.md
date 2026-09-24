@@ -41,7 +41,7 @@ Tienda online de **ropa interior femenina y accesorios** (gorras, anteojos de so
 | Validación | Zod |
 | Imágenes | `sharp` en el servidor: las fotos se suben convertidas a WebP (las transformaciones de Supabase son pagas y Safari no codifica WebP) |
 | Formato | Prettier + `prettier-plugin-tailwindcss` (ordena las clases) |
-| Hosting | Netlify (`glowupind.netlify.app` hasta tener dominio propio). No publica en cada push: ver §16 |
+| Hosting | Netlify, en `mareapna.com`. La dirección vieja de Netlify redirige al dominio. No publica en cada push: ver §16 |
 | Analítica | Meta Pixel + Google Analytics 4 |
 
 Variables de entorno (`.env.local` local; `.env.example` sin valores en el repo). Nombres verificados con la documentación de Supabase en septiembre de 2026. Las claves viejas `anon` y `service_role` se retiran a fines de 2026: usamos siempre la publicable y la secreta.
@@ -521,7 +521,7 @@ Backups y errores:
 - [ ] ¿Cupón y descuento por transferencia se acumulan?
 - [ ] Cargar las zonas y costos de envío reales en `/admin/zonas` (las que hay son de prueba) y el punto de retiro con sus horarios en Configuración.
 - [ ] Alias, CBU y número de WhatsApp.
-- [ ] Dominio, usuario de Instagram y registro de marca en el INPI.
+- [ ] Usuario de Instagram y registro de marca en el INPI. (El dominio ya está: `mareapna.com`, con el DNS en Netlify. En DonWeb quedaron solo los nameservers.)
 - [ ] Cuenta de Resend con un dominio verificado, y cargar `RESEND_API_KEY`, `EMAIL_FROM` y `EMAIL_INTERNAL`: hasta entonces no sale ningún email y cada intento queda anotado en la consola.
 - [ ] Para que corra el job diario (reseñas y carrito abandonado): `CRON_SECRET` en las variables de entorno y el mismo valor en `cron_secret`, más `cron_site_url`, en la tabla `settings`.
 - [ ] Textos legales revisados.

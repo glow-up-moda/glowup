@@ -4,3 +4,12 @@
   # Decide si este commit se publica o no (§16). Por defecto no: los créditos
   # del plan gratis se gastan en cada build.
   ignore = "node scripts/netlify-ignore.mjs"
+
+# La dirección de Netlify sigue respondiendo aunque haya dominio propio, y eso
+# es el mismo sitio en dos direcciones: para Google, contenido duplicado. Se
+# manda todo al dominio.
+[[redirects]]
+  from = "https://glowupind.netlify.app/*"
+  to = "https://mareapna.com/:splat"
+  status = 301
+  force = true
