@@ -26,7 +26,7 @@ export function productJsonLd(product: ProductDetail) {
     ...(product.images.length > 0
       ? { image: product.images.map((image) => productImageUrl(image.path)) }
       : {}),
-    brand: { "@type": "Brand", name: "GLOW UP" },
+    brand: { "@type": "Brand", name: "MAREA" },
     url,
     offers: {
       "@type": "Offer",

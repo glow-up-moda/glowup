@@ -8,7 +8,7 @@ import { listKits } from "@/lib/store/catalog";
 import { getStoreSettings, transferPrice } from "@/lib/store/settings";
 
 export const metadata: Metadata = {
-  title: "Kits · GLOW UP",
+  title: "Kits · MAREA",
   description:
     "Combos armados de ropa interior y accesorios, a un precio mejor que comprándolos sueltos.",
 };
@@ -25,7 +25,7 @@ export default async function KitsPage() {
       </p>
 
       {kits.length === 0 ? (
-        <p className="mt-6 rounded-card bg-crema-oscuro/60 px-4 py-6">
+        <p className="mt-6 rounded-card bg-arena/60 px-4 py-6">
           Todavía no hay kits armados. Volvé en unos días.
         </p>
       ) : (
@@ -43,9 +43,9 @@ export default async function KitsPage() {
               <li
                 key={kit.id}
                 id={kit.slug}
-                className="grid gap-5 rounded-card bg-crema-oscuro/40 p-4 sm:grid-cols-[14rem_1fr] sm:p-6"
+                className="grid gap-5 rounded-card bg-arena/40 p-4 sm:grid-cols-[14rem_1fr] sm:p-6"
               >
-                <span className="relative block aspect-4/5 overflow-hidden rounded-card bg-crema-oscuro">
+                <span className="relative block aspect-4/5 overflow-hidden rounded-card bg-arena">
                   <ProductImage
                     images={kit.images}
                     sizes="(min-width: 640px) 14rem, 90vw"

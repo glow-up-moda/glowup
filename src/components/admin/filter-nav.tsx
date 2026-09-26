@@ -48,12 +48,12 @@ export function FilterNav({
           href={item.href}
           aria-current={item.active ? "page" : undefined}
           className={`inline-flex min-h-11 shrink-0 items-center gap-2 rounded-full px-4 ${
-            item.active ? "bg-chocolate text-crema" : "bg-crema-oscuro"
+            item.active ? "bg-azul text-crema" : "bg-arena"
           }`}
         >
           {item.label}
           {!!item.count && (
-            <span className="rounded-full bg-coral px-2 text-sm font-medium text-chocolate">
+            <span className="rounded-full bg-azul px-2 text-sm font-medium text-crema">
               {item.count}
             </span>
           )}

@@ -11,7 +11,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 // sería ella quien se dio de baja.
 
 export const metadata: Metadata = {
-  title: "Dejar de recibir avisos · GLOW UP",
+  title: "Dejar de recibir avisos · MAREA",
   robots: { index: false, follow: false },
 };
 

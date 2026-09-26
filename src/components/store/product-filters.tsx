@@ -55,7 +55,7 @@ export function ProductFilters({
       <Button variant="secondary" onClick={() => setIsOpen(true)}>
         Filtrar
         {activeCount > 0 && (
-          <span className="rounded-full bg-coral px-2 text-sm">
+          <span className="rounded-full bg-azul px-2 text-sm text-crema">
             {activeCount}
           </span>
         )}
@@ -95,7 +95,7 @@ export function ProductFilters({
           name="orden"
           defaultValue={active.sort}
           onChange={() => sortFormRef.current?.requestSubmit()}
-          className="min-h-11 rounded-input border-2 border-transparent bg-crema-oscuro px-3 text-base"
+          className="min-h-11 rounded-input border-2 border-transparent bg-arena px-3 text-base"
         >
           {sortOptions.map((option) => (
             <option key={option.value} value={option.value}>
@@ -123,18 +123,18 @@ export function ProductFilters({
         ref={dialogRef}
         onClose={() => setIsOpen(false)}
         aria-label="Filtros"
-        className="drawer drawer-right m-0 ml-auto h-dvh max-h-none w-[min(22rem,90vw)] max-w-none bg-crema p-0 text-chocolate shadow-drawer"
+        className="drawer drawer-right m-0 ml-auto h-dvh max-h-none w-[min(22rem,90vw)] max-w-none bg-crema p-0 text-azul shadow-drawer"
       >
         <form className="flex h-full flex-col">
           <input type="hidden" name="orden" value={active.sort} />
 
-          <div className="flex items-center justify-between border-b border-crema-oscuro px-4 py-3">
+          <div className="flex items-center justify-between border-b border-arena px-4 py-3">
             <h2 className="font-display text-xl font-semibold">Filtrar</h2>
             <button
               type="button"
               onClick={() => setIsOpen(false)}
               aria-label="Cerrar los filtros"
-              className="flex size-11 items-center justify-center rounded-full hover:bg-crema-oscuro"
+              className="flex size-11 items-center justify-center rounded-full hover:bg-arena"
             >
               <IconClose />
             </button>
@@ -148,14 +148,14 @@ export function ProductFilters({
                   {facets.sizes.map((size) => (
                     <label
                       key={size}
-                      className="flex min-h-11 cursor-pointer items-center gap-2 rounded-full bg-crema-oscuro px-3"
+                      className="flex min-h-11 cursor-pointer items-center gap-2 rounded-full bg-arena px-3"
                     >
                       <input
                         type="checkbox"
                         name="talle"
                         value={size}
                         defaultChecked={active.sizes.includes(size)}
-                        className="size-4 accent-chocolate"
+                        className="size-4 accent-azul"
                       />
                       {size}
                     </label>
@@ -171,14 +171,14 @@ export function ProductFilters({
                   {facets.colors.map((color) => (
                     <label
                       key={color}
-                      className="flex min-h-11 cursor-pointer items-center gap-2 rounded-full bg-crema-oscuro px-3"
+                      className="flex min-h-11 cursor-pointer items-center gap-2 rounded-full bg-arena px-3"
                     >
                       <input
                         type="checkbox"
                         name="color"
                         value={color}
                         defaultChecked={active.colors.includes(color)}
-                        className="size-4 accent-chocolate"
+                        className="size-4 accent-azul"
                       />
                       {color}
                     </label>
@@ -198,7 +198,7 @@ export function ProductFilters({
                     inputMode="numeric"
                     defaultValue={active.minPesos}
                     placeholder={centsToPesosInput(facets.minCents)}
-                    className="min-h-11 w-full rounded-input border-2 border-transparent bg-crema-oscuro px-3 text-base"
+                    className="min-h-11 w-full rounded-input border-2 border-transparent bg-arena px-3 text-base"
                   />
                 </label>
                 <label className="flex-1">
@@ -209,7 +209,7 @@ export function ProductFilters({
                     inputMode="numeric"
                     defaultValue={active.maxPesos}
                     placeholder={centsToPesosInput(facets.maxCents)}
-                    className="min-h-11 w-full rounded-input border-2 border-transparent bg-crema-oscuro px-3 text-base"
+                    className="min-h-11 w-full rounded-input border-2 border-transparent bg-arena px-3 text-base"
                   />
                 </label>
               </div>
@@ -220,13 +220,13 @@ export function ProductFilters({
                 type="checkbox"
                 name="disponibles"
                 defaultChecked={active.onlyAvailable}
-                className="size-5 accent-chocolate"
+                className="size-5 accent-azul"
               />
               Solo lo que hay en stock
             </label>
           </div>
 
-          <div className="border-t border-crema-oscuro p-4">
+          <div className="border-t border-arena p-4">
             <Button type="submit" className="w-full">
               Ver resultados
             </Button>

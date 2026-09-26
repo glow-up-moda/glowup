@@ -158,9 +158,9 @@ function UploadForm({ action }: { action: FormAction }) {
           required
           aria-describedby="photo-file-hint"
           aria-invalid={errors.file ? true : undefined}
-          className="min-h-11 w-full rounded-input bg-crema-oscuro px-3 py-2 text-base file:mr-3 file:rounded-full file:border-0 file:bg-rosa file:px-4 file:py-2 file:text-chocolate"
+          className="min-h-11 w-full rounded-input bg-arena px-3 py-2 text-base file:mr-3 file:rounded-full file:border-0 file:bg-brisa file:px-4 file:py-2 file:text-azul"
         />
-        <p id="photo-file-hint" className="text-sm text-chocolate/80">
+        <p id="photo-file-hint" className="text-sm text-azul/80">
           Ideal en 4:5, con fondo crema o arena y luz natural. Se guarda en
           WebP.
         </p>
@@ -197,7 +197,7 @@ function PhotoCard({ photo, position }: { photo: PhotoRow; position: number }) {
 
   return (
     <li className="flex flex-col gap-2 rounded-card bg-crema p-2">
-      <div className="relative aspect-[4/5] overflow-hidden rounded-input bg-crema-oscuro">
+      <div className="relative aspect-[4/5] overflow-hidden rounded-input bg-arena">
         {/* Miniatura WebP ya optimizada: no pasa por el optimizador de imágenes. */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
@@ -216,7 +216,7 @@ function PhotoCard({ photo, position }: { photo: PhotoRow; position: number }) {
             type="submit"
             disabled={!photo.moveUp}
             aria-label={`Mover la foto ${position} antes`}
-            className="flex size-11 items-center justify-center rounded-full hover:bg-crema-oscuro disabled:opacity-40"
+            className="flex size-11 items-center justify-center rounded-full hover:bg-arena disabled:opacity-40"
           >
             <IconArrowUp />
           </button>
@@ -226,7 +226,7 @@ function PhotoCard({ photo, position }: { photo: PhotoRow; position: number }) {
             type="submit"
             disabled={!photo.moveDown}
             aria-label={`Mover la foto ${position} después`}
-            className="flex size-11 items-center justify-center rounded-full hover:bg-crema-oscuro disabled:opacity-40"
+            className="flex size-11 items-center justify-center rounded-full hover:bg-arena disabled:opacity-40"
           >
             <IconArrowDown />
           </button>

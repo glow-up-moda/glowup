@@ -15,7 +15,7 @@ type Alert = {
   lead: string;
   rows: { label: string; value: string }[];
   action: { label: string; url: string };
-  tone?: "rosa" | "error";
+  tone?: "brisa" | "error";
 };
 
 async function alert(key: string, kind: string, props: Alert): Promise<void> {

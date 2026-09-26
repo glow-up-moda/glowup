@@ -36,7 +36,7 @@ function CheckRow({
     <li className="flex items-start gap-3 py-2">
       <span
         aria-hidden
-        className="mt-0.5 size-5 shrink-0 border-2 border-chocolate"
+        className="mt-0.5 size-5 shrink-0 border-2 border-azul"
       />
       <span className="min-w-0 flex-1">
         <span className="font-medium">{quantity} ×</span> {name}
@@ -100,10 +100,10 @@ export default async function PackingSlipPage({
         </Notice>
       )}
 
-      <article className="rounded-card border-2 border-crema-oscuro p-5 md:p-8 print:rounded-none print:border-0 print:p-0">
-        <header className="flex items-start justify-between gap-4 border-b-2 border-chocolate pb-3">
+      <article className="rounded-card border-2 border-arena p-5 md:p-8 print:rounded-none print:border-0 print:p-0">
+        <header className="flex items-start justify-between gap-4 border-b-2 border-azul pb-3">
           <div>
-            <p className="font-display text-2xl font-semibold">GLOW UP</p>
+            <p className="font-display text-2xl font-semibold">MAREA</p>
             <p className="text-sm">Hoja para armar el pedido</p>
           </div>
           <div className="text-right">
@@ -143,7 +143,7 @@ export default async function PackingSlipPage({
         </div>
 
         {order.is_gift && (
-          <section className="mt-4 rounded-card border-2 border-chocolate p-3">
+          <section className="mt-4 rounded-card border-2 border-azul p-3">
             <h2 className="font-medium">Es para regalo: caja sin precios</h2>
             {order.gift_message && (
               <p className="mt-1">
@@ -157,7 +157,7 @@ export default async function PackingSlipPage({
           <h2 className="font-medium">
             {plural(units, "producto", "productos")}
           </h2>
-          <ul className="mt-1 divide-y divide-crema-oscuro border-y border-crema-oscuro">
+          <ul className="mt-1 divide-y divide-arena border-y border-arena">
             {lines.map((line) => {
               const parts = partsOf(line.id);
               return parts.length > 0 ? (

@@ -54,7 +54,7 @@ export function SearchDialog() {
         type="button"
         onClick={() => setIsOpen(true)}
         aria-label="Buscar"
-        className="flex size-11 items-center justify-center rounded-full hover:bg-crema-oscuro"
+        className="flex size-11 items-center justify-center rounded-full hover:bg-arena"
       >
         <IconSearch />
       </button>
@@ -66,7 +66,7 @@ export function SearchDialog() {
           setTerm("");
         }}
         aria-label="Buscar"
-        className="mx-auto mt-0 w-full max-w-xl rounded-b-card bg-crema p-0 text-chocolate shadow-drawer backdrop:bg-chocolate/40"
+        className="mx-auto mt-0 w-full max-w-xl rounded-b-card bg-crema p-0 text-azul shadow-drawer backdrop:bg-azul/40"
       >
         <form action="/buscar" className="flex items-center gap-2 p-3">
           <label htmlFor="busqueda" className="sr-only">
@@ -80,28 +80,28 @@ export function SearchDialog() {
             value={term}
             onChange={(event) => setTerm(event.target.value)}
             placeholder="Corpiño, bombacha, gorra…"
-            className="min-h-11 flex-1 rounded-input border-2 border-transparent bg-crema-oscuro px-3 text-base"
+            className="min-h-11 flex-1 rounded-input border-2 border-transparent bg-arena px-3 text-base"
           />
           <button
             type="button"
             onClick={() => setIsOpen(false)}
             aria-label="Cerrar el buscador"
-            className="flex size-11 items-center justify-center rounded-full hover:bg-crema-oscuro"
+            className="flex size-11 items-center justify-center rounded-full hover:bg-arena"
           >
             <IconClose />
           </button>
         </form>
 
         {products.length > 0 && (
-          <ul className="max-h-[60vh] overflow-y-auto border-t border-crema-oscuro">
+          <ul className="max-h-[60vh] overflow-y-auto border-t border-arena">
             {products.map((product) => (
               <li key={product.id}>
                 <Link
                   href={`/producto/${product.slug}`}
                   onClick={() => setIsOpen(false)}
-                  className="flex items-center gap-3 px-3 py-2 hover:bg-crema-oscuro"
+                  className="flex items-center gap-3 px-3 py-2 hover:bg-arena"
                 >
-                  <span className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-input bg-crema-oscuro">
+                  <span className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-input bg-arena">
                     {product.images[0] ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
@@ -110,7 +110,7 @@ export function SearchDialog() {
                         className="size-full object-cover"
                       />
                     ) : (
-                      <Sparkle className="size-5 text-rosa" />
+                      <Sparkle className="size-5 text-brisa" />
                     )}
                   </span>
                   <span className="min-w-0 flex-1">
@@ -122,7 +122,7 @@ export function SearchDialog() {
                 </Link>
               </li>
             ))}
-            <li className="border-t border-crema-oscuro">
+            <li className="border-t border-arena">
               <Link
                 href={`/buscar?q=${encodeURIComponent(clean)}`}
                 onClick={() => setIsOpen(false)}
@@ -137,7 +137,7 @@ export function SearchDialog() {
         {clean.length >= 2 &&
           results?.term === clean &&
           products.length === 0 && (
-            <p className="border-t border-crema-oscuro px-3 py-4 text-sm">
+            <p className="border-t border-arena px-3 py-4 text-sm">
               No encontramos nada con “{clean}”. Probá con otra palabra.
             </p>
           )}

@@ -21,7 +21,7 @@ export function AnnouncementBar({ messages }: { messages: string[] }) {
   if (messages.length === 0) return null;
 
   return (
-    <div className="bg-rosa text-chocolate">
+    <div className="bg-brisa text-azul">
       <div className="mx-auto flex h-10 max-w-6xl items-center justify-center px-4 text-center text-sm">
         <span key={index} className="fade-in truncate" aria-hidden="true">
           {messages[index % messages.length]}

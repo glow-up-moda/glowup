@@ -15,7 +15,7 @@ export function WhatsappFab({ href }: { href: string }) {
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Escribinos por WhatsApp"
-      className="fixed right-4 bottom-4 z-30 flex size-14 items-center justify-center rounded-full bg-coral text-chocolate shadow-soft transition-colors duration-150 ease-brand hover:bg-rosa"
+      className="fixed right-4 bottom-4 z-30 flex size-14 items-center justify-center rounded-full bg-azul text-crema shadow-soft transition-colors duration-150 ease-brand hover:bg-azul/90"
     >
       <IconWhatsApp width={26} height={26} />
     </a>

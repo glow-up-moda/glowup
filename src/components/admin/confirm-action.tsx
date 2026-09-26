@@ -39,7 +39,7 @@ export function ConfirmAction({
                 "primary",
                 "cursor-pointer [&::-webkit-details-marker]:hidden",
               )
-            : "inline-flex min-h-11 cursor-pointer items-center rounded-full px-3 underline underline-offset-4 hover:bg-crema-oscuro [&::-webkit-details-marker]:hidden"
+            : "inline-flex min-h-11 cursor-pointer items-center rounded-full px-3 underline underline-offset-4 hover:bg-arena [&::-webkit-details-marker]:hidden"
         }
       >
         {label}

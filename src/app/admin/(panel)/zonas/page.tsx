@@ -50,7 +50,7 @@ export default async function ZonesPage({
             <li key={zone.id}>
               <Link
                 href={`/admin/zonas/${zone.id}`}
-                className="flex min-h-16 items-center gap-4 rounded-card bg-crema-oscuro/60 px-4 py-3"
+                className="flex min-h-16 items-center gap-4 rounded-card bg-arena/60 px-4 py-3"
               >
                 <span className="flex-1">
                   <span className="flex flex-wrap items-center gap-2">

@@ -124,16 +124,16 @@ export function CartDrawer({
         setChecked({ issues: {}, pricesChanged: false });
       }}
       aria-label="Tu carrito"
-      className="drawer drawer-right m-0 ml-auto h-dvh max-h-none w-[min(26rem,92vw)] max-w-none bg-crema p-0 text-chocolate shadow-drawer"
+      className="drawer drawer-right m-0 ml-auto h-dvh max-h-none w-[min(26rem,92vw)] max-w-none bg-crema p-0 text-azul shadow-drawer"
     >
       <div className="flex h-full flex-col">
-        <div className="flex items-center justify-between border-b border-crema-oscuro px-4 py-3">
+        <div className="flex items-center justify-between border-b border-arena px-4 py-3">
           <h2 className="font-display text-xl font-semibold">Tu carrito</h2>
           <button
             type="button"
             onClick={close}
             aria-label="Cerrar el carrito"
-            className="flex size-11 items-center justify-center rounded-full hover:bg-crema-oscuro"
+            className="flex size-11 items-center justify-center rounded-full hover:bg-arena"
           >
             <IconClose />
           </button>
@@ -149,12 +149,12 @@ export function CartDrawer({
         ) : (
           <>
             {checked.pricesChanged && (
-              <p className="mx-4 mt-3 rounded-card bg-rosa px-3 py-2 text-sm">
+              <p className="mx-4 mt-3 rounded-card bg-brisa px-3 py-2 text-sm">
                 Actualizamos los precios: son los de hoy.
               </p>
             )}
 
-            <ul className="flex-1 divide-y divide-crema-oscuro overflow-y-auto px-4">
+            <ul className="flex-1 divide-y divide-arena overflow-y-auto px-4">
               {items.map((item) => (
                 <li key={item.id} className="flex gap-3 py-4">
                   {/* Repite el link del nombre que está al lado, así que para
@@ -164,7 +164,7 @@ export function CartDrawer({
                     onClick={close}
                     aria-hidden="true"
                     tabIndex={-1}
-                    className="flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-input bg-crema-oscuro"
+                    className="flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-input bg-arena"
                   >
                     {item.imagePath ? (
                       // eslint-disable-next-line @next/next/no-img-element
@@ -174,7 +174,7 @@ export function CartDrawer({
                         className="size-full object-cover"
                       />
                     ) : (
-                      <Sparkle className="size-6 text-rosa" />
+                      <Sparkle className="size-6 text-brisa" />
                     )}
                   </Link>
                   <div className="min-w-0 flex-1">
@@ -205,7 +205,7 @@ export function CartDrawer({
                           onChange={(event) =>
                             setQuantity(item.id, Number(event.target.value))
                           }
-                          className="min-h-11 rounded-input border-2 border-transparent bg-crema-oscuro px-2 text-base"
+                          className="min-h-11 rounded-input border-2 border-transparent bg-arena px-2 text-base"
                         >
                           {Array.from(
                             { length: MAX_PER_LINE },
@@ -238,7 +238,7 @@ export function CartDrawer({
                     type="button"
                     onClick={() => remove(item.id)}
                     aria-label={`Sacar ${item.name} del carrito`}
-                    className="flex size-11 shrink-0 items-center justify-center self-start rounded-full hover:bg-crema-oscuro"
+                    className="flex size-11 shrink-0 items-center justify-center self-start rounded-full hover:bg-arena"
                   >
                     <IconTrash />
                   </button>
@@ -246,7 +246,7 @@ export function CartDrawer({
               ))}
             </ul>
 
-            <div className="border-t border-crema-oscuro p-4">
+            <div className="border-t border-arena p-4">
               {missing != null && (
                 <div className="mb-3">
                   <p className="text-sm">
@@ -255,11 +255,11 @@ export function CartDrawer({
                       : `Te faltan ${formatMoney(missing)} para el envío gratis.`}
                   </p>
                   <div
-                    className="mt-1 h-1.5 overflow-hidden rounded-full bg-crema-oscuro"
+                    className="mt-1 h-1.5 overflow-hidden rounded-full bg-arena"
                     role="presentation"
                   >
                     <div
-                      className="h-full rounded-full bg-coral transition-[width] duration-300 ease-brand"
+                      className="h-full rounded-full bg-aqua transition-[width] duration-300 ease-brand"
                       style={{ width: `${progress}%` }}
                     />
                   </div>
@@ -269,9 +269,9 @@ export function CartDrawer({
                 <Link
                   href={`/producto/${suggestion.slug}`}
                   onClick={close}
-                  className="mb-3 flex items-center gap-3 rounded-card bg-crema-oscuro/60 p-2"
+                  className="mb-3 flex items-center gap-3 rounded-card bg-arena/60 p-2"
                 >
-                  <span className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-input bg-crema-oscuro">
+                  <span className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-input bg-arena">
                     {suggestion.imagePath ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
@@ -280,7 +280,7 @@ export function CartDrawer({
                         className="size-full object-cover"
                       />
                     ) : (
-                      <Sparkle className="size-5 text-rosa" />
+                      <Sparkle className="size-5 text-brisa" />
                     )}
                   </span>
                   <span className="min-w-0 flex-1">
@@ -303,7 +303,7 @@ export function CartDrawer({
                 El envío y los descuentos se calculan en el siguiente paso.
               </p>
               {blocked ? (
-                <p className="mt-3 rounded-card bg-crema-oscuro px-3 py-2 text-sm">
+                <p className="mt-3 rounded-card bg-arena px-3 py-2 text-sm">
                   Revisá lo que quedó sin stock arriba y seguí.
                 </p>
               ) : (

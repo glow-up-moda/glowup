@@ -11,7 +11,7 @@ export async function StoreHeader() {
   const categories = await getNavigation();
 
   return (
-    <header className="sticky top-0 z-40 border-b border-crema-oscuro bg-crema/95 backdrop-blur">
+    <header className="sticky top-0 z-40 border-b border-arena bg-crema/95 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-6xl items-center gap-1 px-4">
         <MenuDrawer categories={categories} />
 
@@ -19,7 +19,7 @@ export async function StoreHeader() {
           href="/"
           className="flex min-h-11 items-center font-display text-2xl font-semibold whitespace-nowrap"
         >
-          GLOW UP
+          MAREA
         </Link>
 
         <nav aria-label="Categorías" className="ml-8 hidden md:block">
@@ -28,7 +28,7 @@ export async function StoreHeader() {
               <li key={category.id}>
                 <Link
                   href={`/${category.slug}`}
-                  className="flex min-h-11 items-center rounded-full px-3 hover:bg-crema-oscuro"
+                  className="flex min-h-11 items-center rounded-full px-3 hover:bg-arena"
                 >
                   {category.name}
                 </Link>
@@ -37,7 +37,7 @@ export async function StoreHeader() {
             <li>
               <Link
                 href="/kits"
-                className="flex min-h-11 items-center rounded-full px-3 hover:bg-crema-oscuro"
+                className="flex min-h-11 items-center rounded-full px-3 hover:bg-arena"
               >
                 Kits
               </Link>
@@ -50,7 +50,7 @@ export async function StoreHeader() {
           <Link
             href="/favoritos"
             aria-label="Favoritos"
-            className="flex size-11 items-center justify-center rounded-full hover:bg-crema-oscuro"
+            className="flex size-11 items-center justify-center rounded-full hover:bg-arena"
           >
             <IconHeart />
           </Link>

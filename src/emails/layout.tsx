@@ -18,11 +18,12 @@ import type { CSSProperties, ReactNode } from "react";
 // pide por nombre y cae en la del sistema cuando no está.
 
 export const colors = {
-  chocolate: "#3A2925",
-  rosa: "#EFA3B5",
-  coral: "#F27F73",
-  crema: "#FFF7EE",
-  cremaOscuro: "#F3E6D8",
+  azul: "#075477",
+  aqua: "#45B5C9",
+  brisa: "#A8DDE4",
+  crema: "#FFF9F0",
+  arena: "#F5EBDD",
+  tostado: "#C9A982",
   error: "#B42318",
   exito: "#2F6B3A",
 } as const;
@@ -34,7 +35,7 @@ export const fonts = {
 
 const body: CSSProperties = {
   backgroundColor: colors.crema,
-  color: colors.chocolate,
+  color: colors.azul,
   fontFamily: fonts.text,
   fontSize: "16px",
   lineHeight: 1.6,
@@ -91,16 +92,16 @@ export function Small({ children }: { children: ReactNode }) {
   );
 }
 
-/** Botón principal: fondo coral y texto chocolate, en píldora (§5). */
+/** Botón principal: fondo azul y texto crema, en píldora (§5). */
 export function Button({ href, children }: { href: string; children: string }) {
   return (
     <Section style={{ margin: "20px 0" }}>
       <Link
         href={href}
         style={{
-          backgroundColor: colors.coral,
+          backgroundColor: colors.azul,
           borderRadius: "999px",
-          color: colors.chocolate,
+          color: colors.crema,
           display: "inline-block",
           fontWeight: 500,
           padding: "12px 24px",
@@ -114,15 +115,15 @@ export function Button({ href, children }: { href: string; children: string }) {
 }
 
 /**
- * Bloque destacado. `tono` sigue §5: rosa para lo neutro, crema oscuro con
+ * Bloque destacado. `tono` sigue §5: brisa para lo neutro, arena con
  * borde para los avisos de error y de éxito. Esos dos llevan además un signo,
  * porque el color por sí solo no puede ser lo que comunica el estado.
  */
 export function Panel({
-  tone = "rosa",
+  tone = "brisa",
   children,
 }: {
-  tone?: "rosa" | "crema" | "error" | "exito";
+  tone?: "brisa" | "crema" | "error" | "exito";
   children: ReactNode;
 }) {
   const accent =
@@ -132,10 +133,10 @@ export function Panel({
   return (
     <Section
       style={{
-        backgroundColor: tone === "rosa" ? colors.rosa : colors.cremaOscuro,
+        backgroundColor: tone === "brisa" ? colors.brisa : colors.arena,
         border: accent ? `1px solid ${accent}` : undefined,
         borderRadius: "20px",
-        color: accent ?? colors.chocolate,
+        color: accent ?? colors.azul,
         margin: "20px 0",
         padding: "16px 20px",
       }}
@@ -242,7 +243,7 @@ export function EmailLayout({
               margin: "0 0 24px",
             }}
           >
-            GLOW UP
+            MAREA
           </Text>
 
           {children}
@@ -250,16 +251,16 @@ export function EmailLayout({
           <Hr
             style={{
               border: "none",
-              borderTop: `1px solid ${colors.cremaOscuro}`,
+              borderTop: `1px solid ${colors.arena}`,
               margin: "32px 0 16px",
             }}
           />
           <Text style={{ fontSize: "14px", margin: 0 }}>
             {footer === "internal" ? (
-              "Aviso automático del panel de GLOW UP."
+              "Aviso automático del panel de MAREA."
             ) : (
               <>
-                GLOW UP · Ropa interior y accesorios · Paraná, Entre Ríos.
+                MAREA · Ropa interior y accesorios · Paraná, Entre Ríos.
                 {footer === "store" && (
                   <>
                     <br />

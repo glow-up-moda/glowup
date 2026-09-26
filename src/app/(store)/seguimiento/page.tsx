@@ -7,7 +7,7 @@ import { Block, PageShell } from "@/components/store/page-shell";
 import { findOrder } from "../pedido/actions";
 
 export const metadata: Metadata = {
-  title: "Seguir mi pedido · GLOW UP",
+  title: "Seguir mi pedido · MAREA",
   description: "Mirá en qué anda tu pedido con el número y tu email.",
 };
 

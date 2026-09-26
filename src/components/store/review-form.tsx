@@ -12,7 +12,7 @@ import { clearFields, useFormAction } from "@/lib/use-form-action";
 // error no borre lo escrito (§7, formularios).
 
 const fieldClass =
-  "w-full rounded-input border-2 border-transparent bg-crema-oscuro px-3 py-2 text-base text-chocolate placeholder:text-chocolate/60 focus:border-chocolate";
+  "w-full rounded-input border-2 border-transparent bg-arena px-3 py-2 text-base text-azul placeholder:text-azul/60 focus:border-azul";
 
 const RATINGS = [
   { value: 1, label: "1 estrella" },
@@ -89,7 +89,7 @@ export function ReviewForm({
           {RATINGS.map((option) => (
             <label
               key={option.value}
-              className="flex size-11 cursor-pointer items-center justify-center rounded-full focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-chocolate"
+              className="flex size-11 cursor-pointer items-center justify-center rounded-full focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-azul"
             >
               <input
                 type="radio"
@@ -103,9 +103,7 @@ export function ReviewForm({
               <IconStar
                 width={28}
                 height={28}
-                className={
-                  option.value <= rating ? "text-coral" : "text-crema-oscuro"
-                }
+                className={option.value <= rating ? "text-azul" : "text-arena"}
               />
             </label>
           ))}

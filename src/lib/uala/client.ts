@@ -110,7 +110,7 @@ export async function createCheckout(order: {
     method: "POST",
     body: JSON.stringify({
       amount: (order.totalCents / 100).toFixed(2),
-      description: `Pedido ${order.number} · GLOW UP`,
+      description: `Pedido ${order.number} · MAREA`,
       callback_success: `${site}/pedido/${order.number}`,
       callback_fail: `${site}/pedido/${order.number}`,
       notification_url: `${site}/api/webhooks/uala`,

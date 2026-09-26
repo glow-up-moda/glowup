@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: { template: "%s · Panel GLOW UP", default: "Panel GLOW UP" },
+  title: { template: "%s · Panel MAREA", default: "Panel MAREA" },
   robots: { index: false, follow: false },
 };
 

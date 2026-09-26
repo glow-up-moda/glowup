@@ -4,16 +4,16 @@ import { Block, PageShell } from "@/components/store/page-shell";
 import { ButtonLink } from "@/components/ui/button";
 
 export const metadata: Metadata = {
-  title: "Nosotras · GLOW UP",
+  title: "Nosotras · MAREA",
   description:
-    "Somos GLOW UP, una tienda de ropa interior y accesorios de Paraná, Entre Ríos.",
+    "Somos MAREA, una tienda de ropa interior y accesorios de Paraná, Entre Ríos.",
 };
 
 export default function AboutPage() {
   return (
     <PageShell
       title="Nosotras"
-      intro="GLOW UP es una tienda de ropa interior y accesorios de Paraná, Entre Ríos."
+      intro="MAREA es una tienda de ropa interior y accesorios de Paraná, Entre Ríos."
     >
       <Block title="Qué hacemos">
         <p>

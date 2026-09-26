@@ -7,7 +7,7 @@ import { buttonClass } from "@/components/ui/button";
 import { getStoreSettings, storeWhatsappLink } from "@/lib/store/settings";
 
 export const metadata: Metadata = {
-  title: "Contacto · GLOW UP",
+  title: "Contacto · MAREA",
   description: "Escribinos por WhatsApp: te respondemos nosotras.",
 };
 

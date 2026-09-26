@@ -13,7 +13,7 @@ import { getSavedCart } from "@/lib/store/abandoned";
 // links solos.
 
 export const metadata: Metadata = {
-  title: "Tu bolsa · GLOW UP",
+  title: "Tu bolsa · MAREA",
   robots: { index: false, follow: false },
 };
 
@@ -47,7 +47,7 @@ export default async function SavedCartPage({
       title="Te guardamos la bolsa"
       intro="Esto es lo que estabas eligiendo, con los precios de hoy."
     >
-      <ul className="divide-y divide-crema-oscuro border-y border-crema-oscuro">
+      <ul className="divide-y divide-arena border-y border-arena">
         {cart.items.map((item) => (
           <li key={item.id} className="flex justify-between gap-3 py-3">
             <span className="min-w-0">

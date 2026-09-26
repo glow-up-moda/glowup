@@ -84,7 +84,7 @@ export default async function OrderPage({
   const address = addressLines(order.shipping_address);
   const whatsapp = whatsappLink(
     order.phone,
-    `Hola, te escribimos de GLOW UP por tu pedido ${order.number}.`,
+    `Hola, te escribimos de MAREA por tu pedido ${order.number}.`,
   );
 
   const doneTexts: Record<string, string> = {
@@ -234,7 +234,7 @@ export default async function OrderPage({
           </Section>
 
           <Section title="Productos">
-            <ul className="divide-y divide-crema-oscuro">
+            <ul className="divide-y divide-arena">
               {lines.map((line) => {
                 const parts = partsOf(line.id);
                 const variant = line.product_variants;
@@ -280,7 +280,7 @@ export default async function OrderPage({
               })}
             </ul>
 
-            <dl className="mt-3 grid grid-cols-[1fr_auto] gap-x-4 gap-y-1 border-t border-crema-oscuro pt-3">
+            <dl className="mt-3 grid grid-cols-[1fr_auto] gap-x-4 gap-y-1 border-t border-arena pt-3">
               <dt>Subtotal</dt>
               <dd className="text-right">
                 {formatMoney(order.subtotal_cents)}
@@ -398,7 +398,7 @@ export default async function OrderPage({
           </Section>
 
           {movements.length > 0 && (
-            <details className="rounded-card bg-crema-oscuro/60 p-4">
+            <details className="rounded-card bg-arena/60 p-4">
               <summary className="flex min-h-11 cursor-pointer items-center font-display text-xl font-semibold">
                 Movimientos de stock
               </summary>

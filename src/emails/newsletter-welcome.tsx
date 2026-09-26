@@ -18,8 +18,8 @@ export type NewsletterWelcomeProps = {
 
 export function subject({ couponCode }: NewsletterWelcomeProps): string {
   return couponCode
-    ? "Tu descuento de primera compra · GLOW UP"
-    : "Bienvenida a GLOW UP";
+    ? "Tu descuento de primera compra · MAREA"
+    : "Bienvenida a MAREA";
 }
 
 export default function NewsletterWelcome({
@@ -65,7 +65,7 @@ export default function NewsletterWelcome({
 
       <Small>
         Te escribimos porque pediste recibir novedades. Si te arrepentiste,{" "}
-        <a href={unsubscribeUrl} style={{ color: colors.chocolate }}>
+        <a href={unsubscribeUrl} style={{ color: colors.azul }}>
           date de baja acá
         </a>
         .

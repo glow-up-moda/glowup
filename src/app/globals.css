@@ -8,13 +8,14 @@
 @theme static {
   /* Paleta: única fuente de color. No existen `white`, `black` ni grises. */
   --color-*: initial;
-  --color-chocolate: #3a2925;
-  --color-rosa: #efa3b5;
-  --color-coral: #f27f73;
-  --color-crema: #fff7ee;
-  --color-crema-oscuro: #f3e6d8;
+  --color-azul: #075477;
+  --color-aqua: #45b5c9;
+  --color-brisa: #a8dde4;
+  --color-crema: #fff9f0;
+  --color-arena: #f5ebdd;
+  --color-tostado: #c9a982;
 
-  /* Solo estados, siempre con ícono y texto, y solo sobre crema o crema oscuro. */
+  /* Solo estados, siempre con ícono y texto, y solo sobre crema o arena. */
   --color-error: #b42318;
   --color-exito: #2f6b3a;
 
@@ -47,10 +48,10 @@
   --default-transition-duration: 300ms;
   --default-transition-timing-function: var(--ease-brand);
 
-  /* Elevación: sombras teñidas de chocolate, nunca grises. */
+  /* Elevación: sombras teñidas de azul, nunca grises. */
   --shadow-*: initial;
-  --shadow-soft: 0 6px 20px -8px rgb(58 41 37 / 0.18);
-  --shadow-drawer: -16px 0 48px -16px rgb(58 41 37 / 0.28);
+  --shadow-soft: 0 6px 20px -8px rgb(7 84 119 / 0.18);
+  --shadow-drawer: -16px 0 48px -16px rgb(7 84 119 / 0.28);
 }
 
 /* `inline` deja que los tokens apunten a las variables que crea next/font. */
@@ -73,12 +74,12 @@
 
   body {
     background-color: var(--color-crema);
-    color: var(--color-chocolate);
+    color: var(--color-azul);
   }
 
-  /* El coral no contrasta lo suficiente sobre crema para marcar el foco (§15). */
+  /* El aqua no contrasta lo suficiente sobre crema para marcar el foco (§15). */
   :focus-visible {
-    outline: 2px solid var(--color-chocolate);
+    outline: 2px solid var(--color-azul);
     outline-offset: 2px;
   }
 

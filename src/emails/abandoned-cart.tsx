@@ -13,7 +13,7 @@ export type AbandonedCartProps = {
 };
 
 export function subject(): string {
-  return "Te quedó algo en la bolsa · GLOW UP";
+  return "Te quedó algo en la bolsa · MAREA";
 }
 
 export default function AbandonedCart({
@@ -41,7 +41,7 @@ export default function AbandonedCart({
             <tr key={`${line.name}-${index}`}>
               <td
                 style={{
-                  borderTop: `1px solid ${colors.cremaOscuro}`,
+                  borderTop: `1px solid ${colors.arena}`,
                   padding: "10px 0",
                 }}
               >
@@ -49,7 +49,7 @@ export default function AbandonedCart({
               </td>
               <td
                 style={{
-                  borderTop: `1px solid ${colors.cremaOscuro}`,
+                  borderTop: `1px solid ${colors.arena}`,
                   padding: "10px 0",
                   textAlign: "right",
                   whiteSpace: "nowrap",
@@ -71,7 +71,7 @@ export default function AbandonedCart({
       <Small>
         Te escribimos porque nos dejaste tu email y aceptaste recibir novedades.
         Si no querés más estos avisos,{" "}
-        <a href={unsubscribeUrl} style={{ color: colors.chocolate }}>
+        <a href={unsubscribeUrl} style={{ color: colors.azul }}>
           date de baja acá
         </a>
         .

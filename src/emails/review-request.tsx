@@ -9,7 +9,7 @@ export type ReviewRequestProps = {
 };
 
 export function subject(): string {
-  return "¿Cómo te quedó? · GLOW UP";
+  return "¿Cómo te quedó? · MAREA";
 }
 
 export default function ReviewRequest({

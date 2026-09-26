@@ -172,7 +172,7 @@ export default async function ProductPage({
           {!movements?.length ? (
             <p>Todavía no hay movimientos.</p>
           ) : (
-            <ul className="divide-y divide-crema-oscuro">
+            <ul className="divide-y divide-arena">
               {movements.map((movement) => (
                 <li
                   key={movement.id}
@@ -209,7 +209,7 @@ export default async function ProductPage({
           {!prices?.length ? (
             <p>El precio no cambió desde que se creó.</p>
           ) : (
-            <ul className="divide-y divide-crema-oscuro">
+            <ul className="divide-y divide-arena">
               {prices.map((change) => (
                 <li
                   key={change.id}

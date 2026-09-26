@@ -20,8 +20,8 @@ export default function GlobalError({
     <html lang="es-AR">
       <body
         style={{
-          backgroundColor: "#FFF7EE",
-          color: "#3A2925",
+          backgroundColor: "#FFF9F0",
+          color: "#075477",
           fontFamily: "system-ui, sans-serif",
           margin: 0,
           padding: "64px 16px",
@@ -42,9 +42,9 @@ export default function GlobalError({
           <a
             href="/"
             style={{
-              backgroundColor: "#F27F73",
+              backgroundColor: "#075477",
               borderRadius: "999px",
-              color: "#3A2925",
+              color: "#FFF9F0",
               display: "inline-block",
               padding: "12px 24px",
               textDecoration: "none",

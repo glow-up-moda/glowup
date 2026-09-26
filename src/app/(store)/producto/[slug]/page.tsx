@@ -22,11 +22,11 @@ export async function generateMetadata({
   const { slug } = await params;
   const product = await getProductBySlug(slug);
   if (!product) return {};
-  const title = product.seoTitle ?? `${product.name} · GLOW UP`;
+  const title = product.seoTitle ?? `${product.name} · MAREA`;
   const description =
     product.seoDescription ??
     product.description?.slice(0, 160) ??
-    `${product.name} en GLOW UP. Envío a todo el país.`;
+    `${product.name} en MAREA. Envío a todo el país.`;
   const photo = product.images[0];
 
   return {
@@ -55,14 +55,11 @@ function Stars({ rating }: { rating: number }) {
   const rounded = Math.round(rating);
   return (
     <span
-      className="inline-flex items-center gap-0.5 text-coral"
+      className="inline-flex items-center gap-0.5 text-azul"
       aria-label={`${rating.toFixed(1).replace(".", ",")} de 5`}
     >
       {[1, 2, 3, 4, 5].map((star) => (
-        <IconStar
-          key={star}
-          className={star <= rounded ? "" : "text-crema-oscuro"}
-        />
+        <IconStar key={star} className={star <= rounded ? "" : "text-arena"} />
       ))}
     </span>
   );
@@ -80,11 +77,11 @@ function Accordion({
   return (
     <details
       open={open}
-      className="border-b border-crema-oscuro py-2 [&_summary::-webkit-details-marker]:hidden"
+      className="border-b border-arena py-2 [&_summary::-webkit-details-marker]:hidden"
     >
       <summary className="flex min-h-11 cursor-pointer items-center justify-between gap-3 font-medium">
         {title}
-        <span aria-hidden="true" className="text-chocolate/60">
+        <span aria-hidden="true" className="text-azul/60">
           +
         </span>
       </summary>
@@ -243,10 +240,7 @@ export default async function ProductPage({
           </h2>
           <ul className="mt-4 grid gap-4 md:grid-cols-2">
             {product.reviews.map((review) => (
-              <li
-                key={review.id}
-                className="rounded-card bg-crema-oscuro/50 p-4"
-              >
+              <li key={review.id} className="rounded-card bg-arena/50 p-4">
                 <Stars rating={review.rating} />
                 {review.text && <p className="mt-2">{review.text}</p>}
                 <p className="mt-2 text-sm">

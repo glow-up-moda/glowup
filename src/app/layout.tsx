@@ -26,14 +26,14 @@ export const metadata: Metadata = {
   // Con esto las direcciones del Open Graph salen absolutas, que es lo que
   // necesitan WhatsApp e Instagram para mostrar la vista previa (§14).
   metadataBase: new URL(siteUrl()),
-  // Cada página escribe su título completo, con el "· GLOW UP" incluido.
-  title: "GLOW UP",
+  // Cada página escribe su título completo, con el "· MAREA" incluido.
+  title: "MAREA",
   description,
   openGraph: {
     type: "website",
-    siteName: "GLOW UP",
+    siteName: "MAREA",
     locale: "es_AR",
-    title: "GLOW UP",
+    title: "MAREA",
     description,
   },
   // Hasta el lanzamiento el sitio muestra la tienda a medio armar y pagos de
@@ -44,7 +44,7 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   colorScheme: "light",
-  themeColor: "#FFF7EE",
+  themeColor: "#FFF9F0",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

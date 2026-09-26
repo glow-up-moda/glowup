@@ -28,10 +28,10 @@ export async function StoreFooter() {
   );
 
   return (
-    <footer className="mt-16 border-t border-crema-oscuro bg-crema-oscuro/40">
+    <footer className="mt-16 border-t border-arena bg-arena/40">
       <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 sm:grid-cols-2 md:grid-cols-4">
         <div>
-          <p className="font-display text-2xl font-semibold">GLOW UP</p>
+          <p className="font-display text-2xl font-semibold">MAREA</p>
           <p className="mt-2 max-w-[30ch] text-sm">
             Ropa interior y accesorios. Paraná, Entre Ríos. Enviamos a todo el
             país.
@@ -114,9 +114,9 @@ export async function StoreFooter() {
       </div>
 
       {/* Falta el QR de Data Fiscal de ARCA: necesita el CUIT (§17). */}
-      <div className="border-t border-crema-oscuro">
+      <div className="border-t border-arena">
         <p className="mx-auto max-w-6xl px-4 py-4 text-sm">
-          © {new Date().getFullYear()} GLOW UP
+          © {new Date().getFullYear()} MAREA
         </p>
       </div>
     </footer>

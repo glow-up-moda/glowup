@@ -18,8 +18,8 @@ export async function generateMetadata({
   const found = await findSubcategory(categoria, subcategoria);
   if (!found) return {};
   return {
-    title: `${found.child.name} · GLOW UP`,
-    description: `${found.child.name} de GLOW UP, en ${found.parent.name.toLowerCase()}. Envío a todo el país.`,
+    title: `${found.child.name} · MAREA`,
+    description: `${found.child.name} de MAREA, en ${found.parent.name.toLowerCase()}. Envío a todo el país.`,
   };
 }
 

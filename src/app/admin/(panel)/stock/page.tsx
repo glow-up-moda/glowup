@@ -113,7 +113,7 @@ export default async function StockPage({
         <button
           type="submit"
           aria-label="Buscar"
-          className="flex size-11 shrink-0 items-center justify-center rounded-full border-2 border-chocolate"
+          className="flex size-11 shrink-0 items-center justify-center rounded-full border-2 border-azul"
         >
           <IconSearch />
         </button>
@@ -123,7 +123,7 @@ export default async function StockPage({
         <Link
           href="/admin/stock?filtro=bajo"
           aria-current={lowOnly ? "page" : undefined}
-          className={`inline-flex min-h-11 items-center rounded-full px-4 ${lowOnly ? "bg-chocolate text-crema" : "bg-crema-oscuro"}`}
+          className={`inline-flex min-h-11 items-center rounded-full px-4 ${lowOnly ? "bg-azul text-crema" : "bg-arena"}`}
         >
           Stock bajo
         </Link>
@@ -184,7 +184,7 @@ export default async function StockPage({
                       {row.stock_reserved === 1 ? "reservada" : "reservadas"}
                     </p>
                     <details className="mt-3">
-                      <summary className="inline-flex min-h-11 cursor-pointer items-center rounded-full px-3 underline underline-offset-4 hover:bg-crema-oscuro">
+                      <summary className="inline-flex min-h-11 cursor-pointer items-center rounded-full px-3 underline underline-offset-4 hover:bg-arena">
                         Mover stock
                       </summary>
                       <div className="mt-3">
@@ -207,7 +207,7 @@ export default async function StockPage({
               primero.
             </Notice>
           ) : (
-            <ul className="divide-y divide-crema-oscuro">
+            <ul className="divide-y divide-arena">
               {movements.map((movement) => (
                 <li
                   key={movement.id}

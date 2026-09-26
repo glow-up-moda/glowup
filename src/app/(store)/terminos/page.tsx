@@ -8,8 +8,8 @@ import { Block, PageShell } from "@/components/store/page-shell";
 // se inventan un CUIT ni una razón social.
 
 export const metadata: Metadata = {
-  title: "Términos y condiciones · GLOW UP",
-  description: "Condiciones de compra en GLOW UP.",
+  title: "Términos y condiciones · MAREA",
+  description: "Condiciones de compra en MAREA.",
 };
 
 const link = "underline underline-offset-4";
@@ -21,9 +21,9 @@ export default function TermsPage() {
 
       <Block title="Quiénes somos">
         <p>
-          GLOW UP es una tienda de ropa interior y accesorios con base en
-          Paraná, Entre Ríos, Argentina. Los datos de la empresa (razón social,
-          CUIT y domicilio) se publican acá antes del lanzamiento.
+          MAREA es una tienda de ropa interior y accesorios con base en Paraná,
+          Entre Ríos, Argentina. Los datos de la empresa (razón social, CUIT y
+          domicilio) se publican acá antes del lanzamiento.
         </p>
         <p>
           Comprar en la tienda implica aceptar estos términos. Si algo no te

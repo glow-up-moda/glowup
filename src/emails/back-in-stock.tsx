@@ -15,7 +15,7 @@ export type BackInStockProps = {
 };
 
 export function subject({ productName }: BackInStockProps): string {
-  return `Volvió ${productName} · GLOW UP`;
+  return `Volvió ${productName} · MAREA`;
 }
 
 export default function BackInStock({

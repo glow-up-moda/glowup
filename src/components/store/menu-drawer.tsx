@@ -28,7 +28,7 @@ export function MenuDrawer({ categories }: { categories: Category[] }) {
         type="button"
         onClick={() => setIsOpen(true)}
         aria-label="Abrir el menú"
-        className="flex size-11 items-center justify-center rounded-full hover:bg-crema-oscuro md:hidden"
+        className="flex size-11 items-center justify-center rounded-full hover:bg-arena md:hidden"
       >
         <IconMenu />
       </button>
@@ -37,16 +37,16 @@ export function MenuDrawer({ categories }: { categories: Category[] }) {
         ref={dialogRef}
         onClose={() => setIsOpen(false)}
         aria-label="Menú"
-        className="drawer m-0 h-dvh max-h-none w-[min(20rem,85vw)] max-w-none bg-crema p-0 text-chocolate shadow-drawer"
+        className="drawer m-0 h-dvh max-h-none w-[min(20rem,85vw)] max-w-none bg-crema p-0 text-azul shadow-drawer"
       >
         <div className="flex h-full flex-col">
-          <div className="flex items-center justify-between border-b border-crema-oscuro px-4 py-3">
-            <span className="font-display text-xl font-semibold">GLOW UP</span>
+          <div className="flex items-center justify-between border-b border-arena px-4 py-3">
+            <span className="font-display text-xl font-semibold">MAREA</span>
             <button
               type="button"
               onClick={() => setIsOpen(false)}
               aria-label="Cerrar el menú"
-              className="flex size-11 items-center justify-center rounded-full hover:bg-crema-oscuro"
+              className="flex size-11 items-center justify-center rounded-full hover:bg-arena"
             >
               <IconClose />
             </button>
@@ -72,7 +72,7 @@ export function MenuDrawer({ categories }: { categories: Category[] }) {
                         <li key={child.id}>
                           <Link
                             href={`/${category.slug}/${child.slug}`}
-                            className="flex min-h-11 items-center text-chocolate/80"
+                            className="flex min-h-11 items-center text-azul/80"
                           >
                             {child.name}
                           </Link>
@@ -92,7 +92,7 @@ export function MenuDrawer({ categories }: { categories: Category[] }) {
               </li>
             </ul>
 
-            <ul className="mt-6 flex flex-col gap-1 border-t border-crema-oscuro pt-4 text-sm">
+            <ul className="mt-6 flex flex-col gap-1 border-t border-arena pt-4 text-sm">
               <li>
                 <Link
                   href="/guia-de-talles"

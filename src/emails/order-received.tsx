@@ -21,7 +21,7 @@ export type OrderReceivedProps = {
 };
 
 export function subject(props: OrderReceivedProps): string {
-  return `Tu pedido ${props.order.number} · GLOW UP`;
+  return `Tu pedido ${props.order.number} · MAREA`;
 }
 
 export default function OrderReceived({ order, bank }: OrderReceivedProps) {

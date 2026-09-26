@@ -24,11 +24,11 @@ export function FavoriteButton({
       aria-label={
         saved ? `Sacar ${name} de favoritos` : `Guardar ${name} en favoritos`
       }
-      className={`flex size-11 items-center justify-center rounded-full bg-crema/90 text-chocolate hover:bg-crema ${className}`}
+      className={`flex size-11 items-center justify-center rounded-full bg-crema/90 text-azul hover:bg-crema ${className}`}
     >
       <IconHeart
         key={String(saved)}
-        className={saved ? "pop fill-coral" : ""}
+        className={saved ? "pop fill-aqua" : ""}
         aria-hidden="true"
       />
     </button>

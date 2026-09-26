@@ -16,12 +16,12 @@ export function AdminShell({
 }) {
   return (
     <div className="min-h-dvh md:flex">
-      <aside className="sticky top-0 hidden h-dvh w-60 shrink-0 flex-col border-r border-crema-oscuro px-4 py-6 md:flex print:hidden">
+      <aside className="sticky top-0 hidden h-dvh w-60 shrink-0 flex-col border-r border-arena px-4 py-6 md:flex print:hidden">
         <Link
           href="/admin"
           className="px-4 font-display text-2xl font-semibold"
         >
-          GLOW UP
+          MAREA
         </Link>
         <p className="px-4 text-sm">Panel</p>
         <SideNav />
@@ -30,7 +30,7 @@ export function AdminShell({
           <form action={signOut}>
             <button
               type="submit"
-              className="mt-1 -ml-3 flex min-h-11 items-center gap-2 rounded-full px-3 hover:bg-crema-oscuro"
+              className="mt-1 -ml-3 flex min-h-11 items-center gap-2 rounded-full px-3 hover:bg-arena"
             >
               <IconLogOut />
               Salir
@@ -40,9 +40,9 @@ export function AdminShell({
       </aside>
 
       <div className="min-w-0 flex-1">
-        <header className="flex h-14 items-center justify-between border-b border-crema-oscuro px-4 md:hidden print:hidden">
+        <header className="flex h-14 items-center justify-between border-b border-arena px-4 md:hidden print:hidden">
           <Link href="/admin" className="font-display text-xl font-semibold">
-            GLOW UP
+            MAREA
           </Link>
           <span className="truncate pl-4 text-sm">{name}</span>
         </header>

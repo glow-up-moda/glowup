@@ -8,7 +8,7 @@ import { Block, PageShell } from "@/components/store/page-shell";
 // que una clienta necesita saber y lo que exige la Ley 25.326.
 
 export const metadata: Metadata = {
-  title: "Privacidad · GLOW UP",
+  title: "Privacidad · MAREA",
   description: "Qué datos pedimos, para qué y qué podés hacer con ellos.",
 };
 

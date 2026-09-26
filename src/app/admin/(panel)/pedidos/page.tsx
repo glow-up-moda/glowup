@@ -127,7 +127,7 @@ export default async function OrdersPage({
         <button
           type="submit"
           aria-label="Buscar"
-          className="flex size-11 shrink-0 items-center justify-center rounded-full border-2 border-chocolate"
+          className="flex size-11 shrink-0 items-center justify-center rounded-full border-2 border-azul"
         >
           <IconSearch />
         </button>
@@ -174,7 +174,7 @@ export default async function OrdersPage({
                 <li key={order.id}>
                   <Link
                     href={`/admin/pedidos/${order.number}`}
-                    className="flex items-center gap-3 rounded-card bg-crema-oscuro/60 p-3 hover:bg-crema-oscuro"
+                    className="flex items-center gap-3 rounded-card bg-arena/60 p-3 hover:bg-arena"
                   >
                     <span className="min-w-0 flex-1">
                       <span className="flex flex-wrap items-center gap-2">

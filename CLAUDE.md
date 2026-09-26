@@ -1,4 +1,4 @@
-# GLOW UP — Guía del proyecto para Claude Code
+# MAREA — Guía del proyecto para Claude Code
 
 > Leé este archivo completo antes de cada tarea. Si una decisión cambia, actualizá este archivo en el mismo commit.
 > Para código de Next.js, seguí además `AGENTS.md`: lo escribe y lo mantiene Next.js, y manda a leer la documentación de la versión instalada en `node_modules/next/dist/docs/`. No lo edites a mano.
@@ -12,7 +12,7 @@ Tienda online de **ropa interior femenina y accesorios** (gorras, anteojos de so
 - Público: mujeres. Tono cercano, cálido y cómplice.
 - Idioma de la interfaz: español rioplatense con voseo ("Elegí tu talle", "Sumalo al carrito").
 - Moneda: pesos argentinos (ARS).
-- Dirección de la experiencia: **sutil pero no básica**. El logo y la estrella son lo memorable; todo lo demás es calmo, prolijo y suave.
+- Dirección de la experiencia: **sutil pero no básica**. El logo es lo memorable; todo lo demás es calmo, prolijo y suave.
 - Todo se diseña primero para celular: la mayoría de las visitas llega desde Instagram y WhatsApp.
 
 ## 2. Forma de trabajo
@@ -87,20 +87,24 @@ public/brand/             logos y favicon
 
 | Token | Hex | Uso |
 |---|---|---|
-| `chocolate` | `#3A2925` | Texto, íconos, footer, bordes fuertes |
-| `rosa` | `#EFA3B5` | Fondos de acento, badges, bloques destacados |
-| `coral` | `#F27F73` | Botón principal, estados activos, badge de oferta |
-| `crema` | `#FFF7EE` | Fondo general |
-| `crema-oscuro` | `#F3E6D8` | Tarjetas, separadores, fondo de inputs |
+| `azul` | `#075477` | Texto, títulos, íconos, botón principal, footer, bordes fuertes |
+| `aqua` | `#45B5C9` | Ondas y acentos decorativos: glow del hero, barra de progreso |
+| `brisa` | `#A8DDE4` | Fondos de acento: barra de anuncios, badges, avisos neutros |
+| `crema` | `#FFF9F0` | Fondo general |
+| `arena` | `#F5EBDD` | Tarjetas, separadores, fondo de inputs |
+| `tostado` | `#C9A982` | Detalle complementario; solo decoración |
 
-Proporción aproximada: crema 60%, chocolate 25%, rosa 10%, coral 5%.
+Proporción aproximada: crema y arena 60%, azul 25%, aqua y brisa 10%, tostado 5%. Lo que hace reconocible a MAREA es crema + azul + aqua.
 
-Reglas de contraste (obligatorias):
-- Permitido: texto chocolate sobre crema (≈13:1), rosa (≈6.9:1), coral (≈5.3:1) y crema oscuro.
-- Prohibido: rosa o coral como color de texto sobre crema.
-- Prohibido: texto blanco o crema sobre coral o rosa.
-- Botón principal: fondo coral, texto chocolate. Secundario: borde y texto chocolate, fondo transparente.
-- Links: chocolate con subrayado.
+Reglas de contraste (obligatorias, medidas sobre estos hex):
+- Permitido como texto: azul sobre crema (7.9:1), sobre arena (7.0:1) y sobre brisa (5.6:1); crema sobre azul (7.9:1, y 6.2:1 en el hover `azul/90`).
+- Prohibido: aqua o tostado como color de texto sobre crema o arena (2.3:1 y 2.1:1).
+- Prohibido: cualquier texto sobre aqua (azul 3.4:1, crema 2.3:1) o sobre tostado (azul 3.7:1, crema 2.1:1). **Aqua y tostado son superficies decorativas, nunca fondo de texto.**
+- Prohibido: texto crema sobre brisa (1.4:1). Sobre brisa el texto va en azul.
+- Botón principal: fondo azul, texto crema. Secundario: borde y texto azul, fondo transparente. El azul es el color de los botones porque el aqua no sostiene texto.
+- Links: azul con subrayado.
+- Las estrellas de las reseñas van en azul: en aqua no se distinguen del fondo.
+- Aqua puede ser una superficie llena si nada tiene que leerse encima y la información también está en texto (la barra de "te faltan $X para el envío gratis").
 - Sin modo oscuro.
 
 ### Colores funcionales (solo estados)
@@ -112,23 +116,22 @@ Reglas de contraste (obligatorias):
 
 - No son colores de marca: no se usan en botones principales, fondos de sección ni decoración, y no cambian la proporción 60/25/10/5.
 - Nunca el color solo: siempre con ícono y texto. El error además marca el borde del campo y se enlaza al input con `aria-describedby`.
-- Solo sobre crema o crema oscuro: error 6.2:1 y éxito 6.0:1 sobre crema; 5.4:1 y 5.2:1 sobre crema oscuro.
-- Prohibido sobre rosa o coral: 3.3:1 y 2.5:1, no llegan a 4.5:1.
-- Bloque de aviso: fondo crema oscuro, borde del color funcional, ícono y texto del mismo color.
-- Si hace falta un chip lleno en el panel, el texto va en crema (6.2:1 sobre error, 6.0:1 sobre éxito).
-- Los avisos neutros o informativos usan fondo rosa con texto chocolate.
+- Solo sobre crema o arena: error 6.3:1 y éxito 6.1:1 sobre crema; 5.6:1 y 5.4:1 sobre arena.
+- Prohibido sobre aqua, brisa o tostado: entre 2.7:1 y 4.4:1, ninguno llega a 4.5:1.
+- Bloque de aviso: fondo arena, borde del color funcional, ícono y texto del mismo color.
+- Si hace falta un chip lleno en el panel, el texto va en crema (6.3:1 sobre error, 6.1:1 sobre éxito).
+- Los avisos neutros o informativos usan fondo brisa con texto azul.
 
 ### Logo
 
-El logo se está redibujando para usar esta paleta (ver pendientes):
-- Letras "GLOW UP" redondeadas en rosa con contorno chocolate; estrella en coral y rosa; trazo curvo y destello en chocolate.
-- La estrella no tapa la G ni la L.
+El logo se está dibujando con esta paleta (ver pendientes):
+- Letras "MAREA" en azul profundo, con la onda en aqua y celeste brisa.
 - Versiones en `public/brand/`:
   - `logo-full.svg`: hero, emails, página Nosotras.
-  - `logo-compact.svg`: header (texto + destello chico).
-  - `star-icon.svg`: favicon, avatar, marca en fotos.
-  - `logo-chocolate.svg` y `logo-crema.svg`: una sola tinta.
-- Mientras no estén los SVG, usar "GLOW UP" escrito con la tipografía de títulos como placeholder. No dibujar ni recrear el logo por código.
+  - `logo-compact.svg`: header (texto + onda chica).
+  - `wave-icon.svg`: favicon, avatar, marca en fotos.
+  - `logo-azul.svg` y `logo-crema.svg`: una sola tinta.
+- Mientras no estén los SVG, usar "MAREA" escrito con la tipografía de títulos como placeholder. No dibujar ni recrear el logo por código.
 
 ### Tipografía
 
@@ -143,9 +146,9 @@ El logo se está redibujando para usar esta paleta (ver pendientes):
 
 - Botones y badges: píldora. Tarjetas de producto: 20px. Inputs: 12px.
 - Fotos destacadas con forma de arco: `border-radius: 999px 999px 20px 20px`.
-- Destello de 4 puntas (del logo) como motivo de marca: confirmación de "agregado", loader y viñetas de beneficios. No usarlo como decoración suelta.
-- "Glow": manchas difusas de rosa y coral con baja opacidad **solo detrás del hero**. Grano muy leve (opacidad ≤ 4%) opcional sobre crema.
-- Sin sombras grises genéricas. Si hace falta elevación (carrito lateral, modales), sombra suave teñida de chocolate.
+- Motivo de marca: hoy es el destello de 4 puntas que quedó del logo anterior, en confirmación de "agregado", loader, viñetas de beneficios y en lugar de las fotos que faltan. Cuando esté el logo nuevo se reemplaza por la onda (§17). No usarlo como decoración suelta.
+- Manchas difusas de aqua y brisa con baja opacidad **solo detrás del hero**. Grano muy leve (opacidad ≤ 4%) opcional sobre crema.
+- Sin sombras grises genéricas. Si hace falta elevación (carrito lateral, modales), sombra suave teñida de azul.
 - La barra de anuncios muestra **un mensaje por vez** que rota, no varios unidos con separadores.
 
 ### Fotografía
@@ -473,7 +476,7 @@ Cómo están hechos:
 - Texto alternativo en todas las fotos, labels en todos los campos, navegación con teclado y áreas táctiles de al menos 44px de alto. Un link corto puede medir menos de ancho: lo que importa es que se pueda tocar.
 - Cada página tiene un solo `h1` y los títulos no saltan niveles. En el checkout el `h1` es `sr-only`: la página se lee como pasos numerados y un título arriba solo ocuparía pantalla en el celular.
 - Un link que repite a otro que está al lado (la miniatura del carrito) va con `aria-hidden` y fuera del tabulador: si no, se anuncia como un enlace sin nombre.
-- Foco visible: anillo chocolate de 2px con separación (el coral no tiene contraste suficiente sobre crema).
+- Foco visible: anillo azul de 2px con separación (el aqua no tiene contraste suficiente sobre crema).
 - Footer en todas las páginas: link a Defensa del Consumidor, botón de arrepentimiento, QR de Data Fiscal de ARCA, términos y privacidad.
 - Los textos legales se redactan como borrador marcado **"PENDIENTE DE REVISIÓN"** y no se publican sin revisión profesional. Incluye la política de cambios de ropa interior por higiene.
 - Consentimiento explícito para newsletter y emails de carrito abandonado.
@@ -511,7 +514,8 @@ Backups y errores:
 
 ## 17. Pendientes
 
-- [ ] Logo ajustado a la paleta en SVG, con todas las versiones. Mientras tanto, el favicon (`src/app/icon.svg`) y la imagen que se ve al compartir un link (`src/app/(store)/opengraph-image.tsx`) son provisorios: una "G" y el nombre escrito, sin el logo.
+- [ ] Logo de MAREA en SVG, con todas las versiones. Mientras tanto, el favicon (`src/app/icon.svg`) y la imagen que se ve al compartir un link (`src/app/(store)/opengraph-image.tsx`) son provisorios: una "M" y el nombre escrito, sin el logo.
+- [ ] Cambiar el destello de 4 puntas por una onda cuando esté el logo: el destello viene del logo anterior y hoy se usa como motivo y como placeholder de las fotos que faltan (§5).
 - [ ] Catálogo: subcategorías de ropa interior, productos, talles, colores y fotos.
 - [ ] Tabla de talles con medidas reales.
 - [ ] Monto de envío gratis y % de descuento por transferencia.

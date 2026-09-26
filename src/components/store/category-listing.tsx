@@ -46,7 +46,7 @@ export async function CategoryListing({
                 href={basePath}
                 aria-current={currentSlug ? undefined : "page"}
                 className={`inline-flex min-h-11 shrink-0 items-center rounded-full px-4 ${
-                  currentSlug ? "bg-crema-oscuro" : "bg-chocolate text-crema"
+                  currentSlug ? "bg-arena" : "bg-azul text-crema"
                 }`}
               >
                 Todo
@@ -61,8 +61,8 @@ export async function CategoryListing({
                   }
                   className={`inline-flex min-h-11 shrink-0 items-center rounded-full px-4 ${
                     currentSlug === subcategory.slug
-                      ? "bg-chocolate text-crema"
-                      : "bg-crema-oscuro"
+                      ? "bg-azul text-crema"
+                      : "bg-arena"
                   }`}
                 >
                   {subcategory.name}
@@ -78,7 +78,7 @@ export async function CategoryListing({
       </div>
 
       {products.length === 0 ? (
-        <p className="rounded-card bg-crema-oscuro/60 px-4 py-6">
+        <p className="rounded-card bg-arena/60 px-4 py-6">
           No encontramos nada con esos filtros. Probá sacando alguno o mirá{" "}
           <Link href={basePath} className="underline underline-offset-4">
             toda la categoría

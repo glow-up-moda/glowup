@@ -6,7 +6,7 @@ import { IconAlert } from "@/components/ui/icons";
 import { useFormAction } from "@/lib/use-form-action";
 
 const fieldClass =
-  "min-h-11 w-full rounded-input border-2 border-transparent bg-crema-oscuro px-3 text-base text-chocolate placeholder:text-chocolate/60 focus:border-chocolate";
+  "min-h-11 w-full rounded-input border-2 border-transparent bg-arena px-3 text-base text-azul placeholder:text-azul/60 focus:border-azul";
 
 /**
  * Pide lo que falta para mostrar un pedido: el email, o el número y el email.

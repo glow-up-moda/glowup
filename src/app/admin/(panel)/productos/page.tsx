@@ -83,7 +83,7 @@ export default async function ProductsPage({
         <button
           type="submit"
           aria-label="Buscar"
-          className="flex size-11 shrink-0 items-center justify-center rounded-full border-2 border-chocolate"
+          className="flex size-11 shrink-0 items-center justify-center rounded-full border-2 border-azul"
         >
           <IconSearch />
         </button>
@@ -123,9 +123,9 @@ export default async function ProductsPage({
               <li key={product.id}>
                 <Link
                   href={`/admin/productos/${product.id}`}
-                  className="flex items-center gap-3 rounded-card bg-crema-oscuro/60 p-3 hover:bg-crema-oscuro"
+                  className="flex items-center gap-3 rounded-card bg-arena/60 p-3 hover:bg-arena"
                 >
-                  <span className="h-[70px] w-14 shrink-0 overflow-hidden rounded-input bg-crema-oscuro">
+                  <span className="h-[70px] w-14 shrink-0 overflow-hidden rounded-input bg-arena">
                     {cover && (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img

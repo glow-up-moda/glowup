@@ -7,7 +7,7 @@ import { IconAlert } from "@/components/ui/icons";
  */
 export function LegalDraft() {
   return (
-    <div className="flex gap-3 rounded-card border border-error bg-crema-oscuro px-4 py-3 text-error">
+    <div className="flex gap-3 rounded-card border border-error bg-arena px-4 py-3 text-error">
       <IconAlert className="mt-0.5 shrink-0" />
       <p>
         <strong>Pendiente de revisión.</strong> Este texto es un borrador que

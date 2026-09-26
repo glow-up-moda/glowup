@@ -11,8 +11,8 @@ export async function generateMetadata({
   const found = await getCategoryBySlug(categoria);
   if (!found) return {};
   return {
-    title: `${found.category.name} · GLOW UP`,
-    description: `${found.category.name} de GLOW UP. Envío a todo el país y en el día en Paraná y Oro Verde.`,
+    title: `${found.category.name} · MAREA`,
+    description: `${found.category.name} de MAREA. Envío a todo el país y en el día en Paraná y Oro Verde.`,
   };
 }
 

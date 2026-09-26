@@ -31,7 +31,7 @@ export function NewsletterForm() {
             required
             autoComplete="email"
             placeholder="tuemail@ejemplo.com"
-            className="min-h-11 w-full rounded-input border-2 border-transparent bg-crema px-3 text-base text-chocolate placeholder:text-chocolate/60 focus:border-chocolate"
+            className="min-h-11 w-full rounded-input border-2 border-transparent bg-crema px-3 text-base text-azul placeholder:text-azul/60 focus:border-azul"
           />
           <Button type="submit" disabled={pending} className="shrink-0">
             {pending ? "Anotándote…" : "Quiero el descuento"}

@@ -29,7 +29,7 @@ export async function generateMetadata({
 }: PageProps<"/pedido/[numero]">): Promise<Metadata> {
   const number = parseOrderNumber((await params).numero);
   return {
-    title: number ? `Pedido ${number} · GLOW UP` : "Tu pedido · GLOW UP",
+    title: number ? `Pedido ${number} · MAREA` : "Tu pedido · MAREA",
     robots: { index: false, follow: false },
   };
 }
@@ -69,7 +69,7 @@ function OrderItems({ order }: { order: PublicOrder }) {
     order.order_items.filter((item) => item.parent_item_id === id);
 
   return (
-    <ul className="divide-y divide-crema-oscuro border-y border-crema-oscuro">
+    <ul className="divide-y divide-arena border-y border-arena">
       {lines.map((line) => (
         <li key={line.id} className="flex justify-between gap-3 py-3">
           <span className="min-w-0">
@@ -160,7 +160,7 @@ export default async function OrderPage({
       )}
 
       <div className="flex items-center gap-3">
-        <Sparkle className="size-8 text-coral" />
+        <Sparkle className="size-8 text-aqua" />
         <p className="text-sm">Pedido {order.number}</p>
       </div>
 
@@ -186,7 +186,7 @@ export default async function OrderPage({
       )}
 
       {pendingTransfer && (
-        <section className="mt-6 rounded-card bg-rosa p-4 md:p-6">
+        <section className="mt-6 rounded-card bg-brisa p-4 md:p-6">
           <h2 className="font-display text-xl font-semibold">
             Cómo transferir
           </h2>
@@ -291,7 +291,7 @@ export default async function OrderPage({
         )}
         {order.shipping_method === "pickup" &&
           (settings.pickupAddress || settings.pickupHours) && (
-            <div className="mt-3 rounded-card bg-crema-oscuro px-4 py-3 text-sm">
+            <div className="mt-3 rounded-card bg-arena px-4 py-3 text-sm">
               <p className="font-medium">Dónde lo retirás</p>
               {settings.pickupAddress && <p>{settings.pickupAddress}</p>}
               {settings.pickupHours && <p>{settings.pickupHours}</p>}
@@ -308,7 +308,7 @@ export default async function OrderPage({
           </dl>
         )}
         {order.is_gift && (
-          <p className="mt-3 rounded-card bg-crema-oscuro px-4 py-3 text-sm">
+          <p className="mt-3 rounded-card bg-arena px-4 py-3 text-sm">
             Va como regalo, sin precios
             {order.gift_message && `, con tu mensaje: “${order.gift_message}”`}.
           </p>

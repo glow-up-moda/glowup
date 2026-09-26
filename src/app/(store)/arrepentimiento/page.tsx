@@ -5,7 +5,7 @@ import { LegalDraft } from "@/components/store/legal-draft";
 import { Block, PageShell } from "@/components/store/page-shell";
 
 export const metadata: Metadata = {
-  title: "Botón de arrepentimiento · GLOW UP",
+  title: "Botón de arrepentimiento · MAREA",
   description:
     "Cómo cancelar una compra dentro de los 10 días, como indica la ley.",
 };

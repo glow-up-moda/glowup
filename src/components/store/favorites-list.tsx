@@ -60,12 +60,12 @@ export function FavoritesList() {
         >
           {[0, 1, 2, 3].map((index) => (
             <li key={index}>
-              <span className="block aspect-4/5 animate-pulse rounded-card bg-crema-oscuro" />
+              <span className="block aspect-4/5 animate-pulse rounded-card bg-arena" />
             </li>
           ))}
         </ul>
       ) : products.length === 0 ? (
-        <div className="mt-8 flex flex-col items-start gap-4 rounded-card bg-crema-oscuro/50 p-6">
+        <div className="mt-8 flex flex-col items-start gap-4 rounded-card bg-arena/50 p-6">
           <p>
             Todavía no guardaste nada. Tocá el corazón de lo que te guste y
             queda acá.

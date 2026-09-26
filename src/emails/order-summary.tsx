@@ -83,7 +83,7 @@ export function OrderSummary({ order }: { order: OrderEmailData }) {
             <tr key={`${line.name}-${index}`}>
               <td
                 style={{
-                  borderTop: `1px solid ${colors.cremaOscuro}`,
+                  borderTop: `1px solid ${colors.arena}`,
                   padding: "10px 0",
                 }}
               >
@@ -98,7 +98,7 @@ export function OrderSummary({ order }: { order: OrderEmailData }) {
               </td>
               <td
                 style={{
-                  borderTop: `1px solid ${colors.cremaOscuro}`,
+                  borderTop: `1px solid ${colors.arena}`,
                   padding: "10px 0",
                   textAlign: "right",
                   whiteSpace: "nowrap",
@@ -129,7 +129,7 @@ export function OrderSummary({ order }: { order: OrderEmailData }) {
       {order.pickup && (order.pickup.address || order.pickup.hours) && (
         <Section
           style={{
-            backgroundColor: colors.cremaOscuro,
+            backgroundColor: colors.arena,
             borderRadius: "20px",
             margin: "12px 0",
             padding: "12px 16px",

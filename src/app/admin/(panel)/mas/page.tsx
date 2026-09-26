@@ -82,7 +82,7 @@ export default async function MorePage() {
           <li key={href}>
             <Link
               href={href}
-              className="flex min-h-16 items-center gap-4 rounded-card bg-crema-oscuro/60 px-4 py-3"
+              className="flex min-h-16 items-center gap-4 rounded-card bg-arena/60 px-4 py-3"
             >
               <Icon className="shrink-0" />
               <span className="flex-1">

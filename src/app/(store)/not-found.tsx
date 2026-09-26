@@ -9,7 +9,7 @@ export default async function NotFound() {
 
   return (
     <div className="mx-auto flex max-w-3xl flex-col items-start px-4 py-16">
-      <Sparkle className="size-10 text-rosa" />
+      <Sparkle className="size-10 text-brisa" />
       <h1 className="mt-4 font-display text-2xl font-semibold md:text-3xl">
         No encontramos esta página
       </h1>
@@ -24,7 +24,7 @@ export default async function NotFound() {
           <li key={category.id}>
             <Link
               href={`/${category.slug}`}
-              className="inline-flex min-h-11 items-center rounded-full bg-crema-oscuro px-4"
+              className="inline-flex min-h-11 items-center rounded-full bg-arena px-4"
             >
               {category.name}
             </Link>
@@ -33,7 +33,7 @@ export default async function NotFound() {
         <li>
           <Link
             href="/kits"
-            className="inline-flex min-h-11 items-center rounded-full bg-crema-oscuro px-4"
+            className="inline-flex min-h-11 items-center rounded-full bg-arena px-4"
           >
             Kits
           </Link>
@@ -41,7 +41,7 @@ export default async function NotFound() {
         <li>
           <Link
             href="/buscar"
-            className="inline-flex min-h-11 items-center rounded-full bg-crema-oscuro px-4"
+            className="inline-flex min-h-11 items-center rounded-full bg-arena px-4"
           >
             Buscar
           </Link>

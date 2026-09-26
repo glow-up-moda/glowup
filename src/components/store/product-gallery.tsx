@@ -22,8 +22,8 @@ export function ProductGallery({
 
   if (images.length === 0) {
     return (
-      <div className="flex aspect-4/5 items-center justify-center rounded-card bg-crema-oscuro">
-        <Sparkle className="size-16 text-rosa" />
+      <div className="flex aspect-4/5 items-center justify-center rounded-card bg-arena">
+        <Sparkle className="size-16 text-brisa" />
         <span className="sr-only">{name} todavía no tiene fotos.</span>
       </div>
     );
@@ -48,7 +48,7 @@ export function ProductGallery({
       >
         {images.map((image, index) => (
           <li key={image.path} className="w-full shrink-0 snap-center">
-            <span className="relative block aspect-4/5 overflow-hidden bg-crema-oscuro">
+            <span className="relative block aspect-4/5 overflow-hidden bg-arena">
               <Image
                 src={productImageUrl(image.path)}
                 alt={image.alt}
@@ -72,7 +72,7 @@ export function ProductGallery({
               aria-label={`Ver la foto ${index + 1} de ${images.length}`}
               aria-current={current === index ? "true" : undefined}
               className={`relative size-16 overflow-hidden rounded-input border-2 ${
-                current === index ? "border-chocolate" : "border-transparent"
+                current === index ? "border-azul" : "border-transparent"
               }`}
             >
               <Image

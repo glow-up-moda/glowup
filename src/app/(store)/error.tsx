@@ -25,7 +25,7 @@ export default function StoreError({
 
   return (
     <div className="mx-auto flex max-w-3xl flex-col items-start px-4 py-16">
-      <Sparkle className="size-10 text-rosa" />
+      <Sparkle className="size-10 text-brisa" />
       <h1 className="mt-4 font-display text-2xl font-semibold md:text-3xl">
         Se nos rompió algo
       </h1>

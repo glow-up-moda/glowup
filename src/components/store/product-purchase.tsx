@@ -16,10 +16,9 @@ export type NotifyState = { message?: string; error?: string };
 function chipClass(selected: boolean, soldOut = false): string {
   const base =
     "inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-full px-4 transition-colors duration-150 ease-brand";
-  if (selected) return `${base} bg-chocolate text-crema`;
-  if (soldOut)
-    return `${base} bg-crema-oscuro/60 text-chocolate/60 line-through`;
-  return `${base} bg-crema-oscuro hover:bg-rosa`;
+  if (selected) return `${base} bg-azul text-crema`;
+  if (soldOut) return `${base} bg-arena/60 text-azul/60 line-through`;
+  return `${base} bg-arena hover:bg-brisa`;
 }
 
 export function ProductPurchase({
@@ -178,7 +177,7 @@ export function ProductPurchase({
               required
               autoComplete="email"
               placeholder="tuemail@ejemplo.com"
-              className="min-h-11 flex-1 rounded-input border-2 border-transparent bg-crema-oscuro px-3 text-base"
+              className="min-h-11 flex-1 rounded-input border-2 border-transparent bg-arena px-3 text-base"
             />
             <Button type="submit" variant="secondary" disabled={notifying}>
               {notifying ? "Guardando…" : "Avisame"}
@@ -208,13 +207,13 @@ export function ProductPurchase({
       )}
 
       {/* En el celular el botón queda fijo abajo (§7). */}
-      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-crema-oscuro bg-crema/95 p-3 backdrop-blur md:hidden">
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-arena bg-crema/95 p-3 backdrop-blur md:hidden">
         <div className="flex items-center gap-3">
           <span className="font-medium">{formatMoney(product.priceCents)}</span>
           {variant && !variant.isAvailable ? (
             <a
               href="#email-aviso"
-              className="flex min-h-11 flex-1 items-center justify-center rounded-full border-2 border-chocolate px-5 font-medium"
+              className="flex min-h-11 flex-1 items-center justify-center rounded-full border-2 border-azul px-5 font-medium"
             >
               Avisame cuando vuelva
             </a>

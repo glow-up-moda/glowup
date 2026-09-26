@@ -8,7 +8,7 @@ import { IconAlert } from "./icons";
 // veces en una página, cada campo necesita su propio id.
 
 export const inputClass =
-  "min-h-11 w-full rounded-input border-2 border-transparent bg-crema-oscuro px-3 py-2 text-base text-chocolate placeholder:text-chocolate/60 focus:border-chocolate aria-[invalid=true]:border-error";
+  "min-h-11 w-full rounded-input border-2 border-transparent bg-arena px-3 py-2 text-base text-azul placeholder:text-azul/60 focus:border-azul aria-[invalid=true]:border-error";
 
 type FieldBase = {
   label: string;
@@ -49,7 +49,7 @@ function FieldFrame({
       </label>
       {children}
       {hint && (
-        <p id={`${id}-hint`} className="text-sm text-chocolate/80">
+        <p id={`${id}-hint`} className="text-sm text-azul/80">
           {hint}
         </p>
       )}
@@ -158,13 +158,13 @@ export function CheckboxField({
           name={name}
           type="checkbox"
           aria-describedby={hint ? `${id}-hint` : undefined}
-          className="size-5 shrink-0 accent-chocolate"
+          className="size-5 shrink-0 accent-azul"
           {...props}
         />
         <span className="text-base">{label}</span>
       </label>
       {hint && (
-        <p id={`${id}-hint`} className="-mt-1 pl-8 text-sm text-chocolate/80">
+        <p id={`${id}-hint`} className="-mt-1 pl-8 text-sm text-azul/80">
           {hint}
         </p>
       )}
@@ -200,12 +200,12 @@ export function RadioGroupField({
             name={name}
             value={option.value}
             defaultChecked={value === option.value}
-            className="size-5 shrink-0 accent-chocolate"
+            className="size-5 shrink-0 accent-azul"
           />
           <span className="text-base">{option.label}</span>
         </label>
       ))}
-      {hint && <p className="text-sm text-chocolate/80">{hint}</p>}
+      {hint && <p className="text-sm text-azul/80">{hint}</p>}
     </fieldset>
   );
 }

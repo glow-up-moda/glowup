@@ -70,7 +70,7 @@ export function SideNav() {
                 href={href}
                 aria-current={active ? "page" : undefined}
                 className={`flex min-h-11 items-center gap-3 rounded-full px-4 transition-colors duration-150 ${
-                  active ? "bg-rosa font-medium" : "hover:bg-crema-oscuro"
+                  active ? "bg-brisa font-medium" : "hover:bg-arena"
                 }`}
               >
                 <Icon />
@@ -100,7 +100,7 @@ export function BottomNav() {
   return (
     <nav
       aria-label="Panel"
-      className="fixed inset-x-0 bottom-0 z-20 border-t border-crema-oscuro bg-crema pb-[env(safe-area-inset-bottom)] md:hidden print:hidden"
+      className="fixed inset-x-0 bottom-0 z-20 border-t border-arena bg-crema pb-[env(safe-area-inset-bottom)] md:hidden print:hidden"
     >
       <ul className="grid grid-cols-5">
         {[...bottom, { href: "/admin/mas", label: "Más", icon: IconMore }].map(
@@ -116,7 +116,7 @@ export function BottomNav() {
                 >
                   <span
                     className={`flex h-8 w-14 items-center justify-center rounded-full transition-colors duration-150 ${
-                      active ? "bg-rosa" : ""
+                      active ? "bg-brisa" : ""
                     }`}
                   >
                     <Icon />

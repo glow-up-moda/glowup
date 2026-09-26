@@ -43,7 +43,7 @@ const emptyAddress = {
 };
 
 const fieldClass =
-  "min-h-11 w-full rounded-input border-2 border-transparent bg-crema-oscuro px-3 text-base text-chocolate placeholder:text-chocolate/60 focus:border-chocolate";
+  "min-h-11 w-full rounded-input border-2 border-transparent bg-arena px-3 text-base text-azul placeholder:text-azul/60 focus:border-azul";
 
 function Field({
   label,
@@ -58,7 +58,7 @@ function Field({
     <label className="flex flex-col gap-1.5">
       <span className="text-sm font-medium">{label}</span>
       {children}
-      {hint && <span className="text-sm text-chocolate/80">{hint}</span>}
+      {hint && <span className="text-sm text-azul/80">{hint}</span>}
     </label>
   );
 }
@@ -73,9 +73,9 @@ function Step({
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-card bg-crema-oscuro/40 p-4 md:p-6">
+    <section className="rounded-card bg-arena/40 p-4 md:p-6">
       <h2 className="flex items-center gap-2 font-display text-xl font-semibold">
-        <span className="flex size-7 items-center justify-center rounded-full bg-chocolate text-sm text-crema">
+        <span className="flex size-7 items-center justify-center rounded-full bg-azul text-sm text-crema">
           {number}
         </span>
         {title}
@@ -367,7 +367,7 @@ export function CheckoutForm({
                       setShippingMethod(option.value);
                       setZoneId("");
                     }}
-                    className="size-5 accent-chocolate"
+                    className="size-5 accent-azul"
                   />
                   {option.label}
                 </label>
@@ -375,7 +375,7 @@ export function CheckoutForm({
           </fieldset>
 
           {shippingMethod === "pickup" && (pickup.address || pickup.hours) && (
-            <div className="rounded-card bg-crema-oscuro px-4 py-3 text-sm">
+            <div className="rounded-card bg-arena px-4 py-3 text-sm">
               <p className="font-medium">Dónde lo retirás</p>
               {pickup.address && <p>{pickup.address}</p>}
               {pickup.hours && <p>{pickup.hours}</p>}
@@ -519,7 +519,7 @@ export function CheckoutForm({
               type="checkbox"
               checked={isGift}
               onChange={(event) => setIsGift(event.target.checked)}
-              className="size-5 accent-chocolate"
+              className="size-5 accent-azul"
             />
             Sí, va sin precios y con una tarjeta
           </label>
@@ -586,7 +586,7 @@ export function CheckoutForm({
                 name="pago"
                 checked={paymentMethod === "transfer"}
                 onChange={() => setPaymentMethod("transfer")}
-                className="size-5 accent-chocolate"
+                className="size-5 accent-azul"
               />
               Transferencia bancaria
               {transferDiscountPercent > 0 &&
@@ -598,7 +598,7 @@ export function CheckoutForm({
                 name="pago"
                 checked={paymentMethod === "card"}
                 onChange={() => setPaymentMethod("card")}
-                className="size-5 accent-chocolate"
+                className="size-5 accent-azul"
               />
               Tarjeta de crédito o débito
             </label>
@@ -616,7 +616,7 @@ export function CheckoutForm({
               type="checkbox"
               checked={acceptsTerms}
               onChange={(event) => setAcceptsTerms(event.target.checked)}
-              className="mt-3 size-5 accent-chocolate"
+              className="mt-3 size-5 accent-azul"
             />
             <span className="py-2">
               Acepto los{" "}
@@ -635,7 +635,7 @@ export function CheckoutForm({
               type="checkbox"
               checked={acceptsMarketing}
               onChange={(event) => setAcceptsMarketing(event.target.checked)}
-              className="mt-3 size-5 accent-chocolate"
+              className="mt-3 size-5 accent-azul"
             />
             <span className="py-2">
               Quiero recibir novedades y descuentos por email. (Opcional)
@@ -644,7 +644,7 @@ export function CheckoutForm({
         </Step>
       </div>
 
-      <aside className="rounded-card bg-crema-oscuro/60 p-4 lg:sticky lg:top-24">
+      <aside className="rounded-card bg-arena/60 p-4 lg:sticky lg:top-24">
         <h2 className="font-display text-xl font-semibold">Tu pedido</h2>
 
         <ul className="mt-3 flex flex-col gap-2">
@@ -653,7 +653,7 @@ export function CheckoutForm({
               <span className="min-w-0">
                 {item.quantity} × {item.name}
                 {item.color && (
-                  <span className="block text-chocolate/80">
+                  <span className="block text-azul/80">
                     {item.color} · Talle {item.size}
                   </span>
                 )}
@@ -665,7 +665,7 @@ export function CheckoutForm({
           ))}
         </ul>
 
-        <dl className="mt-4 grid grid-cols-[1fr_auto] gap-y-1 border-t border-crema-oscuro pt-3 text-sm">
+        <dl className="mt-4 grid grid-cols-[1fr_auto] gap-y-1 border-t border-arena pt-3 text-sm">
           <dt>Subtotal</dt>
           <dd className="text-right">
             {totals ? formatMoney(totals.subtotalCents) : "—"}
@@ -717,7 +717,7 @@ export function CheckoutForm({
 
         {(quoteError || error) && (
           <p
-            className="mt-3 flex items-start gap-1.5 rounded-card bg-crema-oscuro px-3 py-2 text-sm text-error"
+            className="mt-3 flex items-start gap-1.5 rounded-card bg-arena px-3 py-2 text-sm text-error"
             role="alert"
           >
             <IconAlert width={16} height={16} className="mt-0.5 shrink-0" />

@@ -10,7 +10,7 @@ import { getNavigation, listKits, listProducts } from "@/lib/store/catalog";
 import { getStoreSettings } from "@/lib/store/settings";
 
 export const metadata: Metadata = {
-  title: "GLOW UP · Ropa interior y accesorios",
+  title: "MAREA · Ropa interior y accesorios",
   description:
     "Ropa interior y accesorios con envío a todo el país. En Paraná y Oro Verde, envío en el día.",
 };
@@ -72,11 +72,11 @@ export default async function HomePage() {
       <section className="relative overflow-hidden">
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute -top-24 -left-20 size-80 rounded-full bg-rosa/40 blur-3xl"
+          className="pointer-events-none absolute -top-24 -left-20 size-80 rounded-full bg-brisa/40 blur-3xl"
         />
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute -right-16 bottom-0 size-72 rounded-full bg-coral/30 blur-3xl"
+          className="pointer-events-none absolute -right-16 bottom-0 size-72 rounded-full bg-aqua/30 blur-3xl"
         />
 
         <div className="relative mx-auto grid max-w-6xl items-center gap-8 px-4 py-12 md:grid-cols-2 md:py-16">
@@ -100,9 +100,9 @@ export default async function HomePage() {
           </div>
 
           <div className="relative rise" style={{ animationDelay: "120ms" }}>
-            <div className="relative mx-auto flex aspect-4/5 w-full max-w-sm items-center justify-center overflow-hidden arch bg-crema-oscuro">
+            <div className="relative mx-auto flex aspect-4/5 w-full max-w-sm items-center justify-center overflow-hidden arch bg-arena">
               <Sparkle
-                className="size-20 shine text-rosa"
+                className="size-20 shine text-brisa"
                 style={{ animationDelay: "500ms" }}
               />
             </div>
@@ -124,8 +124,8 @@ export default async function HomePage() {
                 href={category.href}
                 className="group flex flex-col gap-3 rounded-card focus-visible:outline-offset-4"
               >
-                <span className="flex aspect-square items-center justify-center overflow-hidden rounded-card bg-crema-oscuro transition-transform duration-300 ease-brand group-hover:scale-[1.02]">
-                  <Sparkle className="size-10 text-rosa" />
+                <span className="flex aspect-square items-center justify-center overflow-hidden rounded-card bg-arena transition-transform duration-300 ease-brand group-hover:scale-[1.02]">
+                  <Sparkle className="size-10 text-brisa" />
                 </span>
                 <span className="font-display text-lg font-medium">
                   {category.name}
@@ -163,7 +163,7 @@ export default async function HomePage() {
         </Section>
       )}
 
-      <section className="bg-crema-oscuro/50">
+      <section className="bg-arena/50">
         <div className="mx-auto max-w-6xl px-4 py-10">
           <h2 className="font-display text-2xl font-semibold">
             Comprar acá es fácil
@@ -171,7 +171,7 @@ export default async function HomePage() {
           <ul className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {benefits.map((benefit) => (
               <li key={benefit} className="flex items-start gap-3">
-                <Sparkle className="mt-1 size-5 shrink-0 text-coral" />
+                <Sparkle className="mt-1 size-5 shrink-0 text-aqua" />
                 <span>{benefit}</span>
               </li>
             ))}
@@ -180,7 +180,7 @@ export default async function HomePage() {
       </section>
 
       <section className="mx-auto max-w-6xl px-4 py-10">
-        <div className="rounded-card bg-rosa px-4 py-8 md:px-8">
+        <div className="rounded-card bg-brisa px-4 py-8 md:px-8">
           <h2 className="font-display text-2xl font-semibold">
             Tu primera compra, con descuento
           </h2>

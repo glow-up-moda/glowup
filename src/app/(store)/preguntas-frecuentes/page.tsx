@@ -6,7 +6,7 @@ import { formatMoney } from "@/lib/format";
 import { getStoreSettings } from "@/lib/store/settings";
 
 export const metadata: Metadata = {
-  title: "Preguntas frecuentes · GLOW UP",
+  title: "Preguntas frecuentes · MAREA",
   description:
     "Envíos, cambios, medios de pago y talles: lo que más nos preguntan.",
 };

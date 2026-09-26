@@ -3,15 +3,15 @@ import type { ReactNode } from "react";
 import { IconAlert, IconCheck, IconInfo } from "./icons";
 
 // Avisos (CLAUDE.md §5): error y éxito nunca con el color solo, siempre con
-// ícono y texto, sobre crema oscuro con borde del color funcional. Los
-// informativos van en rosa con texto chocolate.
+// ícono y texto, sobre arena con borde del color funcional. Los
+// informativos van en brisa con texto azul.
 
 type Tone = "info" | "error" | "success";
 
 const styles: Record<Tone, string> = {
-  info: "bg-rosa text-chocolate",
-  error: "border-l-4 border-error bg-crema-oscuro text-error",
-  success: "border-l-4 border-exito bg-crema-oscuro text-exito",
+  info: "bg-brisa text-azul",
+  error: "border-l-4 border-error bg-arena text-error",
+  success: "border-l-4 border-exito bg-arena text-exito",
 };
 
 const icons: Record<Tone, typeof IconInfo> = {

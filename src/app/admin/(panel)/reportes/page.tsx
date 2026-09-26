@@ -152,7 +152,7 @@ export default async function ReportsPage({
               {productos.map(([nombre, unidades]) => (
                 <li
                   key={nombre}
-                  className="flex items-baseline justify-between gap-3 border-b border-crema-oscuro pb-2"
+                  className="flex items-baseline justify-between gap-3 border-b border-arena pb-2"
                 >
                   <span>{nombre}</span>
                   <span className="shrink-0 font-medium">
@@ -169,10 +169,7 @@ export default async function ReportsPage({
           >
             <ul className="flex flex-wrap gap-2">
               {talles.map(([talle, unidades]) => (
-                <li
-                  key={talle}
-                  className="rounded-full bg-crema-oscuro px-4 py-2"
-                >
+                <li key={talle} className="rounded-full bg-arena px-4 py-2">
                   <span className="font-medium">{talle}</span>: {unidades}
                 </li>
               ))}

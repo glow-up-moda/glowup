@@ -40,7 +40,7 @@ export async function startEnrollment(): Promise<EnrollState> {
 
   const { data, error } = await supabase.auth.mfa.enroll({
     factorType: "totp",
-    friendlyName: "Panel GLOW UP",
+    friendlyName: "Panel MAREA",
   });
   if (error || !data)
     return { error: "No pudimos generar el código QR. Probá de nuevo." };

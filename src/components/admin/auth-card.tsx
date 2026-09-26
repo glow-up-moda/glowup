@@ -11,11 +11,9 @@ export function AuthCard({
   return (
     <main className="flex min-h-dvh items-center justify-center px-4 py-10">
       <div className="w-full max-w-sm">
-        <p className="text-center font-display text-3xl font-semibold">
-          GLOW UP
-        </p>
+        <p className="text-center font-display text-3xl font-semibold">MAREA</p>
         <h1 className="mt-1 text-center text-base">{title}</h1>
-        <div className="mt-8 rounded-card bg-crema-oscuro/60 p-5 shadow-soft sm:p-6">
+        <div className="mt-8 rounded-card bg-arena/60 p-5 shadow-soft sm:p-6">
           {children}
         </div>
       </div>

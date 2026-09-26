@@ -7,8 +7,8 @@ export type OrderShippedProps = { order: OrderEmailData; pickup: boolean };
 
 export function subject({ order, pickup }: OrderShippedProps): string {
   return pickup
-    ? `Tu pedido ${order.number} está listo para retirar · GLOW UP`
-    : `Tu pedido ${order.number} salió · GLOW UP`;
+    ? `Tu pedido ${order.number} está listo para retirar · MAREA`
+    : `Tu pedido ${order.number} salió · MAREA`;
 }
 
 export default function OrderShipped({ order, pickup }: OrderShippedProps) {

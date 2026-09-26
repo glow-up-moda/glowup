@@ -7,7 +7,7 @@ import { OrderSummary, type OrderEmailData } from "./order-summary";
 export type PaymentApprovedProps = { order: OrderEmailData };
 
 export function subject({ order }: PaymentApprovedProps): string {
-  return `Confirmamos el pago de tu pedido ${order.number} · GLOW UP`;
+  return `Confirmamos el pago de tu pedido ${order.number} · MAREA`;
 }
 
 export default function PaymentApproved({ order }: PaymentApprovedProps) {

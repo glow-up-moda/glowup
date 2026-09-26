@@ -5,8 +5,8 @@ import { getStoreSettings, isSameDayOpen } from "@/lib/store/settings";
 import { createCatalogClient } from "@/lib/supabase/catalog";
 
 export const metadata: Metadata = {
-  title: "Checkout · GLOW UP",
-  description: "Terminá tu compra en GLOW UP.",
+  title: "Checkout · MAREA",
+  description: "Terminá tu compra en MAREA.",
 };
 
 export default async function CheckoutPage() {

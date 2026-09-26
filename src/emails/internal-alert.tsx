@@ -9,11 +9,11 @@ export type InternalAlertProps = {
   lead: string;
   rows: { label: string; value: string }[];
   action: { label: string; url: string };
-  tone?: "rosa" | "error";
+  tone?: "brisa" | "error";
 };
 
 export function subject({ title }: InternalAlertProps): string {
-  return `${title} · GLOW UP`;
+  return `${title} · MAREA`;
 }
 
 export default function InternalAlert({
@@ -21,7 +21,7 @@ export default function InternalAlert({
   lead,
   rows,
   action,
-  tone = "rosa",
+  tone = "brisa",
 }: InternalAlertProps) {
   return (
     <EmailLayout preview={lead} footer="internal">

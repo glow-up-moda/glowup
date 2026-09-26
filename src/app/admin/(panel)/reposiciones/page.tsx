@@ -78,7 +78,7 @@ export default async function RestockNoticesPage() {
           {filas.map((fila) => (
             <li
               key={`${fila.producto}-${fila.detalle}`}
-              className="rounded-card bg-crema-oscuro/60 p-4"
+              className="rounded-card bg-arena/60 p-4"
             >
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <span>

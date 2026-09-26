@@ -69,7 +69,7 @@ export default async function DashboardPage() {
       ) : (
         <div className="flex flex-col gap-6">
           <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
-            <div className="rounded-card bg-crema-oscuro/60 p-4">
+            <div className="rounded-card bg-arena/60 p-4">
               <p className="text-sm">Ventas de hoy</p>
               <p className="mt-1 font-display text-2xl font-semibold">
                 {formatMoney(summary.sales_today_cents)}
@@ -78,7 +78,7 @@ export default async function DashboardPage() {
                 {plural(summary.orders_today, "pedido", "pedidos")}
               </p>
             </div>
-            <div className="rounded-card bg-crema-oscuro/60 p-4">
+            <div className="rounded-card bg-arena/60 p-4">
               <p className="text-sm">Esta semana</p>
               <p className="mt-1 font-display text-2xl font-semibold">
                 {formatMoney(summary.sales_week_cents)}
@@ -89,7 +89,7 @@ export default async function DashboardPage() {
             </div>
             <Link
               href="/admin/pedidos?estado=por-preparar"
-              className="col-span-2 flex items-center justify-between rounded-card bg-rosa p-4 md:col-span-1"
+              className="col-span-2 flex items-center justify-between rounded-card bg-brisa p-4 md:col-span-1"
             >
               <span>
                 <span className="block text-sm">Por preparar</span>
@@ -121,7 +121,7 @@ export default async function DashboardPage() {
                   <li key={alert.href}>
                     <Link
                       href={alert.href}
-                      className="flex min-h-14 items-center gap-3 rounded-card border-l-4 border-error bg-crema-oscuro px-4 py-3 text-error"
+                      className="flex min-h-14 items-center gap-3 rounded-card border-l-4 border-error bg-arena px-4 py-3 text-error"
                     >
                       <IconAlert className="shrink-0" />
                       <span className="flex-1 font-medium">{alert.text}</span>
@@ -136,7 +136,7 @@ export default async function DashboardPage() {
           {lowStock && lowStock.length > 0 && (
             <section
               aria-labelledby="stock-bajo"
-              className="rounded-card bg-crema-oscuro/60 p-4"
+              className="rounded-card bg-arena/60 p-4"
             >
               <h2
                 id="stock-bajo"
@@ -144,7 +144,7 @@ export default async function DashboardPage() {
               >
                 Stock bajo
               </h2>
-              <ul className="mt-3 divide-y divide-crema-oscuro">
+              <ul className="mt-3 divide-y divide-arena">
                 {lowStock.map((variant) => (
                   <li key={variant.variant_id}>
                     <Link

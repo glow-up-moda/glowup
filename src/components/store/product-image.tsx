@@ -21,8 +21,8 @@ export function ProductImage({
 
   if (!first) {
     return (
-      <span className="flex size-full items-center justify-center bg-crema-oscuro">
-        <Sparkle className="size-12 text-rosa" />
+      <span className="flex size-full items-center justify-center bg-arena">
+        <Sparkle className="size-12 text-brisa" />
       </span>
     );
   }

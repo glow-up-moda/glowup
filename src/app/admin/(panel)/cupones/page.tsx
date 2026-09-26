@@ -58,7 +58,7 @@ export default async function CouponsPage({
               <li key={coupon.id}>
                 <Link
                   href={`/admin/cupones/${coupon.id}`}
-                  className="flex items-center gap-3 rounded-card bg-crema-oscuro/60 p-3 hover:bg-crema-oscuro"
+                  className="flex items-center gap-3 rounded-card bg-arena/60 p-3 hover:bg-arena"
                 >
                   <span className="min-w-0 flex-1">
                     <span className="flex flex-wrap items-center gap-2">

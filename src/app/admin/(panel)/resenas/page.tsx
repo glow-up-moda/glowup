@@ -32,7 +32,7 @@ const empty: Record<Tab, string> = {
 function Stars({ rating }: { rating: number }) {
   return (
     <span
-      className="inline-flex items-center gap-0.5 text-coral"
+      className="inline-flex items-center gap-0.5 text-azul"
       aria-label={`${rating} de 5`}
     >
       {[1, 2, 3, 4, 5].map((star) => (
@@ -40,7 +40,7 @@ function Stars({ rating }: { rating: number }) {
           key={star}
           width={18}
           height={18}
-          className={star <= rating ? "" : "text-crema-oscuro"}
+          className={star <= rating ? "" : "text-arena"}
         />
       ))}
     </span>
@@ -93,10 +93,7 @@ export default async function ReviewsPage({
       ) : reviews && reviews.length > 0 ? (
         <ul className="flex flex-col gap-3">
           {reviews.map((review) => (
-            <li
-              key={review.id}
-              className="rounded-card bg-crema-oscuro/60 p-4 md:p-5"
-            >
+            <li key={review.id} className="rounded-card bg-arena/60 p-4 md:p-5">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <Stars rating={review.rating} />
                 <span className="text-sm">{formatDate(review.created_at)}</span>

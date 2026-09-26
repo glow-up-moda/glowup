@@ -179,7 +179,7 @@ export default async function PricesPage({
               ))}
             </SelectField>
 
-            <details className="rounded-input bg-crema-oscuro/60 p-3">
+            <details className="rounded-input bg-arena/60 p-3">
               <summary className="flex min-h-11 cursor-pointer items-center font-medium">
                 Elegir productos ({selected.length})
               </summary>
@@ -275,7 +275,7 @@ export default async function PricesPage({
                   </div>
                 )}
 
-                <ul className="divide-y divide-crema-oscuro">
+                <ul className="divide-y divide-arena">
                   {rows.map((row) => {
                     const offerLost =
                       !includeCompareAt &&
@@ -346,7 +346,7 @@ export default async function PricesPage({
           {!history?.length ? (
             <Notice>Todavía no hubo cambios de precio.</Notice>
           ) : (
-            <ul className="divide-y divide-crema-oscuro">
+            <ul className="divide-y divide-arena">
               {history.map((change) => (
                 <li key={change.id} className="py-2 first:pt-0">
                   <p>

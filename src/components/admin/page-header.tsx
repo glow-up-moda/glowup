@@ -29,9 +29,7 @@ export function PageHeader({
             {title}
           </h1>
           {description && (
-            <div className="mt-1 max-w-[70ch] text-chocolate/80">
-              {description}
-            </div>
+            <div className="mt-1 max-w-[70ch] text-azul/80">{description}</div>
           )}
         </div>
         {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
@@ -53,10 +51,10 @@ export function Section({
   id?: string;
 }) {
   return (
-    <section id={id} className="rounded-card bg-crema-oscuro/60 p-4 md:p-6">
+    <section id={id} className="rounded-card bg-arena/60 p-4 md:p-6">
       {title && <h2 className="font-display text-xl font-semibold">{title}</h2>}
       {description && (
-        <div className="mt-1 text-sm text-chocolate/80">{description}</div>
+        <div className="mt-1 text-sm text-azul/80">{description}</div>
       )}
       <div className={title || description ? "mt-4" : ""}>{children}</div>
     </section>

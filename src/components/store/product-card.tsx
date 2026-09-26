@@ -55,7 +55,7 @@ export function ProductCard({
         href={`/producto/${product.slug}`}
         className="group block rounded-card focus-visible:outline-offset-4"
       >
-        <span className="relative block aspect-4/5 overflow-hidden rounded-card bg-crema-oscuro">
+        <span className="relative block aspect-4/5 overflow-hidden rounded-card bg-arena">
           <ProductImage
             images={product.images}
             sizes={CARD_SIZES}
@@ -92,7 +92,7 @@ export function KitCardItem({ kit }: { kit: KitCard }) {
         href={`/kits#${kit.slug}`}
         className="group block rounded-card focus-visible:outline-offset-4"
       >
-        <span className="relative block aspect-4/5 overflow-hidden rounded-card bg-crema-oscuro">
+        <span className="relative block aspect-4/5 overflow-hidden rounded-card bg-arena">
           <ProductImage images={kit.images} sizes={CARD_SIZES} />
           <span className="absolute top-2 left-2 flex flex-col items-start gap-1">
             <Badge tone="accent">Kit</Badge>

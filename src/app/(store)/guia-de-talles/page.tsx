@@ -6,8 +6,8 @@ import { compareSizes } from "@/lib/sizes";
 import { createCatalogClient } from "@/lib/supabase/catalog";
 
 export const metadata: Metadata = {
-  title: "Guía de talles · GLOW UP",
-  description: "Cómo medirte y qué talle elegir en GLOW UP.",
+  title: "Guía de talles · MAREA",
+  description: "Cómo medirte y qué talle elegir en MAREA.",
 };
 
 export default async function SizeGuidePage() {
@@ -43,7 +43,7 @@ export default async function SizeGuidePage() {
             {sizes.map((size) => (
               <li
                 key={size}
-                className="inline-flex min-h-11 items-center rounded-full bg-crema-oscuro px-4"
+                className="inline-flex min-h-11 items-center rounded-full bg-arena px-4"
               >
                 {size}
               </li>

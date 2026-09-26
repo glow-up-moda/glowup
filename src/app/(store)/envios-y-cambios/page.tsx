@@ -6,7 +6,7 @@ import { getStoreSettings } from "@/lib/store/settings";
 import { createCatalogClient } from "@/lib/supabase/catalog";
 
 export const metadata: Metadata = {
-  title: "Envíos y cambios · GLOW UP",
+  title: "Envíos y cambios · MAREA",
   description:
     "Zonas, costos y plazos de envío, retiro en Paraná, embalaje discreto y cómo hacer un cambio.",
 };
@@ -34,7 +34,7 @@ export default async function ShippingPage() {
           </p>
         )}
         {zones && zones.length > 0 ? (
-          <ul className="mt-2 divide-y divide-crema-oscuro border-y border-crema-oscuro">
+          <ul className="mt-2 divide-y divide-arena border-y border-arena">
             {zones.map((zone) => (
               <li
                 key={zone.id}

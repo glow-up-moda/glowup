@@ -8,8 +8,8 @@ import { param } from "@/lib/params";
 import { getNavigation, searchProducts } from "@/lib/store/catalog";
 
 export const metadata: Metadata = {
-  title: "Buscar · GLOW UP",
-  description: "Encontrá lo que buscás en GLOW UP.",
+  title: "Buscar · MAREA",
+  description: "Encontrá lo que buscás en MAREA.",
 };
 
 export default async function SearchPage({
@@ -38,12 +38,12 @@ export default async function SearchPage({
           defaultValue={term}
           autoFocus={!term}
           placeholder="Corpiño, bombacha, gorra…"
-          className="min-h-11 flex-1 rounded-input border-2 border-transparent bg-crema-oscuro px-3 text-base"
+          className="min-h-11 flex-1 rounded-input border-2 border-transparent bg-arena px-3 text-base"
         />
         <button
           type="submit"
           aria-label="Buscar"
-          className="flex size-11 shrink-0 items-center justify-center rounded-full border-2 border-chocolate"
+          className="flex size-11 shrink-0 items-center justify-center rounded-full border-2 border-azul"
         >
           <IconSearch />
         </button>
@@ -73,7 +73,7 @@ export default async function SearchPage({
               <li key={category.id}>
                 <Link
                   href={`/${category.slug}`}
-                  className="inline-flex min-h-11 items-center rounded-full bg-crema-oscuro px-4"
+                  className="inline-flex min-h-11 items-center rounded-full bg-arena px-4"
                 >
                   {category.name}
                 </Link>
@@ -82,7 +82,7 @@ export default async function SearchPage({
             <li>
               <Link
                 href="/kits"
-                className="inline-flex min-h-11 items-center rounded-full bg-crema-oscuro px-4"
+                className="inline-flex min-h-11 items-center rounded-full bg-arena px-4"
               >
                 Kits
               </Link>
