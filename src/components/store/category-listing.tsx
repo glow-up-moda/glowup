@@ -1,7 +1,11 @@
 import Link from "next/link";
 
 import { getCategoryFacets, listProducts } from "@/lib/store/catalog";
-import { parseFilters, type SearchParams } from "@/lib/store/filters";
+import {
+  countActiveFilters,
+  parseFilters,
+  type SearchParams,
+} from "@/lib/store/filters";
 import { plural } from "@/lib/format";
 
 import { ProductCard } from "./product-card";
@@ -79,11 +83,31 @@ export async function CategoryListing({
 
       {products.length === 0 ? (
         <p className="rounded-card bg-arena/60 px-4 py-6">
-          No encontramos nada con esos filtros. Probá sacando alguno o mirá{" "}
-          <Link href={basePath} className="underline underline-offset-4">
-            toda la categoría
-          </Link>
-          .
+          {countActiveFilters(active) > 0 ? (
+            <>
+              No encontramos nada con esos filtros. Probá sacando alguno o mirá{" "}
+              <Link href={basePath} className="underline underline-offset-4">
+                toda la categoría
+              </Link>
+              .
+            </>
+          ) : currentSlug ? (
+            <>
+              Todavía no hay nada en {title}. Mirá{" "}
+              <Link href={basePath} className="underline underline-offset-4">
+                toda la categoría
+              </Link>
+              .
+            </>
+          ) : (
+            <>
+              Todavía no hay nada acá. Mirá{" "}
+              <Link href="/" className="underline underline-offset-4">
+                el resto de la tienda
+              </Link>
+              .
+            </>
+          )}
         </p>
       ) : (
         <>

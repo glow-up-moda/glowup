@@ -14,6 +14,17 @@ export type ActiveFilters = {
   sort: ProductSort;
 };
 
+/** Cuántos filtros hay puestos. El orden no filtra, así que no cuenta. */
+export function countActiveFilters(active: ActiveFilters): number {
+  return (
+    active.sizes.length +
+    active.colors.length +
+    (active.minPesos ? 1 : 0) +
+    (active.maxPesos ? 1 : 0) +
+    (active.onlyAvailable ? 1 : 0)
+  );
+}
+
 function toSort(value: string): ProductSort {
   return value === "precio-asc" || value === "precio-desc" ? value : "nuevo";
 }

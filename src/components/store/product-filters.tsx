@@ -7,23 +7,13 @@ import { Button } from "@/components/ui/button";
 import { IconClose } from "@/components/ui/icons";
 import { centsToPesosInput } from "@/lib/format";
 import type { CategoryFacets, ProductSort } from "@/lib/store/catalog";
-import type { ActiveFilters } from "@/lib/store/filters";
+import { type ActiveFilters, countActiveFilters } from "@/lib/store/filters";
 
 const sortOptions: { value: ProductSort; label: string }[] = [
   { value: "nuevo", label: "Lo más nuevo" },
   { value: "precio-asc", label: "Precio: de menor a mayor" },
   { value: "precio-desc", label: "Precio: de mayor a menor" },
 ];
-
-function countActive(active: ActiveFilters): number {
-  return (
-    active.sizes.length +
-    active.colors.length +
-    (active.minPesos ? 1 : 0) +
-    (active.maxPesos ? 1 : 0) +
-    (active.onlyAvailable ? 1 : 0)
-  );
-}
 
 /**
  * Filtros del listado (§7). Es un formulario GET: los filtros quedan en la
@@ -41,7 +31,7 @@ export function ProductFilters({
   const dialogRef = useRef<HTMLDialogElement>(null);
   const sortFormRef = useRef<HTMLFormElement>(null);
   const [isOpen, setIsOpen] = useState(false);
-  const activeCount = countActive(active);
+  const activeCount = countActiveFilters(active);
 
   useEffect(() => {
     const dialog = dialogRef.current;
