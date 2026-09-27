@@ -9,6 +9,14 @@ export const metadata: Metadata = {
   description: "Terminá tu compra en MAREA.",
 };
 
+/**
+ * Sin caché: el checkout decide si todavía se puede pedir envío en el día
+ * comparando con la hora de Argentina (§12). Guardado, seguiría ofreciéndolo
+ * pasado el horario de corte y la base terminaría rechazando el pedido con
+ * same_day_closed.
+ */
+export const dynamic = "force-dynamic";
+
 export default async function CheckoutPage() {
   const supabase = createCatalogClient();
   const [{ data: zones }, settings] = await Promise.all([

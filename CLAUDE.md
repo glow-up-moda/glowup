@@ -216,6 +216,7 @@ Cómo está hecha la tienda:
 - El checkout y la página del pedido corren con la clave secreta: `orders` no se lee por la API pública. Los totales se piden a `quote_cart` en cada cambio; el navegador nunca suma.
 - Los números de pedido son correlativos, así que `/pedido/[numero]` solo se abre si el pedido se hizo en este navegador (cookie `glowup-pedidos`, httpOnly) o si se escribe el email con el que se compró. El error de `/seguimiento` es siempre el mismo, para no revelar qué números existen.
 - Los formularios de la tienda que pueden fallar usan `useFormAction` (`src/lib/use-form-action.ts`), igual que el panel: React 19 borra los campos al terminar la acción.
+- **Las páginas de la tienda se regeneran solas cada minuto** (`revalidate = 60` en el layout de `(store)`). Listados, buscador y ficha de producto se arman en cada visita, pero el inicio y las páginas fijas se prerrenderan y leen la base (catálogo, menú, barra de anuncios, configuración): sin esto quedaban congeladas hasta el próximo build, así que cargar un producto o cambiar Configuración no se veía en la tienda publicada. El checkout es la excepción: no se guarda en caché porque mira la hora para el horario de corte (§12).
 
 ### Inicio (orden de secciones)
 
@@ -519,6 +520,7 @@ Backups y errores:
 - [ ] Logo de MAREA en SVG, con todas las versiones. Mientras tanto, el favicon (`src/app/icon.svg`) y la imagen que se ve al compartir un link (`src/app/(store)/opengraph-image.tsx`) son provisorios: una "M" y el nombre escrito, sin el logo.
 - [ ] Cambiar el destello de 4 puntas por una onda cuando esté el logo: el destello viene del logo anterior y hoy se usa como motivo y como placeholder de las fotos que faltan (§5).
 - [ ] Catálogo: subcategorías de ropa interior, productos, talles, colores y fotos.
+- [ ] Pantalla de categorías en el panel: hoy las categorías y subcategorías solo existen en la base (las creó la migración), el formulario de producto se limita a elegir entre las que hay y no hay forma de agregar una desde el panel.
 - [ ] Tabla de talles con medidas reales.
 - [ ] Monto de envío gratis y % de descuento por transferencia.
 - [ ] Credenciales de prueba de Ualá Bis: las cargadas son de producción.
