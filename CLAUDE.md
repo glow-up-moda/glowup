@@ -371,7 +371,7 @@ Ninguna es `security definer` salvo `private.is_admin()`, que lee `admin_users` 
 
 - Los errores usan `message` como código estable (`out_of_stock`, `invalid_coupon`, `invalid_shipping`, `item_unavailable`, `invalid_items`, `invalid_payload`, `insufficient_stock`, `invalid_movement`, `invalid_transition`, `invalid_price_change`, `invalid_setting`) y `details` con un JSON. La app traduce el código al texto de la tienda.
 - Tope de 10 unidades por línea: una reserva por transferencia inmoviliza stock durante 24 horas.
-- Datos de prueba en `supabase/seed.sql`, aplicados con `npx supabase db push --include-seed`. Nunca van a producción.
+- Datos de prueba en `supabase/seed.sql`. **Hay una sola base de Supabase: la de esta computadora y la del sitio publicado son la misma.** Así que el seed no es un entorno aparte: lo que inserta queda en la base real y se ve en la tienda. Los datos de prueba se borraron el 27 de septiembre de 2026; volver a correr `npx supabase db push --include-seed` los mete de nuevo (el seed usa `on conflict do nothing`, y las filas ya no están). No correrlo salvo que se quiera exactamente eso.
 - Pruebas de humo en `supabase/tests/smoke.sql`, con `npm run db:test`. Crean sus propios datos dentro de una transacción que se deshace, así que no dependen del seed, y restauran la secuencia de pedidos. Si algo falla, la corrida se corta con un error que nombra la prueba; si no, termina en "todas las pruebas pasaron". No son pgTAP: `supabase test db` no aplica.
 
 ## 9. Reglas de stock
