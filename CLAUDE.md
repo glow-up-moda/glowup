@@ -74,7 +74,7 @@ src/app/api/              webhooks y endpoints
 src/components/ui/        botones, inputs, badges
 src/components/store/     header, carrito lateral, tarjetas de producto
 src/components/admin/     armazón, navegación y piezas del panel
-scripts/                  tareas locales (alta de administradoras)
+scripts/                  tareas locales (panel local, alta de administradoras, backup, publicar)
 src/lib/                  supabase, uala, pricing, stock, shipping
 src/emails/               plantillas de React Email
 supabase/migrations/      SQL versionado
@@ -293,6 +293,7 @@ Tiene que ser cómodo de usar desde el celular.
   - Ingreso en `/admin/ingresar` con email y contraseña, nada más. **No hay segundo factor:** se sacó a pedido de la dueña porque pedir un código de la app del celular en cada ingreso era demasiada fricción. La contraseña es la única llave del panel, así que tiene que ser larga y no repetirse en ningún otro lado.
   - Los campos del formulario van con `autocomplete` (`username` y `current-password`), para que el navegador ofrezca guardarlos. La sesión se renueva sola en `src/proxy.ts`, así que en el celular casi nunca hay que volver a escribirlos.
   - Las cuentas se dan de alta con `npm run admin:create`, que pide email, nombre y contraseña en la terminal. Si la cuenta arrastra un segundo factor viejo, el mismo comando lo borra.
+  - Para abrirlo en la computadora: `npm run panel` (`scripts/panel-local.mjs`). Si el servidor de desarrollo ya está andando solo abre `/admin` en el navegador; si no, lo levanta, espera a que conteste y recién ahí abre. La ventana que queda abierta **es** el servidor: cerrarla lo apaga. En el escritorio de la dueña hay un acceso directo ("Panel MAREA") que apunta a `scripts/panel-local.cmd` y hace lo mismo con un doble clic. Ninguno de los dos tiene rutas de una computadora escritas adentro: el script se ubica solo.
   - `requireAdmin()` (`src/lib/auth/admin.ts`) va en cada página y cada acción del panel; `src/proxy.ts` solo renueva la sesión.
   - Una administradora con movimientos de stock a su nombre no se puede borrar de `auth`: el historial exige el usuario. Para sacarle el acceso, se la quita de `admin_users`.
 
