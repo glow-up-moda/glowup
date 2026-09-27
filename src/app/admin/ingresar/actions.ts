@@ -40,5 +40,5 @@ export async function signIn(
     return { error: "Esta cuenta no tiene acceso al panel.", email };
   }
 
-  redirect("/admin/verificar");
+  redirect("/admin");
 }

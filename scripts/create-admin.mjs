@@ -9,8 +9,9 @@ import readline from "node:readline";
 
 import { createClient } from "@supabase/supabase-js";
 
-// El largo mínimo de la contraseña. El panel pide además un segundo factor
-// (§7), así que la contraseña sola nunca alcanza para entrar.
+// El largo mínimo de la contraseña. Desde que el panel se entra solo con email
+// y contraseña (§7), esta es la única llave: que sea larga y que no se repita
+// en ningún otro lado.
 const MIN_PASSWORD_LENGTH = 8;
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -120,23 +121,19 @@ async function main() {
     });
     if (error) throw error;
 
+    // El panel ya no pide segundo factor: si la cuenta arrastra uno de antes,
+    // se borra, porque no lo usa nadie y solo confunde en la app del celular.
     const { data: mfa } = await supabase.auth.admin.mfa.listFactors({
       userId: user.id,
     });
-    if (mfa?.factors?.length) {
-      const reset = await ask(
-        "Esta cuenta ya tiene el segundo paso configurado. ¿Lo borramos para configurarlo de nuevo? (s/N): ",
+    for (const factor of mfa?.factors ?? []) {
+      const { error: deleteError } = await supabase.auth.admin.mfa.deleteFactor(
+        {
+          userId: user.id,
+          id: factor.id,
+        },
       );
-      if (/^s/i.test(reset)) {
-        for (const factor of mfa.factors) {
-          const { error: deleteError } =
-            await supabase.auth.admin.mfa.deleteFactor({
-              userId: user.id,
-              id: factor.id,
-            });
-          if (deleteError) throw deleteError;
-        }
-      }
+      if (deleteError) throw deleteError;
     }
   } else {
     const { data, error } = await supabase.auth.admin.createUser({
@@ -156,9 +153,7 @@ async function main() {
 
   const site = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
   console.log(`\nListo: ${email} ya tiene acceso al panel.`);
-  console.log(
-    `Entrá a ${site}/admin/ingresar y configurá el segundo paso con la app de autenticación de tu celular.`,
-  );
+  console.log(`Entrá a ${site}/admin/ingresar con ese email y esa contraseña.`);
 }
 
 main()

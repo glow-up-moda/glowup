@@ -656,7 +656,7 @@ begin
       'items', jsonb_build_array(jsonb_build_object('variant_id', v_neg90, 'quantity', 1))));
     v_order_transfer := (v_res ->> 'order_id')::uuid;
 
-    -- 16. Administradora con segundo factor --------------------------------------
+    -- 16. Administradora ----------------------------------------------------------
     perform set_config('request.jwt.claims',
       jsonb_build_object('sub', v_admin, 'role', 'authenticated', 'aal', 'aal2')::text, true);
     set local role authenticated;
@@ -782,23 +782,24 @@ begin
     reset role;
 
     -- 17. La misma administradora, solo con contraseña ---------------------------
+    -- Sin segundo factor (§7): la contraseña sola alcanza para el panel.
     perform set_config('request.jwt.claims',
       jsonb_build_object('sub', v_admin, 'role', 'authenticated', 'aal', 'aal1')::text, true);
     set local role authenticated;
 
-    if private.is_admin() then
-      raise exception 'Prueba 17a, sin segundo factor no es administradora';
+    if private.is_admin() is not true then
+      raise exception 'Prueba 17a, con la contraseña sola sigue siendo administradora';
     end if;
     if not exists (select 1 from public.admin_users where user_id = v_admin) then
-      raise exception 'Prueba 17b, sin segundo factor ve su propia fila para ir a verificarlo';
+      raise exception 'Prueba 17b, ve su propia fila de admin_users';
     end if;
     select count(*) into v_count from public.orders;
-    if v_count is distinct from 0 then
-      raise exception 'Prueba 17c, sin segundo factor no ve pedidos: ve %', v_count;
+    if v_count = 0 then
+      raise exception 'Prueba 17c, con la contraseña sola ve los pedidos: ve %', v_count;
     end if;
     select count(*) into v_count from public.products;
-    if v_count is distinct from 0 then
-      raise exception 'Prueba 17d, sin segundo factor no ve productos: ve %', v_count;
+    if v_count = 0 then
+      raise exception 'Prueba 17d, con la contraseña sola ve los productos: ve %', v_count;
     end if;
 
     reset role;

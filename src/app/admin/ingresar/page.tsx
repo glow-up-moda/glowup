@@ -14,7 +14,6 @@ export default async function LoginPage({
 }: PageProps<"/admin/ingresar">) {
   const access = await getAdminAccess();
   if (access.status === "ok") redirect("/admin");
-  if (access.status === "needs_mfa") redirect("/admin/verificar");
 
   const { error } = await searchParams;
 
