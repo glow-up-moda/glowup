@@ -1,1 +1,6 @@
 * text=auto eol=lf
+
+# Los .cmd los ejecuta cmd.exe: necesitan fin de línea de Windows.
+*.cmd text eol=crlf
+
+*.ico binary
