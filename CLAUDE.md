@@ -289,9 +289,10 @@ Tiene que ser cómodo de usar desde el celular.
 - **Configuración:** % de descuento por transferencia, monto de envío gratis, alias y CBU, umbral de stock bajo, mensajes de la barra de anuncios, número de WhatsApp y código del cupón de bienvenida.
   - Una sola pantalla con todo, validado: CBU de 22 números, alias de 6 a 20 caracteres, WhatsApp solo números, horario de corte HH:MM y hasta 5 mensajes de anuncio de 80 caracteres, uno por línea.
   - Un campo opcional vacío se guarda como el null de JSON. Escribir algo inválido nunca lo borra en silencio: vuelve con el error.
-- **Acceso:** solo usuarios con rol admin y verificación en dos pasos.
-  - Ingreso en `/admin/ingresar` con email y contraseña, y después un código de una app de autenticación (TOTP) en `/admin/verificar`. La primera vez, esa pantalla muestra el QR para configurarla.
-  - Las cuentas se dan de alta con `npm run admin:create`, que pide email, nombre y contraseña en la terminal. Si alguien pierde el celular, el mismo comando le borra el segundo paso para configurarlo de nuevo.
+- **Acceso:** solo usuarios que estén en `admin_users`.
+  - Ingreso en `/admin/ingresar` con email y contraseña, nada más. **No hay segundo factor:** se sacó a pedido de la dueña porque pedir un código de la app del celular en cada ingreso era demasiada fricción. La contraseña es la única llave del panel, así que tiene que ser larga y no repetirse en ningún otro lado.
+  - Los campos del formulario van con `autocomplete` (`username` y `current-password`), para que el navegador ofrezca guardarlos. La sesión se renueva sola en `src/proxy.ts`, así que en el celular casi nunca hay que volver a escribirlos.
+  - Las cuentas se dan de alta con `npm run admin:create`, que pide email, nombre y contraseña en la terminal. Si la cuenta arrastra un segundo factor viejo, el mismo comando lo borra.
   - `requireAdmin()` (`src/lib/auth/admin.ts`) va en cada página y cada acción del panel; `src/proxy.ts` solo renueva la sesión.
   - Una administradora con movimientos de stock a su nombre no se puede borrar de `auth`: el historial exige el usuario. Para sacarle el acceso, se la quita de `admin_users`.
 
@@ -343,7 +344,7 @@ Montos siempre en **enteros de centavos**. Fechas guardadas en UTC y mostradas e
 - **La tienda (`anon`)** lee categorías, productos publicados (sin `cost_cents`), sus imágenes, sus variantes (solo `id`, `product_id`, `color` y `size`), kits publicados con sus ítems, zonas de envío y reseñas aprobadas (sin `order_id`). Como el stock está oculto, `select *` sobre `product_variants` falla: pedir siempre las columnas.
 - **El catálogo se lee siempre con un cliente sin sesión**, aunque la clienta esté logueada: con su sesión sería `authenticated` y no vería nada.
 - La disponibilidad pública sale de las vistas `variant_availability` y `kit_availability`, que devuelven solo `is_available` e `is_last_units` (umbral `last_units_threshold`). Corren con los permisos de su dueño, porque `anon` no puede leer las columnas de stock, y por eso filtran adentro lo publicado. El revisor de Supabase las marca como "security definer view": es intencional.
-- **El panel (`authenticated`)** lee y escribe con la sesión de cada administradora, no con la clave secreta. Tiene permisos completos sobre lo que administra, pero cada política exige `private.is_admin()`: estar en `admin_users` y haber pasado el segundo factor (`aal2`). Sin segundo factor, una administradora solo ve su propia fila de `admin_users`, para que el servidor sepa mandarla a verificarlo. Una clienta con cuenta no ve catálogo, pedidos ni configuración.
+- **El panel (`authenticated`)** lee y escribe con la sesión de cada administradora, no con la clave secreta. Tiene permisos completos sobre lo que administra, pero cada política exige `private.is_admin()`: estar en `admin_users`. Ya no se exige el `aal2` del JWT (§7). Una clienta con cuenta, aunque tenga segundo factor, no ve catálogo, pedidos ni configuración.
 - `favorites`: cada persona logueada lee, agrega y borra solo los suyos.
 - La clave secreta queda para lo que no tiene sesión: checkout, webhooks, cron y el alta de administradoras.
 - Fotos: bucket público `product-images`, solo WebP y hasta 2 MB. Solo las administradoras suben, reemplazan o borran.
