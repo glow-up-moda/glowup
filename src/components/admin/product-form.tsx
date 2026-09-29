@@ -228,7 +228,7 @@ export function ProductForm({
             label="Publicado en la tienda"
             name="is_published"
             defaultChecked={initial.is_published}
-            hint="Para publicarlo hace falta al menos una variante y dos fotos."
+            hint="Sin variantes no se puede comprar, y sin fotos se ve el destello de la marca."
           />
           {errors.is_published && (
             <Notice tone="error" className="mt-2">

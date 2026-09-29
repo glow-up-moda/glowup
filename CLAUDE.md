@@ -265,7 +265,7 @@ Footer: links, legales, Data Fiscal, redes
 Tiene que ser cómodo de usar desde el celular.
 - **Inicio:** ventas del día y la semana, pedidos por preparar y alertas (stock bajo, pedidos para revisar, transferencias por confirmar).
 - **Productos:** crear y editar, variantes (color + talle), fotos, costo, precio, precio tachado, SEO, publicado sí/no.
-  - Un producto nuevo arranca como borrador. Para publicarlo hacen falta al menos una variante y dos fotos.
+  - Un producto nuevo arranca como borrador. **No hay requisitos para publicarlo:** se puede publicar sin variantes y sin fotos, a pedido de la dueña, para no frenar la carga del catálogo. Un producto publicado sin variantes se ve en el listado con el cartel "Sin stock" y en su ficha con el selector de talle vacío y el botón apagado: se muestra pero no se puede comprar. Sin fotos, en su lugar va el destello de la marca.
   - El stock inicial de una variante entra como ingreso de mercadería, así queda en el historial.
   - Fotos: el navegador las achica a 2000 px antes de subirlas, y el servidor las pasa a WebP con `sharp` (hasta 1600 × 2000 y una miniatura de 480 × 600) y las guarda en Storage. El texto alternativo es obligatorio.
 - **Stock:** ingreso de mercadería, ajustes, venta manual rápida (Instagram, WhatsApp, en persona) e historial de movimientos.

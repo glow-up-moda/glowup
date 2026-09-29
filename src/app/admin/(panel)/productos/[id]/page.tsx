@@ -122,8 +122,8 @@ export default async function ProductPage({
 
       {param(query.nuevo) && (
         <Notice tone="success" className="mb-4">
-          Producto creado como borrador. Sumale variantes con stock y dos fotos
-          para poder publicarlo.
+          Producto creado como borrador. Sumale variantes con stock y fotos, y
+          después publicalo.
         </Notice>
       )}
 

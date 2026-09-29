@@ -50,9 +50,6 @@ const productSchema = z.object({
   is_published: checkbox,
 });
 
-// La tienda muestra la segunda foto al pasar el mouse (§5).
-const MIN_PHOTOS_TO_PUBLISH = 2;
-
 function parseProduct(formData: FormData) {
   return productSchema.safeParse({
     name: text(formData, "name"),
@@ -130,27 +127,6 @@ export async function updateProduct(
       errors: { slug: "Usá letras o números para la dirección." },
       values,
     };
-
-  if (fields.is_published) {
-    const [{ count: variants }, { count: photos }] = await Promise.all([
-      supabase
-        .from("product_variants")
-        .select("id", { count: "exact", head: true })
-        .eq("product_id", productId),
-      supabase
-        .from("product_images")
-        .select("id", { count: "exact", head: true })
-        .eq("product_id", productId),
-    ]);
-    if (!variants || (photos ?? 0) < MIN_PHOTOS_TO_PUBLISH) {
-      return {
-        errors: {
-          is_published: `Para publicarlo hace falta al menos una variante y ${MIN_PHOTOS_TO_PUBLISH} fotos.`,
-        },
-        values,
-      };
-    }
-  }
 
   const { error } = await supabase
     .from("products")

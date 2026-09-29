@@ -72,8 +72,8 @@ export function PhotoManager({
     <div className="flex flex-col gap-5">
       {photos.length === 0 ? (
         <Notice>
-          Todavía no tiene fotos. Hacen falta dos para publicarlo: la segunda
-          aparece al pasar el mouse.
+          Todavía no tiene fotos. Con dos se ve mejor: la segunda aparece al
+          pasar el mouse.
         </Notice>
       ) : (
         <ol className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
