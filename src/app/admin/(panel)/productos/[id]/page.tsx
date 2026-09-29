@@ -150,19 +150,14 @@ export default async function ProductPage({
             mode="edit"
             initial={{
               name: product.name,
-              slug: product.slug,
               category_id: product.category_id,
               description: product.description ?? "",
-              materials_care: product.materials_care ?? "",
               measurements: product.measurements ?? "",
-              model_info: product.model_info ?? "",
               price: centsToPesosInput(product.price_cents),
               compare_at_price: centsToPesosInput(
                 product.compare_at_price_cents,
               ),
               cost: centsToPesosInput(product.cost_cents),
-              seo_title: product.seo_title ?? "",
-              seo_description: product.seo_description ?? "",
               is_published: product.is_published,
             }}
           />

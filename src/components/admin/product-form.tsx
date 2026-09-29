@@ -17,33 +17,23 @@ import { useFormAction } from "@/lib/use-form-action";
 
 export type ProductValues = {
   name: string;
-  slug: string;
   category_id: string;
   description: string;
-  materials_care: string;
   measurements: string;
-  model_info: string;
   price: string;
   compare_at_price: string;
   cost: string;
-  seo_title: string;
-  seo_description: string;
   is_published: boolean;
 };
 
 export const emptyProduct: ProductValues = {
   name: "",
-  slug: "",
   category_id: "",
   description: "",
-  materials_care: "",
   measurements: "",
-  model_info: "",
   price: "",
   compare_at_price: "",
   cost: "",
-  seo_title: "",
-  seo_description: "",
   is_published: false,
 };
 
@@ -109,14 +99,6 @@ export function ProductForm({
             </option>
           ))}
         </SelectField>
-        <TextField
-          label="Dirección en la tienda"
-          name="slug"
-          maxLength={120}
-          defaultValue={value("slug")}
-          error={errors.slug}
-          hint="Así se ve en el link: /producto/nombre-del-producto. Si la dejás vacía, sale del nombre."
-        />
       </fieldset>
 
       <fieldset className="flex flex-col gap-4">
@@ -172,55 +154,14 @@ export function ProductForm({
           hint="Qué es y cómo es, sin comentarios sobre cuerpos."
         />
         <TextAreaField
-          label="Materiales y cuidados"
-          name="materials_care"
-          maxLength={1000}
-          rows={3}
-          defaultValue={value("materials_care")}
-          error={errors.materials_care}
-        />
-        <TextAreaField
-          label="Medidas"
+          label="Talle"
           name="measurements"
           maxLength={1000}
           rows={3}
           defaultValue={value("measurements")}
           error={errors.measurements}
         />
-        <TextField
-          label="La modelo"
-          name="model_info"
-          maxLength={200}
-          defaultValue={value("model_info")}
-          error={errors.model_info}
-          hint="Por ejemplo: mide 1,68 m y usa talle M."
-        />
       </fieldset>
-
-      <details className="rounded-card bg-crema p-4">
-        <summary className="min-h-11 cursor-pointer py-2 font-medium">
-          Google y redes (SEO)
-        </summary>
-        <div className="mt-3 flex flex-col gap-4">
-          <TextField
-            label="Título para Google"
-            name="seo_title"
-            maxLength={70}
-            defaultValue={value("seo_title")}
-            error={errors.seo_title}
-            hint="Hasta 70 caracteres. Si lo dejás vacío, se usa el nombre."
-          />
-          <TextAreaField
-            label="Descripción para Google"
-            name="seo_description"
-            maxLength={160}
-            rows={2}
-            defaultValue={value("seo_description")}
-            error={errors.seo_description}
-            hint="Hasta 160 caracteres."
-          />
-        </div>
-      </details>
 
       {mode === "edit" && (
         <div>

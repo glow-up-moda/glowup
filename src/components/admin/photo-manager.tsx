@@ -111,12 +111,6 @@ function UploadForm({ action }: { action: FormAction }) {
       return setClientError("Elegí una foto.");
     if (file.size > MAX_ORIGINAL_BYTES)
       return setClientError("La foto pesa más de 25 MB. Probá con otra.");
-    if (String(formData.get("alt") ?? "").trim().length < 3) {
-      return setClientError(
-        "Contá qué se ve en la foto: lo leen quienes usan lector de pantalla.",
-      );
-    }
-
     setClientError(null);
     setPreparing(true);
     try {
@@ -166,16 +160,6 @@ function UploadForm({ action }: { action: FormAction }) {
         </p>
         {errors.file && <p className="text-sm text-error">{errors.file}</p>}
       </div>
-      <TextField
-        label="Qué se ve en la foto"
-        name="alt"
-        id="photo-alt"
-        required
-        maxLength={150}
-        defaultValue={state.values?.alt ?? ""}
-        error={errors.alt}
-        hint="Por ejemplo: Corpiño Luna negro, de frente, sobre fondo crema."
-      />
       <div>
         <Button type="submit" disabled={busy}>
           <IconUpload />

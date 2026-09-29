@@ -209,7 +209,7 @@ export default async function ProductPage({
               </Accordion>
             )}
             {product.measurements && (
-              <Accordion title="Medidas">{product.measurements}</Accordion>
+              <Accordion title="Talle">{product.measurements}</Accordion>
             )}
             <Accordion title="Envíos y cambios">
               <p>

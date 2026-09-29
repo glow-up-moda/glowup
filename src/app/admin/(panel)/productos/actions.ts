@@ -31,45 +31,59 @@ const productSchema = z.object({
     .trim()
     .min(2, "Escribí el nombre del producto.")
     .max(120, "Hasta 120 caracteres."),
-  slug: z.string().trim().max(120, "Hasta 120 caracteres."),
   category_id: z.uuid({ error: "Elegí una categoría." }),
   description: optionalText(3000),
-  materials_care: optionalText(1000),
   measurements: optionalText(1000),
-  model_info: optionalText(200),
   price_cents: pesos("Escribí el precio en pesos, sin centavos."),
   compare_at_price_cents: optionalPesos(
     "Escribí el precio tachado en pesos, sin centavos.",
   ),
   cost_cents: optionalPesos("Escribí el costo en pesos, sin centavos."),
-  seo_title: optionalText(70, "Hasta 70 caracteres: Google corta el resto."),
-  seo_description: optionalText(
-    160,
-    "Hasta 160 caracteres: Google corta el resto.",
-  ),
   is_published: checkbox,
 });
 
 function parseProduct(formData: FormData) {
   return productSchema.safeParse({
     name: text(formData, "name"),
-    slug: text(formData, "slug"),
     category_id: text(formData, "category_id"),
     description: text(formData, "description"),
-    materials_care: text(formData, "materials_care"),
     measurements: text(formData, "measurements"),
-    model_info: text(formData, "model_info"),
     price_cents: text(formData, "price"),
     compare_at_price_cents: text(formData, "compare_at_price"),
     cost_cents: text(formData, "cost"),
-    seo_title: text(formData, "seo_title"),
-    seo_description: text(formData, "seo_description"),
     is_published: text(formData, "is_published") || undefined,
   });
 }
 
 function slugTaken(error: { code?: string; message?: string }): boolean {
   return error.code === "23505" && (error.message ?? "").includes("slug");
+}
+
+/**
+ * La dirección de la tienda sale del nombre (§7): no se escribe a mano. Si dos
+ * productos se llaman igual, al segundo se le suma un número, así cargar el
+ * catálogo nunca se frena por el link.
+ */
+async function freeSlug(
+  supabase: Awaited<ReturnType<typeof requireAdmin>>["supabase"],
+  name: string,
+  exceptId?: string,
+): Promise<string | null> {
+  const base = slugify(name);
+  if (!base) return null;
+
+  let query = supabase
+    .from("products")
+    .select("id, slug")
+    .like("slug", base + "%");
+  if (exceptId) query = query.neq("id", exceptId);
+  const { data } = await query;
+  const taken = new Set((data ?? []).map((row) => row.slug));
+
+  if (!taken.has(base)) return base;
+  for (let n = 2; n < 1000; n++)
+    if (!taken.has(base + "-" + n)) return base + "-" + n;
+  return base + "-" + Date.now();
 }
 
 export async function createProduct(
@@ -81,13 +95,10 @@ export async function createProduct(
   const parsed = parseProduct(formData);
   if (!parsed.success) return { errors: fieldErrors(parsed.error), values };
 
-  const { slug: rawSlug, ...fields } = parsed.data;
-  const slug = slugify(rawSlug || fields.name);
+  const fields = parsed.data;
+  const slug = await freeSlug(supabase, fields.name);
   if (!slug)
-    return {
-      errors: { slug: "Usá letras o números para la dirección." },
-      values,
-    };
+    return { errors: { name: "Usá letras o números en el nombre." }, values };
 
   // Un producto nuevo arranca como borrador: todavía no tiene variantes ni fotos.
   const { data: product, error } = await supabase
@@ -99,7 +110,7 @@ export async function createProduct(
     if (slugTaken(error))
       return {
         errors: {
-          slug: "Ya hay un producto con esa dirección. Cambiala un poco.",
+          name: "Ya hay otro producto con ese nombre. Cambialo un poco.",
         },
         values,
       };
@@ -120,13 +131,11 @@ export async function updateProduct(
   const parsed = parseProduct(formData);
   if (!parsed.success) return { errors: fieldErrors(parsed.error), values };
 
-  const { slug: rawSlug, ...fields } = parsed.data;
-  const slug = slugify(rawSlug || fields.name);
+  const fields = parsed.data;
+  // Con exceptId, su propia dirección no cuenta como tomada.
+  const slug = await freeSlug(supabase, fields.name, productId);
   if (!slug)
-    return {
-      errors: { slug: "Usá letras o números para la dirección." },
-      values,
-    };
+    return { errors: { name: "Usá letras o números en el nombre." }, values };
 
   const { error } = await supabase
     .from("products")
@@ -136,7 +145,7 @@ export async function updateProduct(
     if (slugTaken(error))
       return {
         errors: {
-          slug: "Ya hay un producto con esa dirección. Cambiala un poco.",
+          name: "Ya hay otro producto con ese nombre. Cambialo un poco.",
         },
         values,
       };
@@ -349,26 +358,22 @@ export async function uploadProductImage(
   formData: FormData,
 ): Promise<FormState> {
   const { supabase } = await requireAdmin();
-  const alt = text(formData, "alt").trim();
   const file = formData.get("file");
 
-  if (alt.length < 3) {
-    return {
-      errors: {
-        alt: "Contá qué se ve en la foto: lo leen quienes usan lector de pantalla.",
-      },
-    };
-  }
-  if (alt.length > 150)
-    return { errors: { alt: "Hasta 150 caracteres." }, values: { alt } };
   if (!(file instanceof File) || file.size === 0)
-    return { errors: { file: "Elegí una foto." }, values: { alt } };
-  if (file.size > MAX_UPLOAD_BYTES) {
-    return {
-      errors: { file: "La foto pesa demasiado. Probá con otra." },
-      values: { alt },
-    };
-  }
+    return { errors: { file: "Elegí una foto." } };
+  if (file.size > MAX_UPLOAD_BYTES)
+    return { errors: { file: "La foto pesa demasiado. Probá con otra." } };
+
+  // El alt no se escribe al subir (§15): arranca con el nombre del producto,
+  // que es la columna obligatoria de product_images, y después se puede
+  // mejorar desde "Descripción" en cada foto.
+  const { data: product } = await supabase
+    .from("products")
+    .select("name")
+    .eq("id", productId)
+    .single();
+  const alt = (product?.name ?? "Foto del producto").slice(0, 150);
 
   // WebP en dos tamaños: la foto (hasta 1600 × 2000) y la miniatura del panel.
   let full: Buffer;
@@ -402,7 +407,6 @@ export async function uploadProductImage(
   } catch {
     return {
       errors: { file: "No pudimos leer esa foto. Probá con una JPG o PNG." },
-      values: { alt },
     };
   }
 
@@ -419,10 +423,7 @@ export async function uploadProductImage(
   ]);
   if (uploadFull.error || uploadThumb.error) {
     await storage.remove([path, thumbPath(path)]);
-    return {
-      error: "No se pudo subir la foto. Probá de nuevo.",
-      values: { alt },
-    };
+    return { error: "No se pudo subir la foto. Probá de nuevo." };
   }
 
   const { data: last } = await supabase

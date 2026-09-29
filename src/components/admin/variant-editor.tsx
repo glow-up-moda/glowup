@@ -54,10 +54,7 @@ export function VariantEditor({
           ))}
         </ul>
       )}
-      <details
-        open={variants.length === 0}
-        className="rounded-card bg-crema p-4"
-      >
+      <details className="rounded-card bg-crema p-4">
         <summary className="min-h-11 cursor-pointer py-2 font-medium">
           Agregar variante
         </summary>

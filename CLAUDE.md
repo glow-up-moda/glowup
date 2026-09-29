@@ -238,8 +238,8 @@ Footer: links, legales, Data Fiscal, redes
 - Galería con swipe en celular, nombre, precio, precio tachado si hay oferta, precio con transferencia y cuotas.
 - Selector de color y talle. Talles agotados visibles pero deshabilitados, con "Avisame cuando vuelva".
 - "Últimas unidades" cuando el disponible es ≤ 2 (configurable).
-- Link a guía de talles y "La modelo mide X cm y usa talle Y".
-- Pestañas: Descripción, Materiales y cuidados, Medidas, Envíos y cambios.
+- Link a guía de talles.
+- Pestañas: Descripción, Talle, Envíos y cambios. "Materiales y cuidados" y "La modelo" siguen en la base pero ya no se cargan desde el panel, así que no aparecen.
 - "Combinalo con" (productos o kits relacionados).
 - Reseñas aprobadas.
 - En celular, botón "Sumar al carrito" fijo abajo.
@@ -264,10 +264,11 @@ Footer: links, legales, Data Fiscal, redes
 
 Tiene que ser cómodo de usar desde el celular.
 - **Inicio:** ventas del día y la semana, pedidos por preparar y alertas (stock bajo, pedidos para revisar, transferencias por confirmar).
-- **Productos:** crear y editar, variantes (color + talle), fotos, costo, precio, precio tachado, SEO, publicado sí/no.
+- **Productos:** crear y editar, variantes (color + talle), fotos, costo, precio, precio tachado, publicado sí/no.
+  - El formulario tiene solo lo que la dueña quiere escribir: nombre, categoría, precio, precio tachado, costo, descripción y talle. **La dirección de la tienda sale del nombre** (`freeSlug` en las acciones): no se escribe, y si dos productos se llaman igual al segundo se le suma un número. Renombrar un producto le cambia el link. El título para Google también sale del nombre y la descripción para Google queda vacía; las columnas `slug`, `seo_title`, `seo_description`, `materials_care` y `model_info` siguen existiendo en la base, pero ya no se editan.
   - Un producto nuevo arranca como borrador. **No hay requisitos para publicarlo:** se puede publicar sin variantes y sin fotos, a pedido de la dueña, para no frenar la carga del catálogo. Un producto publicado sin variantes se ve en el listado con el cartel "Sin stock" y en su ficha con el selector de talle vacío y el botón apagado: se muestra pero no se puede comprar. Sin fotos, en su lugar va el destello de la marca.
   - El stock inicial de una variante entra como ingreso de mercadería, así queda en el historial.
-  - Fotos: el navegador las achica a 2000 px antes de subirlas, y el servidor las pasa a WebP con `sharp` (hasta 1600 × 2000 y una miniatura de 480 × 600) y las guarda en Storage. El texto alternativo es obligatorio.
+  - Fotos: el navegador las achica a 2000 px antes de subirlas, y el servidor las pasa a WebP con `sharp` (hasta 1600 × 2000 y una miniatura de 480 × 600) y las guarda en Storage. El texto alternativo no se escribe al subir: arranca con el nombre del producto, que es lo que exige la columna, y se puede mejorar después desde "Descripción" en cada foto.
 - **Stock:** ingreso de mercadería, ajustes, venta manual rápida (Instagram, WhatsApp, en persona) e historial de movimientos.
 - **Formularios del panel:** con `useFormAction` (`src/components/admin/use-form-action.ts`), no con `<form action>` directo. React 19 resetea el formulario al terminar la acción y eso cambia los `<select>` aunque haya fallado: una venta con error volvía a "Entró mercadería".
 - **Precios:** aumento o descuento masivo por categoría o selección, con redondeo, vista previa y margen.
@@ -476,7 +477,7 @@ Cómo están hechos:
 
 ## 15. Accesibilidad y legales
 
-- Texto alternativo en todas las fotos, labels en todos los campos, navegación con teclado y áreas táctiles de al menos 44px de alto. Un link corto puede medir menos de ancho: lo que importa es que se pueda tocar.
+- Texto alternativo en todas las fotos (automático: el nombre del producto, editable foto por foto), labels en todos los campos, navegación con teclado y áreas táctiles de al menos 44px de alto. Un link corto puede medir menos de ancho: lo que importa es que se pueda tocar.
 - Cada página tiene un solo `h1` y los títulos no saltan niveles. En el checkout el `h1` es `sr-only`: la página se lee como pasos numerados y un título arriba solo ocuparía pantalla en el celular.
 - Un link que repite a otro que está al lado (la miniatura del carrito) va con `aria-hidden` y fuera del tabulador: si no, se anuncia como un enlace sin nombre.
 - Foco visible: anillo azul de 2px con separación (el aqua no tiene contraste suficiente sobre crema).
