@@ -536,7 +536,8 @@ Backups y errores:
 - [ ] Textos legales revisados.
 - [ ] Activar en Supabase Auth la protección de contraseñas filtradas (HaveIBeenPwned), que hoy está apagada.
 - [ ] Fotos de clientas reales para el inicio, y la foto del hero (hoy hay un destello en su lugar).
-- [ ] Cuentas de Meta Pixel y Google Analytics, y cargar `NEXT_PUBLIC_META_PIXEL_ID` y `NEXT_PUBLIC_GA4_ID`: sin eso no se mide nada.
+- [x] Meta Pixel: `1587022683122205`, cargado en Netlify y verificado en vivo el 1 de octubre de 2026 (la librería carga, el píxel queda registrado y cuenta también las navegaciones internas, que el fragmento suelto de Meta no hace).
+- [ ] Cuenta de Google Analytics y cargar `NEXT_PUBLIC_GA4_ID`: hasta entonces GA4 no mide nada. Ojo: las dos son `NEXT_PUBLIC_`, así que se incrustan en el build y hay que publicar de nuevo después de cargarlas.
 - [ ] Servicio de monitoreo de errores (tipo Sentry). Hoy los errores solo quedan en los logs de Netlify.
 - [ ] Crear el cupón de bienvenida en el panel y cargar su código en Configuración: hasta entonces el newsletter manda un email sin descuento.
 - [ ] ¿Mover el consentimiento de novedades al lado del email en el checkout? Hoy está al final (paso 6), así que el aviso de carrito abandonado casi nunca va a dispararse: quien se va antes de terminar rara vez llegó a marcarlo.
