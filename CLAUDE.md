@@ -24,7 +24,7 @@ Tienda online de **ropa interior femenina y accesorios** (gorras, anteojos de so
 - No agregues dependencias sin explicar para qué sirven y si existe una alternativa nativa.
 - Nunca subas `.env` ni claves al repositorio.
 - **El repositorio es público** (`glow-up-moda/glowup`). Además de las claves, nunca subas alias, CBU, teléfono, direcciones ni datos de clientas: esos valores viven en la tabla `settings` o en variables de entorno, nunca en el código, en migraciones ni en datos de prueba.
-- Pagos: solo credenciales de prueba de Ualá Bis hasta el lanzamiento (`UALA_ENVIRONMENT=test`).
+- Pagos: **la tienda cobra con las credenciales de producción de Ualá Bis** (`UALA_ENVIRONMENT=production`), por decisión de la dueña. El ambiente de prueba de Ualá rechaza estas credenciales con "Invalid username" (§11) y conseguir las de sandbox hay que pedirlo a soporte, así que la prueba de punta a punta se hace con una compra real que después se devuelve. Mientras no haya un producto publicado con stock, nadie puede llegar a pagar.
 - Cambios de base de datos siempre como migraciones en `supabase/migrations/`, en este orden: primero la migración pasa junto con `supabase/tests/smoke.sql` dentro de una transacción que se deshace; después, commit y push; recién entonces, `npx supabase db push`. Los tipos (`npm run db:types`) se regeneran después de aplicar y van en el commit siguiente. El cron no se prueba en esa transacción: se verifica en `cron.job_run_details`.
 - Al terminar una tarea con interfaz, revisala en 375px (celular) y en escritorio.
 
@@ -54,7 +54,7 @@ SUPABASE_SECRET_KEY=          # solo servidor
 UALA_USERNAME=                # solo servidor
 UALA_CLIENT_ID=               # solo servidor
 UALA_CLIENT_SECRET=           # solo servidor
-UALA_ENVIRONMENT=test         # test | production
+UALA_ENVIRONMENT=production   # test | production. Hoy producción: ver §2
 RESEND_API_KEY=               # solo servidor
 EMAIL_FROM=                   # solo servidor, dominio verificado en Resend
 EMAIL_INTERNAL=               # solo servidor, destino de los avisos internos
@@ -408,7 +408,7 @@ La plata de las ventas cae en la cuenta de Ualá: por eso las tarjetas se cobran
 
 ### Tarjetas (Ualá Bis, API Cobros Online v2)
 
-- Credenciales: app o web de Ualá → Ualá Bis → Cobros online → API. Hay un juego para test y otro para producción, y no son intercambiables.
+- Credenciales: app o web de Ualá → Ualá Bis → Cobros online → API. Hay un juego para test y otro para producción, y no son intercambiables. **Las que tenemos son de producción.** Comprobado el 1 de octubre de 2026 pidiendo token a los dos ambientes: `auth.stage.developers.ar.ua.la` devuelve 401 "Invalid username" y `auth.developers.ar.ua.la` devuelve 200. El juego de sandbox no aparece en el panel junto al de producción: hay que pedírselo a soporte de Ualá Bis.
 - Autenticación: `POST {auth}/auth/token` con `username`, `client_id`, `client_secret_id` y `grant_type: client_credentials`. El token dura 24 horas y se guarda en memoria con unos minutos de margen.
 - Crear el pago: `POST {checkout}/checkout` con el monto **en pesos con dos decimales, como texto** (la base guarda centavos: 2500 se manda como `"25.00"`), `external_reference = order.id`, `notification_url` al webhook y los dos `callback` a `/pedido/[numero]`. Devuelve el `uuid` de la orden y el `checkout_link` al que se manda a la clienta.
 - Mínimo por pago: $25. Por debajo de eso solo queda transferencia. Ojo: un cobro de $25 se parece a una prueba de tarjeta robada y los bancos lo rechazan, así que para probar conviene un monto normal.
@@ -524,7 +524,7 @@ Backups y errores:
 - [ ] Pantalla de categorías en el panel: hoy las categorías y subcategorías solo existen en la base (las creó la migración), el formulario de producto se limita a elegir entre las que hay y no hay forma de agregar una desde el panel.
 - [ ] Tabla de talles con medidas reales.
 - [ ] Monto de envío gratis y % de descuento por transferencia.
-- [ ] Credenciales de prueba de Ualá Bis: las cargadas son de producción.
+- [ ] Credenciales de sandbox de Ualá Bis, pedidas a soporte. Mientras tanto se cobra en producción (§2) y la prueba de tarjeta es una compra real que se devuelve.
 - [ ] Probar un cobro con tarjeta aprobado de punta a punta (el intento de $25 lo rechazó el banco). Queda para la fase 8.
 - [ ] Cuotas sin interés: sí o no, y cuántas.
 - [ ] ¿Cupón y descuento por transferencia se acumulan?
