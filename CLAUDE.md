@@ -532,7 +532,7 @@ Backups y errores:
 - [ ] Alias, CBU y número de WhatsApp.
 - [ ] Usuario de Instagram y registro de marca en el INPI. (El dominio ya está: `mareapna.com`, con el DNS en Netlify. En DonWeb quedaron solo los nameservers.)
 - [ ] Cuenta de Resend con un dominio verificado, y cargar `RESEND_API_KEY`, `EMAIL_FROM` y `EMAIL_INTERNAL`: hasta entonces no sale ningún email y cada intento queda anotado en la consola.
-- [ ] Para que corra el job diario (reseñas y carrito abandonado): `CRON_SECRET` en las variables de entorno y el mismo valor en `cron_secret`, más `cron_site_url`, en la tabla `settings`.
+- [x] Trabajo diario conectado: `CRON_SECRET` generado al azar y cargado en Netlify, y el mismo valor más `cron_site_url` en `settings`. Verificado el 1 de octubre de 2026 en los dos sentidos: la ruta rechaza con 401 sin la clave y con una clave equivocada, y responde 200 con la correcta; y la base la llamó sola con pg_net y recibió `{"ok":true}`. El job `daily-emails` corre a las 13 UTC y su última corrida figura como `succeeded`. **Todavía no manda nada**: sin la cuenta de Resend, cada email queda anotado en la consola.
 - [ ] Textos legales revisados.
 - [ ] Activar en Supabase Auth la protección de contraseñas filtradas (HaveIBeenPwned), que hoy está apagada.
 - [ ] Fotos de clientas reales para el inicio, y la foto del hero (hoy hay un destello en su lugar).
