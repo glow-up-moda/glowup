@@ -497,7 +497,7 @@ Cómo están hechos:
 7. **SEO, analítica, rendimiento y accesibilidad.**
 8. **Legales y prueba completa:** compras de prueba con cada método, pagos rechazados, reservas vencidas y webhook duplicado.
    - Probado de punta a punta: compra por transferencia (pedido → reserva → confirmación en el panel → descuento de stock → preparando → listo para retirar → entregado), pago rechazado de verdad por el webhook, aviso repetido reconocido como duplicado, reserva vencida liberada por el cron, y pago tardío sin stock marcado para revisar (§9.6, pruebas de humo 10a y 10c).
-   - Falta la compra con tarjeta aprobada: el intento real lo rechazó el banco (§17).
+   - Falta solo el tramo final de la tarjeta: que Ualá avise un pago aprobado y el pedido pase a `paid` descontando stock. **Lo anterior ya está probado en el sitio publicado** (1 de octubre de 2026, con `UALA_ENVIRONMENT=production`): la app se autentica contra Ualá, crea el cobro y manda a la clienta a la pantalla de pago con el monto correcto ($15.000 pedidos, "$15.000,00" en Ualá), el pedido queda `pending_payment` con el uuid de Ualá guardado y la reserva de 30 minutos. Se liberó la reserva y se borró todo al terminar.
 9. **Lanzamiento:** en este orden.
    1. Destrabar Netlify (créditos) y publicar, que hoy es lo que frena todo.
    2. Cargar en Netlify las variables que faltan: `RESEND_API_KEY`, `EMAIL_FROM`, `EMAIL_INTERNAL`, `CRON_SECRET`, `NEXT_PUBLIC_META_PIXEL_ID`, `NEXT_PUBLIC_GA4_ID`, y `UALA_ENVIRONMENT=production` con las credenciales de producción.
@@ -525,7 +525,7 @@ Backups y errores:
 - [ ] Tabla de talles con medidas reales.
 - [ ] Monto de envío gratis y % de descuento por transferencia.
 - [ ] Credenciales de sandbox de Ualá Bis, pedidas a soporte. Mientras tanto se cobra en producción (§2) y la prueba de tarjeta es una compra real que se devuelve.
-- [ ] Probar un cobro con tarjeta aprobado de punta a punta (el intento de $25 lo rechazó el banco). Queda para la fase 8.
+- [ ] Una compra con tarjeta pagada de verdad, para probar el último tramo: el aviso de Ualá, el paso a `paid` y el descuento de stock. Crear el cobro y llegar a la pantalla de pago ya está probado (§16, fase 8); lo que falta necesita una tarjeta real. Hacerla por un monto normal: el intento de $25 lo rechazó el banco porque se parece a una prueba de tarjeta robada. Se devuelve desde Ualá después.
 - [ ] Cuotas sin interés: sí o no, y cuántas.
 - [ ] ¿Cupón y descuento por transferencia se acumulan?
 - [ ] Cargar las zonas y costos de envío reales en `/admin/zonas` (las que hay son de prueba) y el punto de retiro con sus horarios en Configuración.
