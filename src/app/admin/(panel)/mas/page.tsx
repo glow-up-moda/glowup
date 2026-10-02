@@ -7,6 +7,7 @@ import {
   IconChart,
   IconChevronRight,
   IconInfo,
+  IconProducts,
   IconLogOut,
   IconSettings,
   IconStar,
@@ -21,6 +22,12 @@ import { signOut } from "../../actions";
 export const metadata: Metadata = { title: "Más" };
 
 const links = [
+  {
+    href: "/admin/categorias",
+    label: "Categorías",
+    description: "El menú de la tienda y sus subcategorías",
+    icon: IconProducts,
+  },
   {
     href: "/admin/precios",
     label: "Precios",

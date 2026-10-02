@@ -41,6 +41,7 @@ const items: Item[] = [
     inBottomBar: true,
   },
   { href: "/admin/stock", label: "Stock", icon: IconStock, inBottomBar: true },
+  { href: "/admin/categorias", label: "Categorías", icon: IconProducts },
   { href: "/admin/precios", label: "Precios", icon: IconTag },
   { href: "/admin/cupones", label: "Cupones", icon: IconTicket },
   { href: "/admin/kits", label: "Kits", icon: IconBag },
@@ -85,6 +86,7 @@ export function SideNav() {
 }
 
 const moreSections = [
+  "/admin/categorias",
   "/admin/precios",
   "/admin/cupones",
   "/admin/configuracion",
