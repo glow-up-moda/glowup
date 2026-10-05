@@ -1,6 +1,7 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
+import { variantLabel } from "@/lib/format";
 import { TextField } from "@/components/ui/field";
 import { Notice } from "@/components/ui/notice";
 import { SubmitButton } from "@/components/ui/submit-button";
@@ -15,8 +16,8 @@ type FormAction = (prev: FormState, formData: FormData) => Promise<FormState>;
 
 export type VariantRow = {
   id: string;
-  color: string;
-  size: string;
+  color: string | null;
+  size: string | null;
   sku: string | null;
   stock_on_hand: number;
   stock_reserved: number;
@@ -109,7 +110,7 @@ function VariantCard({
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
           <p className="font-medium">
-            {variant.color} · {variant.size}
+            {variantLabel(variant.color, variant.size, "Producto único")}
           </p>
           {variant.sku && <p className="text-sm">SKU {variant.sku}</p>}
         </div>
@@ -152,7 +153,7 @@ function EditVariantForm({ variant }: { variant: VariantRow }) {
     onSuccess: (form) => form.reset(),
   });
   const errors = state.errors ?? {};
-  const value = (_key: string, fallback: string) => fallback;
+  const value = (_key: string, fallback: string | null) => fallback ?? "";
   const id = (field: string) => `variante-${variant.id}-${field}`;
 
   return (
@@ -164,8 +165,8 @@ function EditVariantForm({ variant }: { variant: VariantRow }) {
           label="Color"
           name="color"
           id={id("color")}
-          required
           maxLength={40}
+          hint="Vacío si el producto no tiene variantes."
           defaultValue={value("color", variant.color)}
           error={errors.color}
         />
@@ -173,7 +174,6 @@ function EditVariantForm({ variant }: { variant: VariantRow }) {
           label="Talle"
           name="size"
           id={id("size")}
-          required
           maxLength={20}
           defaultValue={value("size", variant.size)}
           error={errors.size}

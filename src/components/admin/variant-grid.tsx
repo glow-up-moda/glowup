@@ -37,7 +37,7 @@ function slugCell(value: string): string {
     .replace(/^-|-$/g, "");
 }
 
-export type ExistingVariant = { color: string; size: string };
+export type ExistingVariant = { color: string | null; size: string | null };
 
 export function VariantGrid({
   existing = [],
@@ -58,7 +58,7 @@ export function VariantGrid({
   const already = new Set(
     existing.map(
       (variant) =>
-        `${variant.color.toLocaleLowerCase("es-AR")}|${variant.size.toLocaleLowerCase("es-AR")}`,
+        `${(variant.color ?? "").toLocaleLowerCase("es-AR")}|${(variant.size ?? "").toLocaleLowerCase("es-AR")}`,
     ),
   );
   const exists = (color: string, size: string) =>

@@ -636,36 +636,36 @@ export type Database = {
       }
       product_variants: {
         Row: {
-          color: string
+          color: string | null
           created_at: string
           id: string
           low_stock_threshold: number | null
           product_id: string
-          size: string
+          size: string | null
           sku: string | null
           stock_on_hand: number
           stock_reserved: number
           updated_at: string
         }
         Insert: {
-          color: string
+          color?: string | null
           created_at?: string
           id?: string
           low_stock_threshold?: number | null
           product_id: string
-          size: string
+          size?: string | null
           sku?: string | null
           stock_on_hand?: number
           stock_reserved?: number
           updated_at?: string
         }
         Update: {
-          color?: string
+          color?: string | null
           created_at?: string
           id?: string
           low_stock_threshold?: number | null
           product_id?: string
-          size?: string
+          size?: string | null
           sku?: string | null
           stock_on_hand?: number
           stock_reserved?: number

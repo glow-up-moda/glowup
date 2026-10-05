@@ -18,7 +18,12 @@ import { isUuid, param } from "@/lib/params";
 import { compareVariants } from "@/lib/sizes";
 import { MOVEMENT_LABELS, movementSign } from "@/lib/admin/stock";
 import { requireAdmin } from "@/lib/auth/admin";
-import { centsToPesosInput, formatDateTime, formatMoney } from "@/lib/format";
+import {
+  centsToPesosInput,
+  formatDateTime,
+  formatMoney,
+  variantLabel,
+} from "@/lib/format";
 
 import {
   addVariants,
@@ -139,7 +144,7 @@ export default async function ProductPage({
 
       {param(query.nuevo) && (
         <Notice tone="success" className="mb-4">
-          Producto creado y publicado. Sumale las fotos y ya queda listo.
+          Producto creado y publicado. Desde acá podés cambiarle el stock, las fotos o los datos.
         </Notice>
       )}
 
@@ -172,11 +177,10 @@ export default async function ProductPage({
           />
         </Section>
 
-        <Section title="Datos del producto" id="datos">
+        <Section title="Datos del producto" id="datos" collapsed>
           <ProductForm
             action={updateProduct.bind(null, id)}
             categories={categories}
-            mode="edit"
             initial={{
               name: product.name,
               category_id: product.category_id,
@@ -206,8 +210,11 @@ export default async function ProductPage({
                       {MOVEMENT_LABELS[movement.type]}
                     </span>{" "}
                     <span className="text-sm">
-                      {movement.product_variants.color} ·{" "}
-                      {movement.product_variants.size}
+                      {variantLabel(
+                        movement.product_variants.color,
+                        movement.product_variants.size,
+                        "",
+                      )}
                     </span>
                     {movement.note && (
                       <span className="block text-sm">{movement.note}</span>

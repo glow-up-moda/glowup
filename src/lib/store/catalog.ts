@@ -223,18 +223,23 @@ export async function getCategoryFacets(
   const products = data ?? [];
   const prices = products.map((product) => product.price_cents);
 
+  // Un producto sin variantes no aporta ni color ni talle a los filtros (§8).
   return {
     sizes: [
       ...new Set(
         products.flatMap((product) =>
-          product.product_variants.map((variant) => variant.size),
+          product.product_variants
+            .map((variant) => variant.size)
+            .filter((size) => size !== null),
         ),
       ),
     ].sort(compareSizes),
     colors: [
       ...new Set(
         products.flatMap((product) =>
-          product.product_variants.map((variant) => variant.color),
+          product.product_variants
+            .map((variant) => variant.color)
+            .filter((color) => color !== null),
         ),
       ),
     ].sort((a, b) => a.localeCompare(b, "es")),

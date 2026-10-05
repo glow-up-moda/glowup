@@ -76,10 +76,13 @@ export default async function ReportsPage({
       producto.name,
       (porProducto.get(producto.name) ?? 0) + linea.quantity,
     );
-    porTalle.set(
-      variante.size,
-      (porTalle.get(variante.size) ?? 0) + linea.quantity,
-    );
+    // Un producto sin variantes no tiene talle: no entra en el ranking (§8).
+    if (variante.size !== null) {
+      porTalle.set(
+        variante.size,
+        (porTalle.get(variante.size) ?? 0) + linea.quantity,
+      );
+    }
 
     if (producto.cost_cents == null) costoDesconocido = true;
     else costo += producto.cost_cents * linea.quantity;

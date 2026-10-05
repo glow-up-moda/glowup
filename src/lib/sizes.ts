@@ -11,15 +11,19 @@ function sizeRank(size: string): [number, number, string] {
   return [2, 0, trimmed];
 }
 
-export function compareSizes(a: string, b: string): number {
-  const [groupA, valueA, textA] = sizeRank(a);
-  const [groupB, valueB, textB] = sizeRank(b);
+/** El null de un producto sin variantes ordena primero (§8). */
+export function compareSizes(a: string | null, b: string | null): number {
+  const [groupA, valueA, textA] = sizeRank(a ?? "");
+  const [groupB, valueB, textB] = sizeRank(b ?? "");
   return groupA - groupB || valueA - valueB || textA.localeCompare(textB, "es");
 }
 
 export function compareVariants(
-  a: { color: string; size: string },
-  b: { color: string; size: string },
+  a: { color: string | null; size: string | null },
+  b: { color: string | null; size: string | null },
 ): number {
-  return a.color.localeCompare(b.color, "es") || compareSizes(a.size, b.size);
+  return (
+    (a.color ?? "").localeCompare(b.color ?? "", "es") ||
+    compareSizes(a.size, b.size)
+  );
 }

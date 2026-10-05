@@ -36,6 +36,13 @@ export function ProductPurchase({
     formData: FormData,
   ) => Promise<NotifyState>;
 }) {
+  // Un producto único tiene una sola fila de stock, sin color ni talle: no hay
+  // nada para elegir, así que no se muestran selectores (§7).
+  const simple =
+    product.variants.length === 1 &&
+    product.variants[0].color === null &&
+    product.variants[0].size === null;
+
   const firstAvailable = product.variants.find(
     (variant) => variant.isAvailable,
   );
@@ -47,8 +54,9 @@ export function ProductPurchase({
   const sizesForColor = product.variants.filter(
     (variant) => variant.color === color,
   );
-  const variant =
-    sizesForColor.find((candidate) => candidate.size === size) ?? null;
+  const variant = simple
+    ? product.variants[0]
+    : (sizesForColor.find((candidate) => candidate.size === size) ?? null);
   const onSale =
     product.compareAtPriceCents != null &&
     product.compareAtPriceCents > product.priceCents;
@@ -120,41 +128,45 @@ export function ProductPurchase({
         </fieldset>
       )}
 
-      <fieldset>
-        <div className="flex flex-wrap items-baseline justify-between gap-2">
-          <legend className="font-medium">Talle</legend>
-          <Link
-            href="/guia-de-talles"
-            className="inline-flex min-h-11 items-center text-sm underline underline-offset-4"
-          >
-            Guía de talles
-          </Link>
-        </div>
-        <div className="mt-2 flex flex-wrap gap-2">
-          {sizesForColor.map((option) => (
-            <label
-              key={option.id}
-              className={chipClass(size === option.size, !option.isAvailable)}
+      {!simple && (
+        <fieldset>
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <legend className="font-medium">Talle</legend>
+            <Link
+              href="/guia-de-talles"
+              className="inline-flex min-h-11 items-center text-sm underline underline-offset-4"
             >
-              <input
-                type="radio"
-                name="talle"
-                value={option.size}
-                checked={size === option.size}
-                onChange={() => setSize(option.size)}
-                className="sr-only"
-              />
-              {option.size}
-            </label>
-          ))}
-        </div>
-        {product.modelInfo && (
-          <p className="mt-2 text-sm">{product.modelInfo}</p>
-        )}
-      </fieldset>
+              Guía de talles
+            </Link>
+          </div>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {sizesForColor.map((option) => (
+              <label
+                key={option.id}
+                className={chipClass(size === option.size, !option.isAvailable)}
+              >
+                <input
+                  type="radio"
+                  name="talle"
+                  value={option.size ?? ""}
+                  checked={size === option.size}
+                  onChange={() => setSize(option.size)}
+                  className="sr-only"
+                />
+                {option.size}
+              </label>
+            ))}
+          </div>
+          {product.modelInfo && (
+            <p className="mt-2 text-sm">{product.modelInfo}</p>
+          )}
+        </fieldset>
+      )}
 
       {variant?.isLastUnits && variant.isAvailable && (
-        <p className="text-sm">Últimas unidades de este talle.</p>
+        <p className="text-sm">
+          {simple ? "Últimas unidades." : "Últimas unidades de este talle."}
+        </p>
       )}
 
       {variant && !variant.isAvailable ? (
@@ -164,7 +176,8 @@ export function ProductPurchase({
           className="flex flex-col gap-2"
         >
           <p>
-            Ese talle se agotó. Dejanos tu email y te avisamos apenas vuelva.
+            {simple ? "Se agotó" : "Ese talle se agotó"}. Dejanos tu email y te
+            avisamos apenas vuelva.
           </p>
           <div className="flex flex-wrap gap-2">
             <label htmlFor="email-aviso" className="sr-only">
@@ -202,7 +215,9 @@ export function ProductPurchase({
             label="Sumar al carrito"
             className="sm:px-10"
           />
-          {!size && <p className="text-sm">Elegí un talle para sumarlo.</p>}
+          {!simple && !size && (
+            <p className="text-sm">Elegí un talle para sumarlo.</p>
+          )}
         </div>
       )}
 
@@ -221,7 +236,7 @@ export function ProductPurchase({
             <AddToCartButton
               item={cartItem}
               disabled={!cartItem}
-              label={size ? "Sumar al carrito" : "Elegí un talle"}
+              label={simple || size ? "Sumar al carrito" : "Elegí un talle"}
               className="flex-1"
             />
           )}

@@ -99,3 +99,15 @@ export function fromLocalInput(value: string): string | null {
 export function plural(count: number, one: string, many: string): string {
   return `${count} ${count === 1 ? one : many}`;
 }
+
+/**
+ * Cómo se nombra una variante. Un producto sin variantes tiene una sola fila
+ * sin color ni talle (§8): ahí no hay nada que mostrar.
+ */
+export function variantLabel(
+  color: string | null,
+  size: string | null,
+  empty = "Sin variantes",
+): string {
+  return [color, size].filter(Boolean).join(" · ") || empty;
+}

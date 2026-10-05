@@ -44,19 +44,41 @@ export function Section({
   description,
   children,
   id,
+  collapsed,
 }: {
   title?: string;
   description?: ReactNode;
   children: ReactNode;
   id?: string;
+  /** Plegada: se abre al tocar el título. Para lo que no se mira siempre. */
+  collapsed?: boolean;
 }) {
-  return (
-    <section id={id} className="rounded-card bg-arena/60 p-4 md:p-6">
-      {title && <h2 className="font-display text-xl font-semibold">{title}</h2>}
+  const body = (
+    <>
       {description && (
         <div className="mt-1 text-sm text-azul/80">{description}</div>
       )}
       <div className={title || description ? "mt-4" : ""}>{children}</div>
+    </>
+  );
+
+  if (collapsed && title) {
+    return (
+      <section id={id} className="rounded-card bg-arena/60 p-4 md:p-6">
+        <details>
+          <summary className="min-h-11 cursor-pointer font-display text-xl font-semibold">
+            {title}
+          </summary>
+          {body}
+        </details>
+      </section>
+    );
+  }
+
+  return (
+    <section id={id} className="rounded-card bg-arena/60 p-4 md:p-6">
+      {title && <h2 className="font-display text-xl font-semibold">{title}</h2>}
+      {body}
     </section>
   );
 }

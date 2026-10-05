@@ -120,7 +120,11 @@ export default async function CategoriesPage({
                       <span className="block font-medium">{parent.name}</span>
                       <span className="block text-sm">
                         /{parent.slug} ·{" "}
-                        {plural(products.get(parent.id) ?? 0, "producto", "productos")}
+                        {plural(
+                          products.get(parent.id) ?? 0,
+                          "producto",
+                          "productos",
+                        )}
                       </span>
                     </span>
                     <IconChevronRight className="shrink-0" />

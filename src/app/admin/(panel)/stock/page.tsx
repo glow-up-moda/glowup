@@ -12,7 +12,7 @@ import { likePattern, param } from "@/lib/params";
 import { compareVariants } from "@/lib/sizes";
 import { MOVEMENT_LABELS, movementSign } from "@/lib/admin/stock";
 import { requireAdmin } from "@/lib/auth/admin";
-import { formatDateTime } from "@/lib/format";
+import { formatDateTime, variantLabel } from "@/lib/format";
 
 export const metadata: Metadata = { title: "Stock" };
 
@@ -21,8 +21,8 @@ const VARIANT_COLUMNS =
 
 type VariantRow = {
   id: string;
-  color: string;
-  size: string;
+  color: string | null;
+  size: string | null;
   sku: string | null;
   stock_on_hand: number;
   stock_reserved: number;
@@ -165,7 +165,7 @@ export default async function StockPage({
                           {row.products.name}
                         </Link>
                         <p className="text-sm">
-                          {row.color} · {row.size}
+                          {variantLabel(row.color, row.size, "Producto único")}
                           {row.sku ? ` · SKU ${row.sku}` : ""}
                         </p>
                       </div>
@@ -223,8 +223,11 @@ export default async function StockPage({
                         className="text-sm underline underline-offset-4"
                       >
                         {movement.product_variants.products?.name} ·{" "}
-                        {movement.product_variants.color} ·{" "}
-                        {movement.product_variants.size}
+                        {variantLabel(
+                          movement.product_variants.color,
+                          movement.product_variants.size,
+                          "",
+                        )}
                       </Link>
                     )}
                     {movement.note && (

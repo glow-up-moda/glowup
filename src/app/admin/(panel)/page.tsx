@@ -6,7 +6,7 @@ import { IconAlert, IconChevronRight } from "@/components/ui/icons";
 import { Notice } from "@/components/ui/notice";
 import type { DashboardSummary } from "@/lib/admin/dashboard";
 import { requireAdmin } from "@/lib/auth/admin";
-import { formatMoney, plural } from "@/lib/format";
+import { formatMoney, plural, variantLabel } from "@/lib/format";
 
 export const metadata: Metadata = { title: "Inicio" };
 
@@ -156,7 +156,11 @@ export default async function DashboardPage() {
                           {variant.product_name}
                         </span>
                         <span className="block text-sm">
-                          {variant.color} · {variant.size}
+                          {variantLabel(
+                            variant.color,
+                            variant.size,
+                            "Producto único",
+                          )}
                         </span>
                       </span>
                       <span className="shrink-0 font-medium">

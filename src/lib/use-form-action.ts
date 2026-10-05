@@ -14,6 +14,8 @@ export type FormState = {
   error?: string;
   errors?: Record<string, string>;
   values?: Record<string, string>;
+  /** Lo devuelve createProduct: el alta sigue con fotos y publicación (§7). */
+  productId?: string;
 };
 
 export const emptyForm: FormState = {};

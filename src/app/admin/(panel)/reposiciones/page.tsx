@@ -5,7 +5,7 @@ import { PageHeader } from "@/components/admin/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Notice } from "@/components/ui/notice";
 import { requireAdmin } from "@/lib/auth/admin";
-import { formatDate, plural } from "@/lib/format";
+import { formatDate, plural, variantLabel } from "@/lib/format";
 
 export const metadata: Metadata = { title: "Avisos de reposición" };
 
@@ -42,7 +42,7 @@ export default async function RestockNoticesPage() {
     const variante = fila.product_variants;
     const producto = variante?.products;
     if (!variante || !producto) continue;
-    const clave = `${producto.name} ${variante.color} ${variante.size}`;
+    const clave = `${producto.name} ${variante.color ?? ""} ${variante.size ?? ""}`;
     const actual = porVariante.get(clave);
     if (actual) {
       actual.emails.push(fila.email);
@@ -51,7 +51,7 @@ export default async function RestockNoticesPage() {
     porVariante.set(clave, {
       producto: producto.name,
       slug: producto.slug,
-      detalle: `${variante.color} · Talle ${variante.size}`,
+      detalle: variantLabel(variante.color, variante.size, "Producto único"),
       disponible: variante.stock_on_hand - variante.stock_reserved,
       emails: [fila.email],
       desde: fila.created_at,

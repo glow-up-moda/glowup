@@ -19,7 +19,7 @@ import {
   text,
 } from "@/lib/admin/forms";
 import { requireAdmin } from "@/lib/auth/admin";
-import { slugify } from "@/lib/format";
+import { slugify, variantLabel } from "@/lib/format";
 import { isUuid } from "@/lib/params";
 import { PRODUCT_IMAGES_BUCKET, thumbPath } from "@/lib/images";
 
@@ -86,7 +86,8 @@ async function freeSlug(
 
 // Grilla de variantes -------------------------------------------------------------
 
-type GridRow = { color: string; size: string; stock: number };
+// color y size en null: la fila es el producto a secas, sin variantes (§8).
+type GridRow = { color: string | null; size: string | null; stock: number };
 
 /**
  * Lee la grilla de colores × talles. Cada celda manda dos campos en paralelo,
@@ -177,7 +178,7 @@ async function createVariants(
       p_created_by: userId,
     });
     if (stockError)
-      return `Las variantes se crearon, pero no el stock de ${created.color} ${created.size}: ${dbErrorMessage(stockError)}`;
+      return `Las variantes se crearon, pero no el stock de ${variantLabel(created.color, created.size, "ese producto")}: ${dbErrorMessage(stockError)}`;
   }
 
   return null;
@@ -197,15 +198,14 @@ export async function createProduct(
   if (!slug)
     return { errors: { name: "Usá letras o números en el nombre." }, values };
 
-  // Nace publicado, a pedido de la dueña: lo que frena la carga del catálogo es
-  // tener que volver después a publicarlo. Sin fotos se ve el destello, y sin
-  // variantes aparece como "Sin stock" (§7).
+  // Nace como borrador y lo publica el formulario recién cuando terminó de
+  // subir las fotos (§7): así nunca se ve a medio cargar en la tienda.
   const grid = parseGrid(formData);
   if (grid.error) return { error: grid.error, values };
 
   const { data: product, error } = await supabase
     .from("products")
-    .insert({ ...fields, slug, is_published: true })
+    .insert({ ...fields, slug, is_published: false })
     .select("id")
     .single();
   if (error) {
@@ -219,20 +219,31 @@ export async function createProduct(
     return { error: dbErrorMessage(error), values };
   }
 
-  const variantError = await createVariants(
-    supabase,
-    userId,
-    product.id,
-    grid.rows,
-  );
+  // Sin colores ni talles, una sola fila sin color ni talle: es el producto a
+  // secas, y ahí vive su stock (§8).
+  const stockSuelto = text(formData, "stock_simple").trim();
+  const rows = grid.rows.length
+    ? grid.rows
+    : stockSuelto === ""
+      ? []
+      : [{ color: null, size: null, stock: Number(stockSuelto) }];
+  if (
+    rows.length === 1 &&
+    rows[0].color === null &&
+    (!Number.isInteger(rows[0].stock) ||
+      rows[0].stock < 0 ||
+      rows[0].stock > 999)
+  ) {
+    return { errors: { stock_simple: "Un número de 0 a 999." }, values };
+  }
+
+  const variantError = await createVariants(supabase, userId, product.id, rows);
 
   revalidatePath("/admin", "layout");
   revalidatePath("/", "layout");
-  redirect(
-    variantError
-      ? `/admin/productos/${product.id}?problema=${encodeURIComponent(variantError)}`
-      : `/admin/productos/${product.id}?nuevo=1`,
-  );
+  return variantError
+    ? { productId: product.id, error: variantError }
+    : { productId: product.id };
 }
 
 export async function updateProduct(
@@ -302,17 +313,19 @@ export async function deleteProduct(productId: string): Promise<FormState> {
 
 // Variantes ---------------------------------------------------------------------
 
+// Color y talle vacíos quieren decir "sin variantes": la fila es el producto a
+// secas y ahí vive su stock (§8).
 const variantSchema = z.object({
   color: z
     .string()
     .trim()
-    .min(1, "Escribí el color.")
-    .max(40, "Hasta 40 caracteres."),
+    .max(40, "Hasta 40 caracteres.")
+    .transform((value) => (value === "" ? null : value)),
   size: z
     .string()
     .trim()
-    .min(1, "Escribí el talle.")
-    .max(20, "Hasta 20 caracteres."),
+    .max(20, "Hasta 20 caracteres.")
+    .transform((value) => (value === "" ? null : value)),
   sku: z
     .string()
     .trim()

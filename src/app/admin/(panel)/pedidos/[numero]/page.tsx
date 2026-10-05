@@ -23,7 +23,7 @@ import {
 import { param } from "@/lib/params";
 import { MOVEMENT_LABELS, movementSign } from "@/lib/admin/stock";
 import { requireAdmin } from "@/lib/auth/admin";
-import { formatDateTime, formatMoney } from "@/lib/format";
+import { formatDateTime, formatMoney, variantLabel } from "@/lib/format";
 
 import {
   cancelOrder,
@@ -410,8 +410,11 @@ export default async function OrderPage({
                     </span>{" "}
                     {movementSign(movement.type, movement.quantity)} ·{" "}
                     {movement.product_variants.products.name}{" "}
-                    {movement.product_variants.color} /{" "}
-                    {movement.product_variants.size}
+                    {variantLabel(
+                      movement.product_variants.color,
+                      movement.product_variants.size,
+                      "",
+                    )}
                     <span className="block">
                       {formatDateTime(movement.created_at)}
                       {movement.note && ` · ${movement.note}`}

@@ -13,9 +13,14 @@ export const metadata: Metadata = {
 export default async function SizeGuidePage() {
   const supabase = createCatalogClient();
   const { data } = await supabase.from("product_variants").select("size");
-  const sizes = [...new Set((data ?? []).map((variant) => variant.size))].sort(
-    compareSizes,
-  );
+  // Un producto sin variantes no tiene talle: no entra en la guía (§8).
+  const sizes = [
+    ...new Set(
+      (data ?? [])
+        .map((variant) => variant.size)
+        .filter((size) => size !== null),
+    ),
+  ].sort(compareSizes);
 
   return (
     <PageShell

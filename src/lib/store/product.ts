@@ -7,8 +7,9 @@ import { listProducts, type ProductCard } from "./catalog";
 
 export type ProductVariant = {
   id: string;
-  color: string;
-  size: string;
+  /** Null en un producto sin variantes: la fila es el producto a secas (§8). */
+  color: string | null;
+  size: string | null;
   isAvailable: boolean;
   isLastUnits: boolean;
 };
@@ -80,7 +81,8 @@ export async function getProductBySlug(
     }))
     .sort(
       (a, b) =>
-        a.color.localeCompare(b.color, "es") || compareSizes(a.size, b.size),
+        (a.color ?? "").localeCompare(b.color ?? "", "es") ||
+        compareSizes(a.size ?? "", b.size ?? ""),
     );
 
   const ratings = (reviews ?? []).map((review) => review.rating);
@@ -102,10 +104,16 @@ export async function getProductBySlug(
       .sort((a, b) => a.sort_order - b.sort_order)
       .map(({ path, alt }) => ({ path, alt })),
     variants,
-    colors: [...new Set(variants.map((variant) => variant.color))],
-    sizes: [...new Set(variants.map((variant) => variant.size))].sort(
-      compareSizes,
-    ),
+    colors: [
+      ...new Set(
+        variants.map((variant) => variant.color).filter((c) => c !== null),
+      ),
+    ],
+    sizes: [
+      ...new Set(
+        variants.map((variant) => variant.size).filter((s) => s !== null),
+      ),
+    ].sort(compareSizes),
     reviews: (reviews ?? []).map((review) => ({
       id: review.id,
       rating: review.rating,
