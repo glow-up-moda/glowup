@@ -11,7 +11,7 @@ import {
   IconTrash,
   Sparkle,
 } from "@/components/ui/icons";
-import { formatMoney } from "@/lib/format";
+import { formatMoney, variantText } from "@/lib/format";
 import { MAX_PER_LINE, useCart } from "@/lib/store/cart";
 import { productImageUrl } from "@/lib/images";
 
@@ -185,20 +185,21 @@ export function CartDrawer({
                     >
                       {item.name}
                     </Link>
-                    {item.color && item.size ? (
-                      <p className="text-sm">
-                        {item.color} · Talle {item.size}
-                      </p>
-                    ) : (
+                    {item.kind === "kit" ? (
                       <p className="text-sm">Kit armado</p>
+                    ) : (
+                      variantText(item.color, item.size) && (
+                        <p className="text-sm">
+                          {variantText(item.color, item.size)}
+                        </p>
+                      )
                     )}
                     <div className="mt-2 flex items-center justify-between gap-3">
                       <label className="flex items-center gap-2 text-sm">
                         <span className="sr-only">
                           Cantidad de {item.name}
-                          {item.color
-                            ? ` ${item.color} talle ${item.size}`
-                            : ""}
+                          {variantText(item.color, item.size) &&
+                            `, ${variantText(item.color, item.size)}`}
                         </span>
                         <select
                           value={item.quantity}

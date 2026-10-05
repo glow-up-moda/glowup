@@ -111,3 +111,12 @@ export function variantLabel(
 ): string {
   return [color, size].filter(Boolean).join(" · ") || empty;
 }
+
+/**
+ * Cómo se nombra una variante en la tienda: "Rosa · Talle 85", "Rosa" sola o
+ * "Talle 85" solo. Los dos son opcionales (§8), así que un producto sin color
+ * ni talle devuelve cadena vacía y no se escribe nada.
+ */
+export function variantText(color: string | null, size: string | null): string {
+  return [color, size && `Talle ${size}`].filter(Boolean).join(" · ");
+}

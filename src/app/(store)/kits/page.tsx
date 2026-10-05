@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { AddToCartButton } from "@/components/store/add-to-cart";
 import { ProductImage } from "@/components/store/product-image";
 import { Badge } from "@/components/ui/badge";
-import { formatMoney } from "@/lib/format";
+import { formatMoney, variantText } from "@/lib/format";
 import { listKits } from "@/lib/store/catalog";
 import { getStoreSettings, transferPrice } from "@/lib/store/settings";
 
@@ -89,8 +89,9 @@ export default async function KitsPage() {
                       <ul className="mt-1 flex flex-col gap-1 text-sm">
                         {kit.items.map((item, index) => (
                           <li key={`${kit.id}-${index}`}>
-                            {item.quantity} × {item.name} · {item.color} · Talle{" "}
-                            {item.size}
+                            {item.quantity} × {item.name}
+                            {variantText(item.color, item.size) &&
+                              ` · ${variantText(item.color, item.size)}`}
                           </li>
                         ))}
                       </ul>

@@ -36,12 +36,12 @@ export function ProductPurchase({
     formData: FormData,
   ) => Promise<NotifyState>;
 }) {
-  // Un producto único tiene una sola fila de stock, sin color ni talle: no hay
-  // nada para elegir, así que no se muestran selectores (§7).
-  const simple =
-    product.variants.length === 1 &&
-    product.variants[0].color === null &&
-    product.variants[0].size === null;
+  // Color y talle son opcionales por separado (§8): un producto puede venir en
+  // tres colores de talle único, en cuatro talles de un solo color, en los dos
+  // o en ninguno. Solo se muestra el selector de lo que de verdad hay que
+  // elegir, y si no hay nada, la fila sin color ni talle es el producto a secas.
+  const hasColors = product.colors.length > 0;
+  const hasSizes = product.sizes.length > 0;
 
   const firstAvailable = product.variants.find(
     (variant) => variant.isAvailable,
@@ -51,12 +51,12 @@ export function ProductPurchase({
   );
   const [size, setSize] = useState<string | null>(null);
 
-  const sizesForColor = product.variants.filter(
-    (variant) => variant.color === color,
-  );
-  const variant = simple
-    ? product.variants[0]
-    : (sizesForColor.find((candidate) => candidate.size === size) ?? null);
+  const sizesForColor = hasColors
+    ? product.variants.filter((variant) => variant.color === color)
+    : product.variants;
+  const variant = hasSizes
+    ? (sizesForColor.find((candidate) => candidate.size === size) ?? null)
+    : (sizesForColor[0] ?? null);
   const onSale =
     product.compareAtPriceCents != null &&
     product.compareAtPriceCents > product.priceCents;
@@ -128,7 +128,7 @@ export function ProductPurchase({
         </fieldset>
       )}
 
-      {!simple && (
+      {hasSizes && (
         <fieldset>
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <legend className="font-medium">Talle</legend>
@@ -165,7 +165,7 @@ export function ProductPurchase({
 
       {variant?.isLastUnits && variant.isAvailable && (
         <p className="text-sm">
-          {simple ? "Últimas unidades." : "Últimas unidades de este talle."}
+          {hasSizes ? "Últimas unidades de este talle." : "Últimas unidades."}
         </p>
       )}
 
@@ -176,8 +176,8 @@ export function ProductPurchase({
           className="flex flex-col gap-2"
         >
           <p>
-            {simple ? "Se agotó" : "Ese talle se agotó"}. Dejanos tu email y te
-            avisamos apenas vuelva.
+            {hasSizes ? "Ese talle se agotó" : "Se agotó"}. Dejanos tu email y
+            te avisamos apenas vuelva.
           </p>
           <div className="flex flex-wrap gap-2">
             <label htmlFor="email-aviso" className="sr-only">
@@ -215,7 +215,7 @@ export function ProductPurchase({
             label="Sumar al carrito"
             className="sm:px-10"
           />
-          {!simple && !size && (
+          {hasSizes && !size && (
             <p className="text-sm">Elegí un talle para sumarlo.</p>
           )}
         </div>
@@ -236,7 +236,7 @@ export function ProductPurchase({
             <AddToCartButton
               item={cartItem}
               disabled={!cartItem}
-              label={simple || size ? "Sumar al carrito" : "Elegí un talle"}
+              label={!hasSizes || size ? "Sumar al carrito" : "Elegí un talle"}
               className="flex-1"
             />
           )}

@@ -13,7 +13,7 @@ import {
 import { Button, ButtonLink } from "@/components/ui/button";
 import { IconAlert } from "@/components/ui/icons";
 import { TrackEvent } from "@/components/store/track-event";
-import { formatMoney } from "@/lib/format";
+import { formatMoney, variantText } from "@/lib/format";
 import { useCart } from "@/lib/store/cart";
 import { type CheckoutTotals, couponMessage } from "@/lib/store/checkout";
 
@@ -652,9 +652,9 @@ export function CheckoutForm({
             <li key={item.id} className="flex justify-between gap-3 text-sm">
               <span className="min-w-0">
                 {item.quantity} × {item.name}
-                {item.color && (
+                {variantText(item.color, item.size) && (
                   <span className="block text-azul/80">
-                    {item.color} · Talle {item.size}
+                    {variantText(item.color, item.size)}
                   </span>
                 )}
               </span>

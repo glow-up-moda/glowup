@@ -89,6 +89,13 @@ async function freeSlug(
 // color y size en null: la fila es el producto a secas, sin variantes (§8).
 type GridRow = { color: string | null; size: string | null; stock: number };
 
+/** Una celda de la grilla: lo que viene vacío o en null no existe. */
+function cell(raw: unknown): string | null {
+  if (raw === null || raw === undefined) return null;
+  const value = String(raw).trim();
+  return value === "" ? null : value;
+}
+
 /**
  * Lee la grilla de colores × talles. Cada celda manda dos campos en paralelo,
  * `combo` y `stock`, así que `getAll` los devuelve alineados. Una celda vacía
@@ -121,15 +128,17 @@ function parseGrid(formData: FormData): {
         error: "No pudimos leer la grilla. Recargá la página.",
       };
 
-    const color = String(pair[0]).trim();
-    const size = String(pair[1]).trim();
-    if (!color || !size) continue;
+    // Una celda puede traer color, talle o los dos: lo que falta viaja en null
+    // y así se guarda, porque la base lo acepta (§8).
+    const color = cell(pair[0]);
+    const size = cell(pair[1]);
+    if (color === null && size === null) continue;
 
     const stock = Number(written);
     if (!Number.isInteger(stock) || stock < 0 || stock > 999)
       return {
         rows: [],
-        error: `El stock de ${color} talle ${size} tiene que ser un número de 0 a 999.`,
+        error: `El stock de ${variantLabel(color, size, "ese producto")} tiene que ser un número de 0 a 999.`,
       };
 
     rows.push({ color, size, stock });
@@ -203,6 +212,14 @@ export async function createProduct(
   const grid = parseGrid(formData);
   if (grid.error) return { error: grid.error, values };
 
+  const escrito = text(formData, "stock_simple").trim();
+  const suelto = escrito === "" ? null : Number(escrito);
+  if (
+    suelto !== null &&
+    (!Number.isInteger(suelto) || suelto < 0 || suelto > 999)
+  )
+    return { errors: { stock_simple: "Un número de 0 a 999." }, values };
+
   const { data: product, error } = await supabase
     .from("products")
     .insert({ ...fields, slug, is_published: false })
@@ -221,21 +238,11 @@ export async function createProduct(
 
   // Sin colores ni talles, una sola fila sin color ni talle: es el producto a
   // secas, y ahí vive su stock (§8).
-  const stockSuelto = text(formData, "stock_simple").trim();
-  const rows = grid.rows.length
+  const rows: GridRow[] = grid.rows.length
     ? grid.rows
-    : stockSuelto === ""
+    : suelto === null
       ? []
-      : [{ color: null, size: null, stock: Number(stockSuelto) }];
-  if (
-    rows.length === 1 &&
-    rows[0].color === null &&
-    (!Number.isInteger(rows[0].stock) ||
-      rows[0].stock < 0 ||
-      rows[0].stock > 999)
-  ) {
-    return { errors: { stock_simple: "Un número de 0 a 999." }, values };
-  }
+      : [{ color: null, size: null, stock: suelto }];
 
   const variantError = await createVariants(supabase, userId, product.id, rows);
 
