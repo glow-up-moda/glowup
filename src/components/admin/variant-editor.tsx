@@ -7,6 +7,7 @@ import { SubmitButton } from "@/components/ui/submit-button";
 import type { FormState } from "@/lib/admin/forms";
 
 import { ConfirmAction } from "./confirm-action";
+import { VariantGrid } from "./variant-grid";
 import { StockMovementForm } from "./stock-movement-form";
 import { useFormAction } from "@/lib/use-form-action";
 
@@ -56,11 +57,40 @@ export function VariantEditor({
       )}
       <details className="rounded-card bg-crema p-4">
         <summary className="min-h-11 cursor-pointer py-2 font-medium">
-          Agregar variante
+          Agregar variantes
         </summary>
-        <AddVariantForm action={addAction} />
+        <AddVariantsForm action={addAction} variants={variants} />
       </details>
     </div>
+  );
+}
+
+/** La grilla de colores × talles, con las que ya existen marcadas. */
+function AddVariantsForm({
+  action,
+  variants,
+}: {
+  action: FormAction;
+  variants: VariantRow[];
+}) {
+  const { state, pending, formRef, onSubmit } = useFormAction(action);
+
+  return (
+    <form
+      ref={formRef}
+      onSubmit={onSubmit}
+      className="mt-3 flex flex-col gap-4"
+      noValidate
+    >
+      {state.message && <Notice tone="success">{state.message}</Notice>}
+      {state.error && <Notice tone="error">{state.error}</Notice>}
+      <VariantGrid
+        existing={variants.map(({ color, size }) => ({ color, size }))}
+      />
+      <SubmitButton pending={pending} className="self-start">
+        Agregar
+      </SubmitButton>
+    </form>
   );
 }
 
@@ -114,66 +144,6 @@ function VariantCard({
         </div>
       </details>
     </li>
-  );
-}
-
-function AddVariantForm({ action }: { action: FormAction }) {
-  const { state, pending, formRef, onSubmit } = useFormAction(action, {
-    onSuccess: (form) => form.reset(),
-  });
-  const errors = state.errors ?? {};
-
-  return (
-    <form
-      ref={formRef}
-      onSubmit={onSubmit}
-      className="mt-3 flex flex-col gap-4"
-    >
-      {state.message && <Notice tone="success">{state.message}</Notice>}
-      {state.error && <Notice tone="error">{state.error}</Notice>}
-      <div className="grid gap-4 sm:grid-cols-2">
-        <TextField
-          label="Color"
-          name="color"
-          required
-          maxLength={40}
-          error={errors.color}
-        />
-        <TextField
-          label="Talle"
-          name="size"
-          required
-          maxLength={20}
-          error={errors.size}
-          hint="Por ejemplo 90, M o Único."
-        />
-        <TextField
-          label="Stock inicial"
-          name="initial_stock"
-          inputMode="numeric"
-          error={errors.initial_stock}
-          hint="Entra como ingreso de mercadería."
-        />
-        <TextField
-          label="SKU (opcional)"
-          name="sku"
-          maxLength={40}
-          error={errors.sku}
-        />
-        <TextField
-          label="Aviso de stock bajo (opcional)"
-          name="low_stock_threshold"
-          inputMode="numeric"
-          error={errors.low_stock_threshold}
-          hint="Vacío usa el de la configuración."
-        />
-      </div>
-      <div>
-        <SubmitButton pending={pending} pendingText="Agregando…">
-          Agregar variante
-        </SubmitButton>
-      </div>
-    </form>
   );
 }
 

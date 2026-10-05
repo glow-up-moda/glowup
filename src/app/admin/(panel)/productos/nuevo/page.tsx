@@ -17,7 +17,7 @@ export default async function NewProductPage() {
     <>
       <PageHeader
         title="Nuevo producto"
-        description="Se crea como borrador. Después le sumás variantes, stock y fotos, y lo publicás."
+        description="Se publica al crearlo. Cargá los colores y talles con su stock acá mismo; las fotos se suman después."
         back={{ href: "/admin/productos", label: "Productos" }}
       />
       <Section>

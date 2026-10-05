@@ -2,14 +2,11 @@
 
 import { useState } from "react";
 
-import {
-  CheckboxField,
-  SelectField,
-  TextAreaField,
-  TextField,
-} from "@/components/ui/field";
+import { SelectField, TextAreaField, TextField } from "@/components/ui/field";
 import { Notice } from "@/components/ui/notice";
 import { SubmitButton } from "@/components/ui/submit-button";
+
+import { VariantGrid } from "./variant-grid";
 import type { FormState } from "@/lib/admin/forms";
 import { formatPercent, margin, parsePesos } from "@/lib/format";
 
@@ -23,7 +20,6 @@ export type ProductValues = {
   price: string;
   compare_at_price: string;
   cost: string;
-  is_published: boolean;
 };
 
 export const emptyProduct: ProductValues = {
@@ -34,7 +30,6 @@ export const emptyProduct: ProductValues = {
   price: "",
   compare_at_price: "",
   cost: "",
-  is_published: false,
 };
 
 export function ProductForm({
@@ -53,8 +48,7 @@ export function ProductForm({
   const { state, pending, formRef, onSubmit } = useFormAction(action, {
     onSuccess: (form) => form.reset(),
   });
-  const value = (key: Exclude<keyof ProductValues, "is_published">) =>
-    initial[key];
+  const value = (key: keyof ProductValues) => initial[key];
   const errors = state.errors ?? {};
 
   // Margen en vivo mientras se escriben precio y costo (§10).
@@ -163,20 +157,13 @@ export function ProductForm({
         />
       </fieldset>
 
-      {mode === "edit" && (
-        <div>
-          <CheckboxField
-            label="Publicado en la tienda"
-            name="is_published"
-            defaultChecked={initial.is_published}
-            hint="Sin variantes no se puede comprar, y sin fotos se ve el destello de la marca."
-          />
-          {errors.is_published && (
-            <Notice tone="error" className="mt-2">
-              {errors.is_published}
-            </Notice>
-          )}
-        </div>
+      {mode === "create" && (
+        <fieldset className="flex flex-col gap-4">
+          <legend className="mb-2 font-display text-lg font-semibold">
+            Variantes y stock
+          </legend>
+          <VariantGrid />
+        </fieldset>
       )}
 
       <div>

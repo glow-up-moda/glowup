@@ -1,7 +1,7 @@
 "use client";
 
 import {
-  type FormEvent,
+  type ChangeEvent,
   startTransition,
   useActionState,
   useEffect,
@@ -9,9 +9,8 @@ import {
   useState,
 } from "react";
 
-import { Button } from "@/components/ui/button";
 import { TextField } from "@/components/ui/field";
-import { IconArrowDown, IconArrowUp, IconUpload } from "@/components/ui/icons";
+import { IconArrowDown, IconArrowUp } from "@/components/ui/icons";
 import { Notice } from "@/components/ui/notice";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { emptyForm, type FormState } from "@/lib/admin/forms";
@@ -102,26 +101,31 @@ function UploadForm({ action }: { action: FormAction }) {
     if (state.message) formRef.current?.reset();
   }, [state]);
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const formData = new FormData(event.currentTarget);
-    const file = formData.get("file");
+  // Se sube apenas se elige la foto: un botón más era un paso de más cargando
+  // el catálogo. El input se limpia al terminar, así se puede encadenar otra.
+  async function handleFile(event: ChangeEvent<HTMLInputElement>) {
+    const input = event.target;
+    const file = input.files?.[0];
+    const formData = new FormData();
 
-    if (!(file instanceof File) || file.size === 0)
-      return setClientError("Elegí una foto.");
-    if (file.size > MAX_ORIGINAL_BYTES)
+    if (!file || file.size === 0) return;
+    if (file.size > MAX_ORIGINAL_BYTES) {
+      input.value = "";
       return setClientError("La foto pesa más de 25 MB. Probá con otra.");
+    }
     setClientError(null);
     setPreparing(true);
     try {
       formData.set("file", await shrink(file), "foto.jpg");
     } catch {
       setPreparing(false);
+      input.value = "";
       return setClientError(
         "No pudimos leer esa foto. Probá con una JPG o PNG.",
       );
     }
     setPreparing(false);
+    input.value = "";
     startTransition(() => formAction(formData));
   }
 
@@ -131,11 +135,11 @@ function UploadForm({ action }: { action: FormAction }) {
   return (
     <form
       ref={formRef}
-      onSubmit={handleSubmit}
+      onSubmit={(event) => event.preventDefault()}
       className="flex flex-col gap-4 rounded-card bg-crema p-4"
       noValidate
     >
-      <h3 className="font-medium">Subir una foto</h3>
+      <h3 className="font-medium">Agregar una foto</h3>
       {state.message && <Notice tone="success">{state.message}</Notice>}
       {(clientError || state.error) && (
         <Notice tone="error">{clientError ?? state.error}</Notice>
@@ -149,26 +153,20 @@ function UploadForm({ action }: { action: FormAction }) {
           name="file"
           type="file"
           accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
-          required
+          disabled={busy}
+          onChange={handleFile}
           aria-describedby="photo-file-hint"
           aria-invalid={errors.file ? true : undefined}
           className="min-h-11 w-full rounded-input bg-arena px-3 py-2 text-base file:mr-3 file:rounded-full file:border-0 file:bg-brisa file:px-4 file:py-2 file:text-azul"
         />
         <p id="photo-file-hint" className="text-sm text-azul/80">
-          Ideal en 4:5, con fondo crema o arena y luz natural. Se guarda en
-          WebP.
-        </p>
-        {errors.file && <p className="text-sm text-error">{errors.file}</p>}
-      </div>
-      <div>
-        <Button type="submit" disabled={busy}>
-          <IconUpload />
           {preparing
             ? "Preparando la foto…"
             : pending
               ? "Subiendo…"
-              : "Subir foto"}
-        </Button>
+              : "Se sube sola al elegirla. Ideal en 4:5, con fondo crema o arena y luz natural."}
+        </p>
+        {errors.file && <p className="text-sm text-error">{errors.file}</p>}
       </div>
     </form>
   );

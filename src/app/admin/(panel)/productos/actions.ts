@@ -9,7 +9,6 @@ import { z } from "zod";
 
 import { dbErrorMessage } from "@/lib/admin/errors";
 import {
-  checkbox,
   fieldErrors,
   type FormState,
   formValues,
@@ -21,6 +20,7 @@ import {
 } from "@/lib/admin/forms";
 import { requireAdmin } from "@/lib/auth/admin";
 import { slugify } from "@/lib/format";
+import { isUuid } from "@/lib/params";
 import { PRODUCT_IMAGES_BUCKET, thumbPath } from "@/lib/images";
 
 // Productos ---------------------------------------------------------------------
@@ -39,7 +39,6 @@ const productSchema = z.object({
     "Escribí el precio tachado en pesos, sin centavos.",
   ),
   cost_cents: optionalPesos("Escribí el costo en pesos, sin centavos."),
-  is_published: checkbox,
 });
 
 function parseProduct(formData: FormData) {
@@ -51,7 +50,6 @@ function parseProduct(formData: FormData) {
     price_cents: text(formData, "price"),
     compare_at_price_cents: text(formData, "compare_at_price"),
     cost_cents: text(formData, "cost"),
-    is_published: text(formData, "is_published") || undefined,
   });
 }
 
@@ -86,11 +84,110 @@ async function freeSlug(
   return base + "-" + Date.now();
 }
 
+// Grilla de variantes -------------------------------------------------------------
+
+type GridRow = { color: string; size: string; stock: number };
+
+/**
+ * Lee la grilla de colores × talles. Cada celda manda dos campos en paralelo,
+ * `combo` y `stock`, así que `getAll` los devuelve alineados. Una celda vacía
+ * no crea nada: es la forma de decir "ese color no viene en ese talle".
+ */
+function parseGrid(formData: FormData): {
+  rows: GridRow[];
+  error?: string;
+} {
+  const combos = formData.getAll("combo").map(String);
+  const stocks = formData.getAll("stock").map(String);
+  const rows: GridRow[] = [];
+
+  for (const [index, raw] of combos.entries()) {
+    const written = (stocks[index] ?? "").trim();
+    if (written === "") continue;
+
+    let pair: unknown;
+    try {
+      pair = JSON.parse(raw);
+    } catch {
+      return {
+        rows: [],
+        error: "No pudimos leer la grilla. Recargá la página.",
+      };
+    }
+    if (!Array.isArray(pair) || pair.length !== 2)
+      return {
+        rows: [],
+        error: "No pudimos leer la grilla. Recargá la página.",
+      };
+
+    const color = String(pair[0]).trim();
+    const size = String(pair[1]).trim();
+    if (!color || !size) continue;
+
+    const stock = Number(written);
+    if (!Number.isInteger(stock) || stock < 0 || stock > 999)
+      return {
+        rows: [],
+        error: `El stock de ${color} talle ${size} tiene que ser un número de 0 a 999.`,
+      };
+
+    rows.push({ color, size, stock });
+  }
+
+  return { rows };
+}
+
+/** Crea las variantes de la grilla y anota el stock inicial como ingreso. */
+async function createVariants(
+  supabase: Awaited<ReturnType<typeof requireAdmin>>["supabase"],
+  userId: string,
+  productId: string,
+  rows: GridRow[],
+): Promise<string | null> {
+  if (rows.length === 0) return null;
+
+  const { data, error } = await supabase
+    .from("product_variants")
+    .insert(
+      rows.map((row) => ({
+        product_id: productId,
+        color: row.color,
+        size: row.size,
+      })),
+    )
+    .select("id, color, size");
+  if (error) {
+    return error.code === "23505"
+      ? "Hay un color y un talle repetidos en la grilla."
+      : dbErrorMessage(error);
+  }
+
+  for (const created of data ?? []) {
+    const row = rows.find(
+      (candidate) =>
+        candidate.color === created.color && candidate.size === created.size,
+    );
+    if (!row || row.stock <= 0) continue;
+
+    // El stock inicial entra como movimiento, así queda en el historial (§9.8).
+    const { error: stockError } = await supabase.rpc("restock_variant", {
+      p_variant_id: created.id,
+      p_quantity: row.stock,
+      p_note: "Stock inicial",
+      p_created_by: userId,
+    });
+    if (stockError)
+      return `Las variantes se crearon, pero no el stock de ${created.color} ${created.size}: ${dbErrorMessage(stockError)}`;
+  }
+
+  return null;
+}
+
 export async function createProduct(
   _prev: FormState,
   formData: FormData,
 ): Promise<FormState> {
-  const { supabase } = await requireAdmin();
+  const { supabase, userId } = await requireAdmin();
   const values = formValues(formData);
   const parsed = parseProduct(formData);
   if (!parsed.success) return { errors: fieldErrors(parsed.error), values };
@@ -100,10 +197,15 @@ export async function createProduct(
   if (!slug)
     return { errors: { name: "Usá letras o números en el nombre." }, values };
 
-  // Un producto nuevo arranca como borrador: todavía no tiene variantes ni fotos.
+  // Nace publicado, a pedido de la dueña: lo que frena la carga del catálogo es
+  // tener que volver después a publicarlo. Sin fotos se ve el destello, y sin
+  // variantes aparece como "Sin stock" (§7).
+  const grid = parseGrid(formData);
+  if (grid.error) return { error: grid.error, values };
+
   const { data: product, error } = await supabase
     .from("products")
-    .insert({ ...fields, slug, is_published: false })
+    .insert({ ...fields, slug, is_published: true })
     .select("id")
     .single();
   if (error) {
@@ -117,8 +219,20 @@ export async function createProduct(
     return { error: dbErrorMessage(error), values };
   }
 
+  const variantError = await createVariants(
+    supabase,
+    userId,
+    product.id,
+    grid.rows,
+  );
+
   revalidatePath("/admin", "layout");
-  redirect(`/admin/productos/${product.id}?nuevo=1`);
+  revalidatePath("/", "layout");
+  redirect(
+    variantError
+      ? `/admin/productos/${product.id}?problema=${encodeURIComponent(variantError)}`
+      : `/admin/productos/${product.id}?nuevo=1`,
+  );
 }
 
 export async function updateProduct(
@@ -230,63 +344,99 @@ function variantConflict(error: {
     : { size: "Ya existe ese color con ese talle." };
 }
 
-export async function addVariant(
+export async function addVariants(
   productId: string,
   _prev: FormState,
   formData: FormData,
 ): Promise<FormState> {
   const { supabase, userId } = await requireAdmin();
-  const values = formValues(formData);
-  const parsed = parseVariant(formData);
-  const initialStock =
-    text(formData, "initial_stock").trim() === ""
-      ? 0
-      : Number(text(formData, "initial_stock"));
 
-  const errors: Record<string, string> = parsed.success
-    ? {}
-    : fieldErrors(parsed.error);
-  if (
-    !Number.isInteger(initialStock) ||
-    initialStock < 0 ||
-    initialStock > 999
-  ) {
-    errors.initial_stock = "Un número de 0 a 999.";
-  }
-  if (!parsed.success || Object.keys(errors).length) return { errors, values };
+  const grid = parseGrid(formData);
+  if (grid.error) return { error: grid.error };
+  if (grid.rows.length === 0)
+    return {
+      error: "Escribí los colores y los talles, y el stock de al menos uno.",
+    };
 
-  const { data: variant, error } = await supabase
-    .from("product_variants")
-    .insert({ ...parsed.data, product_id: productId })
+  const problema = await createVariants(supabase, userId, productId, grid.rows);
+  revalidatePath("/admin", "layout");
+  revalidatePath("/", "layout");
+  if (problema) return { error: problema };
+
+  return {
+    message:
+      grid.rows.length === 1
+        ? "Listo: 1 variante agregada."
+        : `Listo: ${grid.rows.length} variantes agregadas.`,
+  };
+}
+
+/** Publicar y despublicar, que es lo que más se toca, tiene su propio control. */
+export async function setProductPublished(
+  productId: string,
+  published: boolean,
+): Promise<void> {
+  const { supabase } = await requireAdmin();
+  await supabase
+    .from("products")
+    .update({ is_published: published })
+    .eq("id", productId);
+
+  revalidatePath("/admin", "layout");
+  revalidatePath("/", "layout");
+}
+
+/**
+ * Duplica un producto con sus variantes, para cargar una tanda que comparte
+ * colores y talles. El stock arranca en cero y el SKU queda vacío, porque es
+ * único en toda la base. Las fotos no se copian: son archivos y el original se
+ * quedaría sin ellas al borrar la copia.
+ */
+export async function duplicateProduct(productId: string): Promise<void> {
+  const { supabase } = await requireAdmin();
+  const falla: (motivo: string) => never = (motivo) =>
+    redirect(
+      `/admin/productos/${productId}?problema=${encodeURIComponent(motivo)}`,
+    );
+  if (!isUuid(productId)) redirect("/admin/productos");
+
+  const { data: original } = await supabase
+    .from("products")
+    .select(
+      "name, category_id, description, measurements, cost_cents, price_cents, compare_at_price_cents",
+    )
+    .eq("id", productId)
+    .maybeSingle();
+  if (!original) redirect("/admin/productos");
+
+  const name = `${original.name} (copia)`;
+  const slug = await freeSlug(supabase, name);
+  if (!slug) falla("No pudimos armar la dirección de la copia.");
+
+  const { data: copy, error } = await supabase
+    .from("products")
+    .insert({ ...original, name, slug, is_published: false })
     .select("id")
     .single();
-  if (error) {
-    const conflict = variantConflict(error);
-    return conflict
-      ? { errors: conflict, values }
-      : { error: dbErrorMessage(error), values };
-  }
+  if (error) falla(dbErrorMessage(error));
 
-  // El stock inicial entra como movimiento, así queda en el historial.
-  if (initialStock > 0) {
-    const { error: stockError } = await supabase.rpc("restock_variant", {
-      p_variant_id: variant.id,
-      p_quantity: initialStock,
-      p_note: "Stock inicial",
-      p_created_by: userId,
-    });
-    if (stockError) {
-      revalidatePath("/admin", "layout");
-      return {
-        error: `La variante se creó, pero no el stock inicial: ${dbErrorMessage(stockError)}`,
-      };
-    }
+  const { data: variants } = await supabase
+    .from("product_variants")
+    .select("color, size, low_stock_threshold")
+    .eq("product_id", productId);
+  if (variants?.length) {
+    await supabase.from("product_variants").insert(
+      variants.map((variant) => ({
+        product_id: copy.id,
+        color: variant.color,
+        size: variant.size,
+        low_stock_threshold: variant.low_stock_threshold,
+      })),
+    );
   }
 
   revalidatePath("/admin", "layout");
-  return {
-    message: `Listo: ${parsed.data.color} ${parsed.data.size} agregada.`,
-  };
+  redirect(`/admin/productos/${copy.id}?copia=1`);
 }
 
 export async function updateVariant(

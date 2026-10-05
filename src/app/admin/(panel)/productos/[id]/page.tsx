@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Button } from "@/components/ui/button";
 import { notFound } from "next/navigation";
 
 import { ConfirmAction } from "@/components/admin/confirm-action";
@@ -20,11 +21,13 @@ import { requireAdmin } from "@/lib/auth/admin";
 import { centsToPesosInput, formatDateTime, formatMoney } from "@/lib/format";
 
 import {
-  addVariant,
+  addVariants,
   deleteProduct,
   deleteProductImage,
+  duplicateProduct,
   deleteVariant,
   moveProductImage,
+  setProductPublished,
   updateImageAlt,
   updateProduct,
   updateVariant,
@@ -114,16 +117,42 @@ export default async function ProductPage({
         title={product.name}
         back={{ href: "/admin/productos", label: "Productos" }}
         actions={
-          <Badge tone={product.is_published ? "success" : "neutral"}>
-            {product.is_published ? "Publicado" : "Borrador"}
-          </Badge>
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge tone={product.is_published ? "success" : "neutral"}>
+              {product.is_published ? "Publicado" : "Borrador"}
+            </Badge>
+            <form
+              action={setProductPublished.bind(null, id, !product.is_published)}
+            >
+              <Button type="submit" variant="secondary">
+                {product.is_published ? "Despublicar" : "Publicar"}
+              </Button>
+            </form>
+            <form action={duplicateProduct.bind(null, id)}>
+              <Button type="submit" variant="quiet">
+                Duplicar
+              </Button>
+            </form>
+          </div>
         }
       />
 
       {param(query.nuevo) && (
         <Notice tone="success" className="mb-4">
-          Producto creado como borrador. Sumale variantes con stock y fotos, y
-          después publicalo.
+          Producto creado y publicado. Sumale las fotos y ya queda listo.
+        </Notice>
+      )}
+
+      {param(query.copia) && (
+        <Notice className="mb-4">
+          Copia creada como borrador, con las mismas variantes y el stock en
+          cero. Las fotos no se copian.
+        </Notice>
+      )}
+
+      {param(query.problema) && (
+        <Notice tone="error" className="mb-4">
+          {param(query.problema)}
         </Notice>
       )}
 
@@ -131,7 +160,7 @@ export default async function ProductPage({
         <Section title="Variantes y stock" id="stock">
           <VariantEditor
             variants={sortedVariants}
-            addAction={addVariant.bind(null, id)}
+            addAction={addVariants.bind(null, id)}
             lowStockDefault={threshold}
           />
         </Section>
@@ -158,7 +187,6 @@ export default async function ProductPage({
                 product.compare_at_price_cents,
               ),
               cost: centsToPesosInput(product.cost_cents),
-              is_published: product.is_published,
             }}
           />
         </Section>
