@@ -40,7 +40,8 @@ from cat
 cross join (values
   ('Prueba Luna', 'prueba-luna', 3290000, true),
   ('Prueba oculto', 'prueba-oculto', 2750000, false),
-  ('Prueba Clásica', 'prueba-clasica', 990000, true)
+  ('Prueba Clásica', 'prueba-clasica', 990000, true),
+  ('Prueba simple', 'prueba-simple', 1500000, true)
 ) as x (name, slug, price_cents, is_published);
 
 insert into public.product_variants (product_id, color, size, sku, stock_on_hand)
@@ -57,6 +58,11 @@ from (values
   ('prueba-clasica', 'Natural', 'S', 'PRUEBA-CLAS-NAT-S', 4)
 ) as x (product_slug, color, size, sku, stock)
 join public.products p on p.slug = x.product_slug;
+
+-- Una prenda única: sin color ni talle. Es la variante que representa al
+-- producto a secas.
+insert into public.product_variants (product_id, color, size, stock_on_hand)
+select p.id, null, null, 3 from public.products p where p.slug = 'prueba-simple';
 
 with kit as (
   insert into public.kits (name, slug, price_cents, is_published)
@@ -849,6 +855,63 @@ begin
     end if;
 
     reset role;
+
+    -- 19. Un producto sin variantes ------------------------------------------------
+    -- Una prenda única: su fila de stock no tiene color ni talle, y el nombre de
+    -- la línea del pedido no arrastra " — / " de la concatenación.
+    declare
+      v_simple uuid;
+      v_pedido_simple uuid;
+      v_nombre text;
+    begin
+      select v.id into v_simple
+        from public.product_variants v
+        join public.products p on p.id = v.product_id
+       where p.slug = 'prueba-simple';
+
+      if v_simple is null then
+        raise exception 'Prueba 19a, la variante sin color ni talle existe';
+      end if;
+
+      v_res := public.quote_cart(jsonb_build_object(
+        'payment_method', 'transfer', 'shipping_method', 'pickup',
+        'items', jsonb_build_array(jsonb_build_object('variant_id', v_simple, 'quantity', 1))));
+      v_nombre := v_res #>> '{lines,0,name}';
+      if v_nombre is distinct from 'Prueba simple' then
+        raise exception 'Prueba 19b, la línea se llama solo como el producto: vino %', coalesce(v_nombre, 'nulo');
+      end if;
+
+      v_res := public.create_order_with_reservation(jsonb_build_object(
+        'email', 'simple@example.com', 'phone', '3430000000',
+        'payment_method', 'transfer', 'shipping_method', 'pickup',
+        'items', jsonb_build_array(jsonb_build_object('variant_id', v_simple, 'quantity', 1))));
+      v_pedido_simple := (v_res ->> 'order_id')::uuid;
+
+      select name_snapshot into v_nombre
+        from public.order_items where order_id = v_pedido_simple;
+      if v_nombre is distinct from 'Prueba simple' then
+        raise exception 'Prueba 19c, el pedido guarda el nombre sin color ni talle: vino %', coalesce(v_nombre, 'nulo');
+      end if;
+
+      perform public.confirm_order_payment(v_pedido_simple, null);
+      select stock_on_hand into v_count from public.product_variants where id = v_simple;
+      if v_count is distinct from 2 then
+        raise exception 'Prueba 19d, al cobrar descuenta stock: quedan %', v_count;
+      end if;
+
+      -- Dos filas sin color ni talle en el mismo producto no se pueden.
+      v_msg := null;
+      begin
+        insert into public.product_variants (product_id, color, size)
+        select product_id, null, null from public.product_variants where id = v_simple;
+      exception when unique_violation then
+        v_msg := 'repetida';
+      end;
+      if v_msg is distinct from 'repetida' then
+        raise exception 'Prueba 19e, un producto no puede tener dos variantes sin color ni talle';
+      end if;
+    end;
+
   exception when others then
     -- La secuencia no vuelve atrás con el rollback: se restaura antes de fallar.
     perform setval('public.order_number_seq', v_seq_last, v_seq_called);
