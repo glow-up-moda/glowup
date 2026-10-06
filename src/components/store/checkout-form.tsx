@@ -673,8 +673,8 @@ export function CheckoutForm({
 
           {totals && totals.couponDiscountCents > 0 && (
             <>
-              <dt>Cupón {totals.coupon?.code}</dt>
-              <dd className="text-right">
+              <dt className="text-caracola">Cupón {totals.coupon?.code}</dt>
+              <dd className="text-right text-caracola">
                 −{formatMoney(totals.couponDiscountCents)}
               </dd>
             </>
@@ -682,8 +682,8 @@ export function CheckoutForm({
 
           {totals && totals.transferDiscountCents > 0 && (
             <>
-              <dt>Descuento por transferencia</dt>
-              <dd className="text-right">
+              <dt className="text-caracola">Descuento por transferencia</dt>
+              <dd className="text-right text-caracola">
                 −{formatMoney(totals.transferDiscountCents)}
               </dd>
             </>

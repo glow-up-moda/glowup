@@ -86,7 +86,9 @@ export function ProductPurchase({
     <div className="flex flex-col gap-5">
       <div>
         <p className="flex flex-wrap items-baseline gap-2">
-          <span className="font-display text-2xl font-semibold">
+          <span
+            className={`font-display text-2xl font-semibold ${onSale ? "text-caracola" : ""}`}
+          >
             {formatMoney(product.priceCents)}
           </span>
           {onSale && (
@@ -97,7 +99,7 @@ export function ProductPurchase({
           {onSale && <Badge tone="offer">Oferta</Badge>}
         </p>
         {transferDiscountPercent > 0 && (
-          <p className="text-sm">
+          <p className="text-sm text-caracola">
             {formatMoney(transferPriceCents)} pagando por transferencia (
             {transferDiscountPercent}% off)
           </p>

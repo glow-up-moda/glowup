@@ -15,6 +15,13 @@
   --color-arena: #f5ebdd;
   --color-tostado: #c9a982;
 
+  /* Acento de ofertas y descuentos. El azul tiñe toda la página y una oferta
+     no se distinguía de un botón. Es el único color cálido que llega a 4.5:1
+     sobre crema (6.2) y sobre arena (5.5), y con crema encima (6.2): el coral
+     vivo se queda en 4.1 sobre arena. No se confunde con el rojo de error. */
+  --color-caracola: #a82e5e;
+  --color-caracola-suave: #f7dde4;
+
   /* Solo estados, siempre con ícono y texto, y solo sobre crema o arena. */
   --color-error: #b42318;
   --color-exito: #2f6b3a;

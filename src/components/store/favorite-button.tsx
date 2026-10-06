@@ -28,7 +28,7 @@ export function FavoriteButton({
     >
       <IconHeart
         key={String(saved)}
-        className={saved ? "pop fill-aqua" : ""}
+        className={saved ? "pop fill-caracola text-caracola" : ""}
         aria-hidden="true"
       />
     </button>

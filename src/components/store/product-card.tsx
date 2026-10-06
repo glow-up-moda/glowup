@@ -23,7 +23,9 @@ function Price({
     compareAtPriceCents != null && compareAtPriceCents > priceCents;
   return (
     <p className="mt-1 flex flex-wrap items-baseline gap-2">
-      <span className="font-medium">{formatMoney(priceCents)}</span>
+      <span className={`font-medium ${onSale ? "text-caracola" : ""}`}>
+        {formatMoney(priceCents)}
+      </span>
       {onSale && (
         <span className="text-sm line-through">
           {formatMoney(compareAtPriceCents)}

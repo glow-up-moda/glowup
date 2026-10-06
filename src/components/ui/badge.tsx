@@ -1,14 +1,15 @@
 import type { ReactNode } from "react";
 
 // Badges píldora. Los de estado usan el chip lleno del §5: texto crema sobre
-// error o éxito (6.2:1 y 6.0:1). Los demás, texto azul.
+// error o éxito (6.2:1 y 6.0:1). La oferta va en caracola, el acento de
+// descuentos (6.2:1 con crema encima). Los demás, texto azul.
 
 type Tone = "neutral" | "accent" | "offer" | "error" | "success";
 
 const styles: Record<Tone, string> = {
   neutral: "bg-arena text-azul",
   accent: "bg-brisa text-azul",
-  offer: "bg-azul text-crema",
+  offer: "bg-caracola text-crema",
   error: "bg-error text-crema",
   success: "bg-exito text-crema",
 };

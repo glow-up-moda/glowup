@@ -93,17 +93,20 @@ public/brand/             logos y favicon
 | `crema` | `#FFF9F0` | Fondo general |
 | `arena` | `#F5EBDD` | Tarjetas, separadores, fondo de inputs |
 | `tostado` | `#C9A982` | Detalle complementario; solo decoración |
+| `caracola` | `#A82E5E` | Acento de ofertas y descuentos |
+| `caracola-suave` | `#F7DDE4` | Fondo del bloque del cupón de bienvenida |
 
-Proporción aproximada: crema y arena 60%, azul 25%, aqua y brisa 10%, tostado 5%. Lo que hace reconocible a MAREA es crema + azul + aqua.
+Proporción aproximada: crema y arena 60%, azul 25%, aqua y brisa 10%, tostado y caracola 5%. Lo que hace reconocible a MAREA es crema + azul + aqua.
 
 Reglas de contraste (obligatorias, medidas sobre estos hex):
-- Permitido como texto: azul sobre crema (7.9:1), sobre arena (7.0:1) y sobre brisa (5.6:1); crema sobre azul (7.9:1, y 6.2:1 en el hover `azul/90`).
+- Permitido como texto: azul sobre crema (7.9:1), sobre arena (7.0:1) y sobre brisa (5.6:1); crema sobre azul (7.9:1, y 6.2:1 en el hover `azul/90`); caracola sobre crema (6.2:1) y sobre arena (5.5:1), crema sobre caracola (6.2:1) y azul sobre caracola-suave (6.5:1).
 - Prohibido: aqua o tostado como color de texto sobre crema o arena (2.3:1 y 2.1:1).
 - Prohibido: cualquier texto sobre aqua (azul 3.4:1, crema 2.3:1) o sobre tostado (azul 3.7:1, crema 2.1:1). **Aqua y tostado son superficies decorativas, nunca fondo de texto.**
 - Prohibido: texto crema sobre brisa (1.4:1). Sobre brisa el texto va en azul.
 - Botón principal: fondo azul, texto crema. Secundario: borde y texto azul, fondo transparente. El azul es el color de los botones porque el aqua no sostiene texto.
 - Links: azul con subrayado.
 - Las estrellas de las reseñas van en azul: en aqua no se distinguen del fondo.
+- **Caracola es el acento de ofertas y descuentos**, y nada más: badge "Oferta", el precio cuando está rebajado (el tachado sigue en azul), la línea del descuento por transferencia, lo que se descuenta en el resumen del checkout y el corazón de favoritos marcado. Fuera de eso no aparece: botones, links, texto común, fondos de sección, anillo de foco y logo siguen en azul. Se eligió por contraste: es el único cálido que pasa 4.5:1 sobre crema **y** sobre arena, que es el fondo de las tarjetas; el coral vivo (`#C9442F`) se queda en 4.1:1 sobre arena. Y no se confunde con el rojo de error, que cereza o terracota sí.
 - Aqua puede ser una superficie llena si nada tiene que leerse encima y la información también está en texto (la barra de "te faltan $X para el envío gratis").
 - Sin modo oscuro.
 

@@ -68,7 +68,9 @@ export default async function KitsPage() {
                   </div>
 
                   <p className="mt-2 flex flex-wrap items-baseline gap-2">
-                    <span className="font-display text-xl font-semibold">
+                    <span
+                      className={`font-display text-xl font-semibold ${onSale ? "text-caracola" : ""}`}
+                    >
                       {formatMoney(kit.priceCents)}
                     </span>
                     {onSale && (
@@ -78,7 +80,7 @@ export default async function KitsPage() {
                     )}
                   </p>
                   {settings.transferDiscountPercent > 0 && (
-                    <p className="text-sm">
+                    <p className="text-sm text-caracola">
                       {formatMoney(withTransfer)} pagando por transferencia
                     </p>
                   )}

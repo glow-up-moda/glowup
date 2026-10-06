@@ -180,7 +180,7 @@ export default async function HomePage() {
       </section>
 
       <section className="mx-auto max-w-6xl px-4 py-10">
-        <div className="rounded-card bg-brisa px-4 py-8 md:px-8">
+        <div className="rounded-card bg-caracola-suave px-4 py-8 md:px-8">
           <h2 className="font-display text-2xl font-semibold">
             Tu primera compra, con descuento
           </h2>
