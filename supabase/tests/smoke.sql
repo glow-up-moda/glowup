@@ -601,7 +601,7 @@ begin
 
     -- Pero sí lee por la vista las claves que muestra la tienda, y solo esas.
     select count(*) into v_count from public.public_settings;
-    if v_count is distinct from 7
+    if v_count is distinct from 9
        or (select value #>> '{}' from public.public_settings where key = 'transfer_discount_percent') is distinct from '10'
        or exists (select 1 from public.public_settings where key in ('bank_alias', 'bank_cbu')) then
       raise exception 'Prueba 15m2, anon lee la configuración de la tienda sin el alias ni el CBU: ve % claves', v_count;
@@ -941,6 +941,31 @@ begin
       end if;
 
       update public.categories set image_path = null where id = v_cat;
+    end;
+
+    -- 21. El nombre y la foto de los combos ----------------------------------------
+    -- Viven en settings porque /kits no es una categoría, y la tienda los lee
+    -- por la vista pública: si no están ahí, el menú se queda sin etiqueta.
+    begin
+      if not exists (select 1 from public.settings where key = 'kits_label') then
+        raise exception 'Prueba 21a, kits_label existe en settings';
+      end if;
+
+      select count(*) into v_count from public.public_settings
+       where key in ('kits_label', 'kits_image_path');
+      if v_count <> 2 then
+        raise exception 'Prueba 21b, los dos salen por public_settings: vinieron %', v_count;
+      end if;
+
+      v_msg := null;
+      begin
+        perform public.set_settings(jsonb_build_object('kits_label', 'Combos de prueba'));
+      exception when others then
+        v_msg := sqlerrm;
+      end;
+      if v_msg is not null then
+        raise exception 'Prueba 21c, set_settings acepta kits_label: %', v_msg;
+      end if;
     end;
 
   exception when others then
