@@ -9,7 +9,7 @@ import { createCatalogClient } from "@/lib/supabase/catalog";
 export const metadata: Metadata = {
   title: "Envíos y cambios · MAREA",
   description:
-    "Zonas, costos y plazos de envío, retiro en Paraná, embalaje discreto y cómo hacer un cambio.",
+    "Zonas, costos y plazos de envío, retiro en Paraná y cómo hacer un cambio.",
 };
 
 export default async function ShippingPage() {
@@ -82,26 +82,14 @@ export default async function ShippingPage() {
         {settings.pickupHours && <p>{settings.pickupHours}</p>}
       </Block>
 
-      <Block title="Embalaje discreto">
-        <p>
-          Todo viaja en un paquete neutro: desde afuera no se ve la marca ni qué
-          hay adentro. Si es un regalo, podés pedir la caja sin precios y una
-          tarjeta con tu mensaje al hacer el pedido.
-        </p>
-      </Block>
-
       <Block title="Cambios">
         <p>
-          Tenés 15 días desde que recibís el pedido para cambiar una prenda sin
-          uso, con su etiqueta y en su empaque original.
+          Los artículos tienen un plazo límite de cambio de 48 hs por talle o
+          fallas de fábrica.
         </p>
         <p>
-          Por razones de higiene, las bombachas y los trajes de baño no tienen
-          cambio. Los corpiños, bodies, accesorios y toallones sí.
-        </p>
-        <p>
-          Escribinos por WhatsApp con el número de pedido y coordinamos. Si el
-          cambio es por una falla nuestra, el envío lo pagamos nosotras.
+          Por cuestiones de higiene, la ropa interior y las mallas no cuentan
+          con cambio.
         </p>
       </Block>
     </PageShell>
