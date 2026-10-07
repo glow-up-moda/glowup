@@ -1,7 +1,11 @@
-// Fotos de productos en Supabase Storage (bucket público product-images).
-// Cada foto tiene dos archivos WebP: el principal y una miniatura "-thumb".
+// Fotos del catálogo en Supabase Storage (bucket público product-images).
+// Guarda las de producto, cada una con dos archivos WebP —el principal y una
+// miniatura "-thumb"—, y las de categoría, que son una sola, bajo categories/.
 
 export const PRODUCT_IMAGES_BUCKET = "product-images";
+
+/** Tope del servidor al subir. El navegador ya la achicó antes de mandarla. */
+export const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
 
 export function thumbPath(path: string): string {
   return path.replace(/\.webp$/, "-thumb.webp");

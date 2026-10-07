@@ -1,13 +1,17 @@
 "use server";
 
+import { randomUUID } from "node:crypto";
+
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import sharp from "sharp";
 import { z } from "zod";
 
 import { dbErrorMessage } from "@/lib/admin/errors";
 import { fieldErrors, type FormState, text } from "@/lib/admin/forms";
 import { requireAdmin } from "@/lib/auth/admin";
 import { slugify } from "@/lib/format";
+import { MAX_UPLOAD_BYTES, PRODUCT_IMAGES_BUCKET } from "@/lib/images";
 import { isUuid } from "@/lib/params";
 
 // Categorías y subcategorías (§7). La tienda arma sus rutas con esto:
@@ -249,4 +253,100 @@ export async function moveCategory(
 
   revalidatePath("/admin", "layout");
   revalidatePath("/", "layout");
+}
+
+/**
+ * La foto de la tarjeta del inicio. Una sola por categoría y cuadrada, que es
+ * como se muestra; el navegador ya la achicó a 2000px antes de mandarla y acá
+ * se recorta a 800 y se pasa a WebP, igual que las de producto (§7).
+ */
+export async function uploadCategoryImage(
+  id: string,
+  _prev: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  const { supabase } = await requireAdmin();
+  if (!isUuid(id)) return { error: "No encontramos esa categoría." };
+
+  const file = formData.get("file");
+  if (!(file instanceof File) || file.size === 0)
+    return { errors: { file: "Elegí una foto." } };
+  if (file.size > MAX_UPLOAD_BYTES)
+    return { errors: { file: "La foto pesa demasiado. Probá con otra." } };
+
+  let webp: Buffer;
+  try {
+    webp = await sharp(Buffer.from(await file.arrayBuffer()), {
+      failOn: "error",
+    })
+      .rotate()
+      .resize({ width: 800, height: 800, fit: "cover" })
+      .webp({ quality: 82 })
+      .toBuffer();
+  } catch {
+    return {
+      errors: { file: "No pudimos leer esa foto. Probá con una JPG o PNG." },
+    };
+  }
+
+  const { data: category } = await supabase
+    .from("categories")
+    .select("image_path")
+    .eq("id", id)
+    .maybeSingle();
+  if (!category) return { error: "No encontramos esa categoría." };
+
+  // Nombre nuevo en cada subida: el archivo se sirve con caché de un año, así
+  // que reemplazarlo con el mismo nombre dejaría la foto vieja a la vista.
+  const path = `categories/${id}/${randomUUID()}.webp`;
+  const storage = supabase.storage.from(PRODUCT_IMAGES_BUCKET);
+  const { error: uploadError } = await storage.upload(path, webp, {
+    contentType: "image/webp",
+    cacheControl: "31536000",
+    upsert: false,
+  });
+  if (uploadError) return { error: "No se pudo subir la foto. Probá de nuevo." };
+
+  const { error } = await supabase
+    .from("categories")
+    .update({ image_path: path })
+    .eq("id", id);
+  if (error) {
+    await storage.remove([path]);
+    return { error: dbErrorMessage(error, "No se pudo guardar la foto.") };
+  }
+
+  // El archivo viejo recién se borra cuando el nuevo ya está guardado.
+  if (category.image_path) await storage.remove([category.image_path]);
+
+  revalidatePath("/admin", "layout");
+  revalidatePath("/", "layout");
+  return { message: "Foto subida." };
+}
+
+export async function removeCategoryImage(id: string): Promise<FormState> {
+  const { supabase } = await requireAdmin();
+  if (!isUuid(id)) return { error: "No encontramos esa categoría." };
+
+  const { data: category } = await supabase
+    .from("categories")
+    .select("image_path")
+    .eq("id", id)
+    .maybeSingle();
+  if (!category?.image_path) return { message: "No tenía foto." };
+
+  const { error } = await supabase
+    .from("categories")
+    .update({ image_path: null })
+    .eq("id", id);
+  if (error)
+    return { error: dbErrorMessage(error, "No se pudo sacar la foto.") };
+
+  await supabase.storage
+    .from(PRODUCT_IMAGES_BUCKET)
+    .remove([category.image_path]);
+
+  revalidatePath("/admin", "layout");
+  revalidatePath("/", "layout");
+  return { message: "Foto borrada." };
 }

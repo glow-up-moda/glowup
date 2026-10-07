@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 
 import { KitCardItem, ProductCard } from "@/components/store/product-card";
@@ -7,6 +8,7 @@ import { ButtonLink } from "@/components/ui/button";
 import { Sparkle } from "@/components/ui/icons";
 import { formatMoney } from "@/lib/format";
 import { getNavigation, listKits, listProducts } from "@/lib/store/catalog";
+import { productImageUrl } from "@/lib/images";
 import { getStoreSettings } from "@/lib/store/settings";
 
 export const metadata: Metadata = {
@@ -115,16 +117,27 @@ export default async function HomePage() {
             ...categories.map((category) => ({
               href: `/${category.slug}`,
               name: category.name,
+              imagePath: category.imagePath,
             })),
-            { href: "/kits", name: "Kits" },
+            { href: "/kits", name: "Kits", imagePath: null },
           ].map((category) => (
             <li key={category.href}>
               <Link
                 href={category.href}
                 className="group flex flex-col gap-3 rounded-card focus-visible:outline-offset-4"
               >
-                <span className="flex aspect-square items-center justify-center overflow-hidden rounded-card bg-arena transition-transform duration-300 ease-brand group-hover:scale-[1.02]">
-                  <Sparkle className="size-10 text-brisa" />
+                <span className="relative flex aspect-square items-center justify-center overflow-hidden rounded-card bg-arena transition-transform duration-300 ease-brand group-hover:scale-[1.02]">
+                  {category.imagePath ? (
+                    <Image
+                      src={productImageUrl(category.imagePath)}
+                      alt=""
+                      fill
+                      sizes="(min-width: 768px) 20rem, 45vw"
+                      className="object-cover"
+                    />
+                  ) : (
+                    <Sparkle className="size-10 text-brisa" />
+                  )}
                 </span>
                 <span className="font-display text-lg font-medium">
                   {category.name}

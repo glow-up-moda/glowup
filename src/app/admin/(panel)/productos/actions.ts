@@ -21,7 +21,11 @@ import {
 import { requireAdmin } from "@/lib/auth/admin";
 import { slugify, variantLabel } from "@/lib/format";
 import { isUuid } from "@/lib/params";
-import { PRODUCT_IMAGES_BUCKET, thumbPath } from "@/lib/images";
+import {
+  MAX_UPLOAD_BYTES,
+  PRODUCT_IMAGES_BUCKET,
+  thumbPath,
+} from "@/lib/images";
 
 // Productos ---------------------------------------------------------------------
 
@@ -518,9 +522,6 @@ export async function deleteVariant(variantId: string): Promise<FormState> {
 }
 
 // Fotos -------------------------------------------------------------------------
-
-// El navegador ya las achica antes de subirlas; esto es solo el tope del servidor.
-const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
 
 export async function uploadProductImage(
   productId: string,

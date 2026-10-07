@@ -44,7 +44,14 @@ export type Category = {
   id: string;
   name: string;
   slug: string;
-  children: { id: string; name: string; slug: string }[];
+  /** La foto de la tarjeta del inicio, o null si no cargó ninguna. */
+  imagePath: string | null;
+  children: {
+    id: string;
+    name: string;
+    slug: string;
+    imagePath: string | null;
+  }[];
 };
 
 type ProductRow = {
@@ -62,7 +69,7 @@ export const getNavigation = cache(async (): Promise<Category[]> => {
   const supabase = createCatalogClient();
   const { data } = await supabase
     .from("categories")
-    .select("id, name, slug, parent_id, sort_order")
+    .select("id, name, slug, parent_id, sort_order, image_path")
     .order("sort_order");
   const categories = data ?? [];
 
@@ -72,9 +79,15 @@ export const getNavigation = cache(async (): Promise<Category[]> => {
       id: parent.id,
       name: parent.name,
       slug: parent.slug,
+      imagePath: parent.image_path,
       children: categories
         .filter((child) => child.parent_id === parent.id)
-        .map(({ id, name, slug }) => ({ id, name, slug })),
+        .map(({ id, name, slug, image_path }) => ({
+          id,
+          name,
+          slug,
+          imagePath: image_path,
+        })),
     }));
 });
 

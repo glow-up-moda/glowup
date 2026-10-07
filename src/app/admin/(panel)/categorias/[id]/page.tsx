@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { CategoryForm } from "@/components/admin/category-form";
+import { CategoryImage } from "@/components/admin/category-image";
 import { ConfirmAction } from "@/components/admin/confirm-action";
 import { PageHeader, Section } from "@/components/admin/page-header";
 import { Notice } from "@/components/ui/notice";
@@ -9,7 +10,12 @@ import { requireAdmin } from "@/lib/auth/admin";
 import { plural } from "@/lib/format";
 import { isUuid, param } from "@/lib/params";
 
-import { deleteCategory, updateCategory } from "../actions";
+import {
+  deleteCategory,
+  removeCategoryImage,
+  updateCategory,
+  uploadCategoryImage,
+} from "../actions";
 
 export const metadata: Metadata = { title: "Categoría" };
 
@@ -29,7 +35,7 @@ export default async function CategoryPage({
 
   const { data: category } = await supabase
     .from("categories")
-    .select("id, name, slug, parent_id")
+    .select("id, name, slug, parent_id, image_path")
     .eq("id", id)
     .maybeSingle();
   if (!category) notFound();
@@ -72,6 +78,18 @@ export default async function CategoryPage({
             parent_id: category.parent_id ?? "",
           }}
           mode="edit"
+        />
+      </Section>
+
+      <Section
+        title="Foto"
+        description="La que se ve en la tarjeta del inicio."
+      >
+        <CategoryImage
+          name={category.name}
+          imagePath={category.image_path}
+          uploadAction={uploadCategoryImage.bind(null, id)}
+          removeAction={removeCategoryImage.bind(null, id)}
         />
       </Section>
 

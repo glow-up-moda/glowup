@@ -277,7 +277,9 @@ Tiene que ser cómodo de usar desde el celular.
   - El stock inicial de cada celda entra como ingreso de mercadería, así queda en el historial.
   - **Duplicar** copia los datos y las variantes (con stock en cero y sin SKU, que es único en toda la base) y deja la copia como borrador. Las fotos no se copian: son archivos, y el original se quedaría sin ellas al borrar la copia.
   - Fotos: en la ficha **se suben apenas se eligen**, sin botón aparte. El navegador las achica a 2000 px antes de subirlas (`src/lib/admin/photo.ts`), y el servidor las pasa a WebP con `sharp` (hasta 1600 × 2000 y una miniatura de 480 × 600) y las guarda en Storage. El texto alternativo no se escribe al subir: arranca con el nombre del producto, que es lo que exige la columna, y se puede mejorar después desde "Descripción" en cada foto.
-- **Categorías** (`/admin/categorias`): el menú de la tienda. Alta, edición, borrado y orden, con las subcategorías anidadas bajo su categoría y la cuenta de productos de cada una. La dirección sale del nombre, igual que en productos, así que renombrar una le cambia el link. **Solo dos niveles**, porque la tienda enruta `/[categoria]` y `/[categoria]/[subcategoria]`: una subcategoría no puede colgar de otra, y una categoría con subcategorías adentro no puede pasar a ser subcategoría. El orden se cambia con flechas que intercambian el `sort_order` con la vecina del mismo grupo. Borrar solo se ofrece cuando está vacía; con productos o subcategorías adentro, la base lo impide (`on delete restrict`) y la pantalla lo explica en vez de dejar que falle.
+- **Categorías** (`/admin/categorias`): el menú de la tienda. Alta, edición, borrado, orden y **la foto de la tarjeta del inicio**, con las subcategorías anidadas bajo su categoría y la cuenta de productos de cada una.
+  - La foto se sube apenas se elige, igual que las de producto, y se recorta cuadrada a 800px en WebP: la tarjeta del inicio es cuadrada. Es una sola; subir otra reemplaza la anterior y recién entonces borra el archivo viejo. Sin foto, la tarjeta muestra el destello de la marca.
+  - El nombre del archivo lleva un uuid nuevo en cada subida, porque se sirve con caché de un año: con el mismo nombre quedaría a la vista la foto vieja. La dirección sale del nombre, igual que en productos, así que renombrar una le cambia el link. **Solo dos niveles**, porque la tienda enruta `/[categoria]` y `/[categoria]/[subcategoria]`: una subcategoría no puede colgar de otra, y una categoría con subcategorías adentro no puede pasar a ser subcategoría. El orden se cambia con flechas que intercambian el `sort_order` con la vecina del mismo grupo. Borrar solo se ofrece cuando está vacía; con productos o subcategorías adentro, la base lo impide (`on delete restrict`) y la pantalla lo explica en vez de dejar que falle.
 - **Stock:** ingreso de mercadería, ajustes, venta manual rápida (Instagram, WhatsApp, en persona) e historial de movimientos.
 - **Formularios del panel:** con `useFormAction` (`src/components/admin/use-form-action.ts`), no con `<form action>` directo. React 19 resetea el formulario al terminar la acción y eso cambia los `<select>` aunque haya fallado: una venta con error volvía a "Entró mercadería".
 - **Precios:** aumento o descuento masivo por categoría o selección, con redondeo, vista previa y margen.
@@ -312,7 +314,8 @@ Tiene que ser cómodo de usar desde el celular.
 
 Montos siempre en **enteros de centavos**. Fechas guardadas en UTC y mostradas en `America/Argentina/Buenos_Aires`. El esquema vive en `supabase/migrations/`; después de cada migración, regenerar los tipos con `npm run db:types`.
 
-- `categories` (id, parent_id, name, slug único, sort_order)
+- `categories` (id, parent_id, name, slug único, sort_order, image_path)
+  - `image_path` es la foto de la tarjeta del inicio: una ruta en el bucket `product-images`, bajo `categories/<id>/`, o null. Si está, no puede ser una cadena vacía: la tarjeta pediría un archivo que no existe.
 - `products` (id, category_id, name, slug único, description, materials_care, measurements, model_info, cost_cents, price_cents, compare_at_price_cents, is_published, seo_title, seo_description, created_at)
   - Un producto vendido no se puede borrar (sus variantes están en pedidos): se despublica.
 - `product_images` (id, product_id, path, alt obligatorio, sort_order)
@@ -360,7 +363,7 @@ Montos siempre en **enteros de centavos**. Fechas guardadas en UTC y mostradas e
 - **El panel (`authenticated`)** lee y escribe con la sesión de cada administradora, no con la clave secreta. Tiene permisos completos sobre lo que administra, pero cada política exige `private.is_admin()`: estar en `admin_users`. Ya no se exige el `aal2` del JWT (§7). Una clienta con cuenta, aunque tenga segundo factor, no ve catálogo, pedidos ni configuración.
 - `favorites`: cada persona logueada lee, agrega y borra solo los suyos.
 - La clave secreta queda para lo que no tiene sesión: checkout, webhooks, cron y el alta de administradoras.
-- Fotos: bucket público `product-images`, solo WebP y hasta 2 MB. Solo las administradoras suben, reemplazan o borran.
+- Fotos: bucket público `product-images`, solo WebP y hasta 2 MB. Guarda las de producto (bajo `products/`) y las de categoría (bajo `categories/`). Solo las administradoras suben, reemplazan o borran.
 
 ### Funciones de la base
 
