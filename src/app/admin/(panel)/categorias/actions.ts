@@ -258,7 +258,11 @@ export async function moveCategory(
 /**
  * La foto de la tarjeta del inicio. Una sola por categoría y cuadrada, que es
  * como se muestra; el navegador ya la achicó a 2000px antes de mandarla y acá
- * se recorta a 800 y se pasa a WebP, igual que las de producto (§7).
+ * se recorta a 1200 y se pasa a WebP, igual que las de producto (§7).
+ *
+ * 1200 y calidad 90 porque este archivo no es el que se sirve: Netlify lo
+ * vuelve a achicar y a comprimir para cada tamaño, y partir de uno ya
+ * machacado deja las letras de los productos con bordes sucios.
  */
 export async function uploadCategoryImage(
   id: string,
@@ -280,8 +284,8 @@ export async function uploadCategoryImage(
       failOn: "error",
     })
       .rotate()
-      .resize({ width: 800, height: 800, fit: "cover" })
-      .webp({ quality: 82 })
+      .resize({ width: 1200, height: 1200, fit: "cover" })
+      .webp({ quality: 90 })
       .toBuffer();
   } catch {
     return {
@@ -305,7 +309,8 @@ export async function uploadCategoryImage(
     cacheControl: "31536000",
     upsert: false,
   });
-  if (uploadError) return { error: "No se pudo subir la foto. Probá de nuevo." };
+  if (uploadError)
+    return { error: "No se pudo subir la foto. Probá de nuevo." };
 
   const { error } = await supabase
     .from("categories")

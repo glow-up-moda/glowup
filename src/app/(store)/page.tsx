@@ -132,7 +132,8 @@ export default async function HomePage() {
                       src={productImageUrl(category.imagePath)}
                       alt=""
                       fill
-                      sizes="(min-width: 768px) 20rem, 45vw"
+                      sizes="(min-width: 1184px) 368px, (min-width: 768px) 31vw, 45vw"
+                      quality={85}
                       className="object-cover"
                     />
                   ) : (
