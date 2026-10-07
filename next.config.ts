@@ -17,6 +17,10 @@ const nextConfig: NextConfig = {
     },
   },
   images: {
+    // Desde Next 16 esta lista es obligatoria y arranca en [75]: una calidad
+    // que no esté acá se baja a la más cercana sin avisar. La 85 es para las
+    // tarjetas de categoría, que tienen letras chicas (§7).
+    qualities: [75, 85],
     remotePatterns: supabaseHost
       ? [
           {
