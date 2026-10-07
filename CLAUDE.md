@@ -195,7 +195,6 @@ Letras "MAREA" dibujadas a mano en azul profundo, con dos ondas en celeste debaj
 | `/favoritos` | Guardados en el navegador; se sincronizan si hay cuenta |
 | `/checkout` | Datos, entrega y pago en una sola página |
 | `/pedido/[numero]` | Confirmación, estado real, instrucciones de transferencia y, si ya se entregó, el formulario de reseña |
-| `/seguimiento` | Buscar pedido con número + email |
 | `/bolsa/[id]` | Link del email de carrito abandonado: devuelve la bolsa con los precios de hoy |
 | `/baja/[id]` | Baja de los avisos de carrito abandonado |
 | `/cuenta` | Opcional: historial de pedidos (ingreso con link por email) |
@@ -218,7 +217,7 @@ Cómo está hecha la tienda:
 - "Avisame cuando vuelva" se guarda con una acción del servidor, porque `back_in_stock_requests` no está abierta a la API pública.
 - Mientras un producto no tenga fotos, en lugar del hueco se muestra el destello de la marca.
 - El checkout y la página del pedido corren con la clave secreta: `orders` no se lee por la API pública. Los totales se piden a `quote_cart` en cada cambio; el navegador nunca suma.
-- Los números de pedido son correlativos, así que `/pedido/[numero]` solo se abre si el pedido se hizo en este navegador (cookie `glowup-pedidos`, httpOnly) o si se escribe el email con el que se compró. El error de `/seguimiento` es siempre el mismo, para no revelar qué números existen.
+- Los números de pedido son correlativos, así que `/pedido/[numero]` solo se abre si el pedido se hizo en este navegador (cookie `glowup-pedidos`, httpOnly) o si se escribe el email con el que se compró. **No hay página de seguimiento**: se sacó el 7 de octubre de 2026 a pedido de la dueña. Quien pierda el link llega por el email del pedido o escribiendo por WhatsApp.
 - Los formularios de la tienda que pueden fallar usan `useFormAction` (`src/lib/use-form-action.ts`), igual que el panel: React 19 borra los campos al terminar la acción.
 - **Las páginas de la tienda se regeneran solas cada minuto** (`revalidate = 60` en el layout de `(store)`). Listados, buscador y ficha de producto se arman en cada visita, pero el inicio y las páginas fijas se prerrenderan y leen la base (catálogo, menú, barra de anuncios, configuración): sin esto quedaban congeladas hasta el próximo build, así que cargar un producto o cambiar Configuración no se veía en la tienda publicada. El checkout es la excepción: no se guarda en caché porque mira la hora para el horario de corte (§12).
 
@@ -277,6 +276,11 @@ Tiene que ser cómodo de usar desde el celular.
   - El stock inicial de cada celda entra como ingreso de mercadería, así queda en el historial.
   - **Duplicar** copia los datos y las variantes (con stock en cero y sin SKU, que es único en toda la base) y deja la copia como borrador. Las fotos no se copian: son archivos, y el original se quedaría sin ellas al borrar la copia.
   - Fotos: en la ficha **se suben apenas se eligen**, sin botón aparte. El navegador las achica a 2000 px antes de subirlas (`src/lib/admin/photo.ts`), y el servidor las pasa a WebP con `sharp` (hasta 1600 × 2000 y una miniatura de 480 × 600) y las guarda en Storage. El texto alternativo no se escribe al subir: arranca con el nombre del producto, que es lo que exige la columna, y se puede mejorar después desde "Descripción" en cada foto.
+- **Textos del inicio** (`/admin/inicio`): la portada se edita sin tocar código. El título, el subtítulo y el botón del hero; los títulos de las secciones; el título y los puntos de "Comprar acá es fácil" (uno por línea, hasta seis); el bloque del cupón; la frase del pie; y la foto del hero, que se recorta 4:5 como el arco.
+  - Se guardan todos juntos en `settings.home_texts`, un objeto con una clave por campo. **Los valores de fábrica viven en el código** (`homeDefaults` en `src/lib/store/settings.ts`) y no en la base: lo guardado es solo lo que se cambió, así que **vaciar un campo y guardar lo devuelve al original**. Esa es la salida cuando algo queda mal escrito.
+  - Cada campo tiene su tope de caracteres, para que un título largo no empuje el botón fuera de la pantalla del celular.
+  - Después de guardar, el formulario se rearma con una `key`: `defaultValue` no vuelve a aplicarse sola, y sin eso un campo vaciado seguía viéndose en blanco aunque ya estuviera usando el texto de fábrica.
+  - **Queda afuera a propósito:** los legales (§15), los textos de botones, errores y estados vacíos, y las páginas largas. Ahí vive la voz de la marca y lo que la ley pide, y un texto mal puesto rompe la compra o deja expuesta a la tienda sin que se note. Tampoco hay historial: lo que se pisa, se pisa.
 - **Categorías** (`/admin/categorias`): el menú de la tienda. Alta, edición, borrado, orden y **la foto de la tarjeta del inicio**, con las subcategorías anidadas bajo su categoría y la cuenta de productos de cada una.
   - La foto se sube apenas se elige, igual que las de producto, y se recorta cuadrada a 1200px en WebP con calidad 90: la tarjeta del inicio es cuadrada. Ese archivo **no es el que se sirve** —Netlify lo vuelve a achicar y a comprimir para cada tamaño—, así que guardarlo chico o muy comprimido deja las letras de los productos con bordes sucios. Es una sola; subir otra reemplaza la anterior y recién entonces borra el archivo viejo. Sin foto, la tarjeta muestra el destello de la marca.
   - El nombre del archivo lleva un uuid nuevo en cada subida, porque se sirve con caché de un año: con el mismo nombre quedaría a la vista la foto vieja. La dirección sale del nombre, igual que en productos, así que renombrar una le cambia el link. **Solo dos niveles**, porque la tienda enruta `/[categoria]` y `/[categoria]/[subcategoria]`: una subcategoría no puede colgar de otra, y una categoría con subcategorías adentro no puede pasar a ser subcategoría. El orden se cambia con flechas que intercambian el `sort_order` con la vecina del mismo grupo. Borrar solo se ofrece cuando está vacía; con productos o subcategorías adentro, la base lo impide (`on delete restrict`) y la pantalla lo explica en vez de dejar que falle.
@@ -350,9 +354,10 @@ Montos siempre en **enteros de centavos**. Fechas guardadas en UTC y mostradas e
 - `abandoned_carts` (id, email único, items, total_cents, notified_at, recovered_at) y `marketing_optouts` (email): copia del carrito de quien dejó su email y aceptó novedades, y quiénes pidieron no recibir más (§13).
 - `newsletter_subscribers` (id, email único, welcomed_at): quienes se anotaron desde el inicio.
 - `favorites` (user_id, product_id), solo con cuenta.
-- `settings` (clave/valor jsonb: transfer_discount_percent, free_shipping_threshold_cents, discounts_stack, bank_alias, bank_cbu, low_stock_default, last_units_threshold, announcement_messages, whatsapp_number, same_day_cutoff_time, welcome_coupon_code, kits_label, kits_image_path, y `cron_site_url` y `cron_secret`, que no se editan desde el panel)
-  - La tienda no lee la tabla: lee la vista `public_settings`, que expone solo las claves que se muestran (hoy nueve) y deja afuera el alias, el CBU y lo del cron. **Una clave nueva que la tienda tenga que ver hay que agregarla a esa vista**, y la prueba de humo 15m2 cuenta cuántas son.
+- `settings` (clave/valor jsonb: transfer_discount_percent, free_shipping_threshold_cents, discounts_stack, bank_alias, bank_cbu, low_stock_default, last_units_threshold, announcement_messages, whatsapp_number, same_day_cutoff_time, welcome_coupon_code, kits_label, kits_image_path, home_texts, home_hero_image_path, y `cron_site_url` y `cron_secret`, que no se editan desde el panel)
+  - La tienda no lee la tabla: lee la vista `public_settings`, que expone solo las claves que se muestran (hoy once) y deja afuera el alias, el CBU y lo del cron. **Una clave nueva que la tienda tenga que ver hay que agregarla a esa vista**, y la prueba de humo 15m2 cuenta cuántas son.
   - Los valores iniciales están en la migración del esquema, porque producción también los necesita. Alias, CBU y WhatsApp arrancan vacíos: el repo es público.
+  - `home_texts` es un objeto con los textos del inicio que se cambiaron; los que faltan usan `homeDefaults` del código (§7).
   - `value` es jsonb `not null` y un valor sin configurar es el null de JSON. El panel guarda con `set_settings`, no con un upsert: PostgREST convertiría ese null en NULL de SQL y la columna lo rechaza.
 
 ### Exposición por la API
@@ -450,7 +455,8 @@ No se guardan datos de tarjetas en ningún lugar: el formulario de pago es de Ua
 
 ## 12. Envíos
 
-- Métodos: envío a domicilio por zona (costo fijo configurable), envío en el día en Paraná y Oro Verde (con horario de corte configurable) y retiro en punto de entrega en Paraná.
+- Métodos: envío a domicilio por zona (costo fijo configurable), envío en el día (con horario de corte configurable) y retiro en punto de entrega en Paraná.
+- **Dónde llega el envío en el día se escribe en un solo lugar:** `SAME_DAY_CITIES` en `src/lib/site.ts`. Lo nombran el inicio, los listados, la ficha de producto, Envíos y cambios, las preguntas frecuentes, Nosotras, el panel de zonas y los textos que ve Google; escrito en cada lugar se desincronizaba, y ya había pasado.
 - Las zonas se cargan en `/admin/zonas`; el checkout las ofrece según el método elegido y, si la dirección alcanza para saber cuál le toca (por código postal o por provincia), la elige sola. La sugerencia se calcula al dibujar, no con un efecto, así elegir a mano siempre gana; si empatan dos zonas, no se elige ninguna.
 - **El horario de corte se aplica, no solo se muestra:** pasada esa hora el envío en el día no aparece en el checkout, y `calculate_order_totals` lo rechaza con `same_day_closed` si igual llega. La hora es la de Argentina y la mira la base.
 - El punto de retiro (`pickup_address` y `pickup_hours` en `settings`) se muestra en el checkout, en la página del pedido, en los emails y en `/envios-y-cambios`. Es una dirección real, así que vive en la base y no en el código (§2).
@@ -552,7 +558,7 @@ Backups y errores:
 - [x] Trabajo diario conectado: `CRON_SECRET` generado al azar y cargado en Netlify, y el mismo valor más `cron_site_url` en `settings`. Verificado el 1 de octubre de 2026 en los dos sentidos: la ruta rechaza con 401 sin la clave y con una clave equivocada, y responde 200 con la correcta; y la base la llamó sola con pg_net y recibió `{"ok":true}`. El job `daily-emails` corre a las 13 UTC y su última corrida figura como `succeeded`. **Todavía no manda nada**: sin la cuenta de Resend, cada email queda anotado en la consola.
 - [ ] Textos legales revisados.
 - [ ] Activar en Supabase Auth la protección de contraseñas filtradas (HaveIBeenPwned), que hoy está apagada.
-- [ ] Fotos de clientas reales para el inicio, y la foto del hero (hoy hay un destello en su lugar).
+- [ ] Fotos de clientas reales para el inicio, y la foto del hero (hoy hay un destello en su lugar). **La del hero ya se sube sola** desde `/admin/inicio`: falta elegir cuál.
 - [x] Meta Pixel: `1587022683122205`, cargado en Netlify y verificado en vivo el 1 de octubre de 2026 (la librería carga, el píxel queda registrado y cuenta también las navegaciones internas, que el fragmento suelto de Meta no hace).
 - [ ] Cuenta de Google Analytics y cargar `NEXT_PUBLIC_GA4_ID`: hasta entonces GA4 no mide nada. Ojo: las dos son `NEXT_PUBLIC_`, así que se incrustan en el build y hay que publicar de nuevo después de cargarlas.
 - [ ] Servicio de monitoreo de errores (tipo Sentry). Hoy los errores solo quedan en los logs de Netlify.

@@ -1,6 +1,7 @@
 import { cache } from "react";
 
 import { TIME_ZONE } from "@/lib/format";
+import { SAME_DAY_CITIES } from "@/lib/site";
 import { createCatalogClient } from "@/lib/supabase/catalog";
 
 // Configuración que muestra la tienda. Sale de la vista `public_settings`
@@ -17,7 +18,76 @@ export type StoreSettings = {
   /** Cómo se llama el bloque de kits en el menú y en el inicio, y su foto. */
   kitsLabel: string;
   kitsImagePath: string | null;
+  /** Los textos del inicio, que se editan desde el panel (§7). */
+  home: HomeTexts;
+  homeHeroImagePath: string | null;
 };
+
+/**
+ * Lo que se puede reescribir del inicio. Los valores por defecto están abajo y
+ * no en la base: lo guardado es solo lo que se cambió, y un campo que se borra
+ * vuelve solo al texto de fábrica en vez de dejar un hueco.
+ */
+export type HomeTexts = {
+  heroTitle: string;
+  heroSubtitle: string;
+  heroCta: string;
+  categoriesTitle: string;
+  newTitle: string;
+  kitsTitle: string;
+  benefitsTitle: string;
+  benefits: string[];
+  newsletterTitle: string;
+  newsletterText: string;
+  footerTagline: string;
+};
+
+export const homeDefaults: HomeTexts = {
+  heroTitle: "Llevá el verano con vos.",
+  heroSubtitle: "Prendas y accesorios para acompañarte en cada momento.",
+  heroCta: "Ver la colección",
+  categoriesTitle: "Qué estás buscando",
+  newTitle: "Lo nuevo",
+  kitsTitle: "Kits armados",
+  benefitsTitle: "Comprar acá es fácil",
+  benefits: [
+    `Envío en el día en ${SAME_DAY_CITIES}`,
+    "Cambios por fallas o manchas",
+    "Productos de buena calidad y durabilidad",
+  ],
+  newsletterTitle: "Tu primera compra, con descuento",
+  newsletterText:
+    "Dejanos tu email y te mandamos un código para usar en la primera compra. Después te escribimos solo cuando vale la pena.",
+  footerTagline:
+    "Prendas y accesorios. Paraná, Entre Ríos. Enviamos a todo el país.",
+};
+
+/** Las claves del objeto guardado, en el orden en que se muestran en el panel. */
+export const homeFields = Object.keys(homeDefaults) as (keyof HomeTexts)[];
+
+/** Lo guardado pisa el texto de fábrica campo por campo; lo vacío no pisa nada. */
+function mergeHome(stored: unknown): HomeTexts {
+  if (typeof stored !== "object" || stored === null) return homeDefaults;
+  const saved = stored as Record<string, unknown>;
+  const merged = { ...homeDefaults };
+
+  for (const field of homeFields) {
+    const value = saved[field];
+    if (field === "benefits") {
+      const list = Array.isArray(value)
+        ? value.filter(
+            (item): item is string =>
+              typeof item === "string" && item.trim() !== "",
+          )
+        : [];
+      if (list.length > 0) merged.benefits = list;
+      continue;
+    }
+    if (typeof value === "string" && value.trim() !== "")
+      (merged[field] as string) = value;
+  }
+  return merged;
+}
 
 const defaults: StoreSettings = {
   transferDiscountPercent: 0,
@@ -29,6 +99,8 @@ const defaults: StoreSettings = {
   pickupHours: null,
   kitsLabel: "Combos",
   kitsImagePath: null,
+  home: homeDefaults,
+  homeHeroImagePath: null,
 };
 
 function number(value: unknown): number | null {
@@ -66,6 +138,8 @@ export const getStoreSettings = cache(async (): Promise<StoreSettings> => {
     pickupHours: text(stored.get("pickup_hours")),
     kitsLabel: text(stored.get("kits_label")) ?? defaults.kitsLabel,
     kitsImagePath: text(stored.get("kits_image_path")),
+    home: mergeHome(stored.get("home_texts")),
+    homeHeroImagePath: text(stored.get("home_hero_image_path")),
   };
 });
 

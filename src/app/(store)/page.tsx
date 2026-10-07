@@ -53,13 +53,7 @@ export default async function HomePage() {
     getStoreSettings(),
   ]);
 
-  const benefits = [
-    settings.sameDayCutoffTime
-      ? `Envío en el día en Paraná y Oro Verde, comprando antes de las ${settings.sameDayCutoffTime}`
-      : "Envío en el día en Paraná y Oro Verde",
-    "Cambios por fallas o manchas",
-    "Productos de buena calidad y durabilidad",
-  ];
+  const { home } = settings;
 
   return (
     <>
@@ -80,31 +74,43 @@ export default async function HomePage() {
               className="rise font-display text-3xl font-semibold text-balance md:text-4xl"
               style={{ animationDelay: "60ms" }}
             >
-              Llevá el verano con vos.
+              {home.heroTitle}
             </h1>
             <p
               className="mt-4 max-w-[45ch] rise text-lg"
               style={{ animationDelay: "180ms" }}
             >
-              Prendas y accesorios para acompañarte en cada momento.
+              {home.heroSubtitle}
             </p>
             <div className="mt-6 rise" style={{ animationDelay: "300ms" }}>
-              <ButtonLink href="/ropa-interior">Ver la colección</ButtonLink>
+              <ButtonLink href="/ropa-interior">{home.heroCta}</ButtonLink>
             </div>
           </div>
 
           <div className="relative rise" style={{ animationDelay: "120ms" }}>
             <div className="relative mx-auto flex aspect-4/5 w-full max-w-sm items-center justify-center overflow-hidden arch bg-arena">
-              <Sparkle
-                className="size-20 shine text-brisa"
-                style={{ animationDelay: "500ms" }}
-              />
+              {settings.homeHeroImagePath ? (
+                <Image
+                  src={productImageUrl(settings.homeHeroImagePath)}
+                  alt=""
+                  fill
+                  sizes="(min-width: 768px) 24rem, 100vw"
+                  quality={85}
+                  priority
+                  className="object-cover"
+                />
+              ) : (
+                <Sparkle
+                  className="size-20 shine text-brisa"
+                  style={{ animationDelay: "500ms" }}
+                />
+              )}
             </div>
           </div>
         </div>
       </section>
 
-      <Section title="Qué estás buscando">
+      <Section title={home.categoriesTitle}>
         <ul className="grid grid-cols-2 gap-4 md:grid-cols-3">
           {[
             ...categories.map((category) => ({
@@ -147,7 +153,11 @@ export default async function HomePage() {
       </Section>
 
       {products.length > 0 && (
-        <Section title="Lo nuevo" href="/ropa-interior" linkLabel="Ver todo">
+        <Section
+          title={home.newTitle}
+          href="/ropa-interior"
+          linkLabel="Ver todo"
+        >
           <ul className="-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 md:mx-0 md:grid md:grid-cols-4 md:overflow-visible md:px-0">
             {products.map((product, index) => (
               <li
@@ -162,7 +172,7 @@ export default async function HomePage() {
       )}
 
       {kits.length > 0 && (
-        <Section title="Kits armados" href="/kits" linkLabel="Ver los kits">
+        <Section title={home.kitsTitle} href="/kits" linkLabel="Ver los kits">
           <ul className="grid grid-cols-2 gap-4 md:grid-cols-3">
             {kits.map((kit) => (
               <li key={kit.id}>
@@ -176,10 +186,10 @@ export default async function HomePage() {
       <section className="bg-arena/50">
         <div className="mx-auto max-w-6xl px-4 py-10">
           <h2 className="font-display text-2xl font-semibold">
-            Comprar acá es fácil
+            {home.benefitsTitle}
           </h2>
           <ul className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {benefits.map((benefit) => (
+            {home.benefits.map((benefit) => (
               <li key={benefit} className="flex items-start gap-3">
                 <Sparkle className="mt-1 size-5 shrink-0 text-aqua" />
                 <span>{benefit}</span>
@@ -192,12 +202,9 @@ export default async function HomePage() {
       <section className="mx-auto max-w-6xl px-4 py-10">
         <div className="rounded-card bg-caracola-suave px-4 py-8 md:px-8">
           <h2 className="font-display text-2xl font-semibold">
-            Tu primera compra, con descuento
+            {home.newsletterTitle}
           </h2>
-          <p className="mt-2 max-w-[60ch]">
-            Dejanos tu email y te mandamos un código para usar en la primera
-            compra. Después te escribimos solo cuando vale la pena.
-          </p>
+          <p className="mt-2 max-w-[60ch]">{home.newsletterText}</p>
           <NewsletterForm />
         </div>
       </section>

@@ -6,6 +6,7 @@ import {
   IconBag,
   IconChart,
   IconChevronRight,
+  IconHome,
   IconInfo,
   IconProducts,
   IconLogOut,
@@ -22,6 +23,12 @@ import { signOut } from "../../actions";
 export const metadata: Metadata = { title: "Más" };
 
 const links = [
+  {
+    href: "/admin/inicio",
+    label: "Textos del inicio",
+    description: "Lo que se lee en la portada, y la foto de arriba",
+    icon: IconHome,
+  },
   {
     href: "/admin/categorias",
     label: "Categorías",

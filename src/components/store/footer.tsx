@@ -21,7 +21,7 @@ const legal = [
 ];
 
 export async function StoreFooter() {
-  const { whatsappNumber } = await getStoreSettings();
+  const { whatsappNumber, home } = await getStoreSettings();
   const whatsapp = storeWhatsappLink(
     whatsappNumber,
     "¡Hola! Tengo una consulta.",
@@ -39,10 +39,7 @@ export async function StoreFooter() {
             priority
             className="h-10 w-auto"
           />
-          <p className="mt-2 max-w-[30ch] text-sm">
-            Ropa interior y accesorios. Paraná, Entre Ríos. Enviamos a todo el
-            país.
-          </p>
+          <p className="mt-2 max-w-[30ch] text-sm">{home.footerTagline}</p>
           {whatsapp && (
             <a
               href={whatsapp}
