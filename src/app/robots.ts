@@ -20,7 +20,6 @@ export default function robots(): MetadataRoute.Robots {
           "/admin",
           "/checkout",
           "/pedido/",
-          "/seguimiento",
           "/bolsa/",
           "/baja/",
           "/favoritos",

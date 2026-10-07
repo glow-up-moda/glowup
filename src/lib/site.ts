@@ -22,3 +22,12 @@ export function absoluteUrl(path: string): string {
  * el sitemap.
  */
 export const INDEXABLE = false;
+
+/**
+ * Dónde llega el envío en el día. Vive acá porque lo nombran el inicio, los
+ * listados, la ficha de producto, Envíos y cambios, las preguntas frecuentes,
+ * Nosotras y los textos que ve Google: escrito en cada lugar, se desincroniza
+ * apenas se suma una localidad.
+ */
+export const SAME_DAY_CITIES =
+  "Paraná, Colonia Avellaneda, Oro Verde y San Benito";

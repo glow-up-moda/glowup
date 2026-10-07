@@ -1,3 +1,4 @@
+import { SAME_DAY_CITIES } from "@/lib/site";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -213,7 +214,7 @@ export default async function ProductPage({
             )}
             <Accordion title="Envíos y cambios">
               <p>
-                Enviamos a todo el país. En Paraná y Oro Verde, envío en el día
+                Enviamos a todo el país. En {SAME_DAY_CITIES}, envío en el día
                 {settings.sameDayCutoffTime
                   ? ` comprando antes de las ${settings.sameDayCutoffTime}`
                   : ""}

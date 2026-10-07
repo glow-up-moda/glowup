@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { DM_Sans, Fredoka } from "next/font/google";
 
-import { INDEXABLE, siteUrl } from "@/lib/site";
+import { INDEXABLE, SAME_DAY_CITIES, siteUrl } from "@/lib/site";
 
 import "./globals.css";
 
@@ -19,8 +19,7 @@ const dmSans = DM_Sans({
   display: "swap",
 });
 
-const description =
-  "Ropa interior y accesorios. Envío a todo el país, y en el día en Paraná y Oro Verde.";
+const description = `Prendas y accesorios. Envío a todo el país, y en el día en ${SAME_DAY_CITIES}.`;
 
 export const metadata: Metadata = {
   // Con esto las direcciones del Open Graph salen absolutas, que es lo que

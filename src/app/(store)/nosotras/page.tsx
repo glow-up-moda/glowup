@@ -1,3 +1,4 @@
+import { SAME_DAY_CITIES } from "@/lib/site";
 import type { Metadata } from "next";
 
 import { Block, PageShell } from "@/components/store/page-shell";
@@ -5,15 +6,14 @@ import { ButtonLink } from "@/components/ui/button";
 
 export const metadata: Metadata = {
   title: "Nosotras · MAREA",
-  description:
-    "Somos MAREA, una tienda de ropa interior y accesorios de Paraná, Entre Ríos.",
+  description: "Somos MAREA, una tienda de Paraná, Entre Ríos.",
 };
 
 export default function AboutPage() {
   return (
     <PageShell
       title="Nosotras"
-      intro="MAREA es una tienda de ropa interior y accesorios de Paraná, Entre Ríos."
+      intro="MAREA es una tienda de Paraná, Entre Ríos."
     >
       <Block title="Qué hacemos">
         <p>
@@ -25,7 +25,7 @@ export default function AboutPage() {
 
       <Block title="Cómo trabajamos">
         <p>
-          Preparamos cada pedido a mano, en Paraná. En Paraná y Oro Verde lo
+          Preparamos cada pedido a mano, en Paraná. En {SAME_DAY_CITIES} lo
           llevamos en el día; al resto del país lo despachamos apenas se
           confirma el pago.
         </p>

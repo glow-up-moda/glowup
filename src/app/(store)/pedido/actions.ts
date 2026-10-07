@@ -60,21 +60,6 @@ export async function verifyOrderEmail(
   redirect(`/pedido/${found}`);
 }
 
-/** Desde /seguimiento: número y email juntos. */
-export async function findOrder(
-  _prev: FindOrderState,
-  formData: FormData,
-): Promise<FindOrderState> {
-  const found = await findOrderNumber(
-    String(formData.get("numero") ?? ""),
-    String(formData.get("email") ?? ""),
-  );
-  if (!found) return { error: NOT_FOUND };
-
-  await rememberOrder(found);
-  redirect(`/pedido/${found}`);
-}
-
 /**
  * Vuelve a abrir el pago con tarjeta de un pedido que quedó pendiente. Crea un
  * link nuevo en vez de reusar el anterior: los de Ualá Bis pueden vencer, y el

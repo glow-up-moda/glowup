@@ -1,3 +1,4 @@
+import { SAME_DAY_CITIES } from "@/lib/site";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 
@@ -12,7 +13,7 @@ export async function generateMetadata({
   if (!found) return {};
   return {
     title: `${found.category.name} · MAREA`,
-    description: `${found.category.name} de MAREA. Envío a todo el país y en el día en Paraná y Oro Verde.`,
+    description: `${found.category.name} de MAREA. Envío a todo el país y en el día en ${SAME_DAY_CITIES}.`,
   };
 }
 

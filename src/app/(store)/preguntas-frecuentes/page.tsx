@@ -1,3 +1,4 @@
+import { SAME_DAY_CITIES } from "@/lib/site";
 import type { Metadata } from "next";
 import Link from "next/link";
 
@@ -21,7 +22,7 @@ export default async function FaqPage() {
     >
       <Block title="¿Cuánto tarda en llegar?">
         <p>
-          En Paraná y Oro Verde hacemos envíos en el día
+          En {SAME_DAY_CITIES} hacemos envíos en el día
           {settings.sameDayCutoffTime
             ? ` para los pedidos que entran antes de las ${settings.sameDayCutoffTime}`
             : ""}

@@ -1,5 +1,6 @@
 "use client";
 
+import { SAME_DAY_CITIES } from "@/lib/site";
 import { CheckboxField, TextAreaField, TextField } from "@/components/ui/field";
 import { Notice } from "@/components/ui/notice";
 import { SubmitButton } from "@/components/ui/submit-button";
@@ -80,7 +81,7 @@ export function ZoneForm({
         label="Es zona de envío en el día"
         name="same_day"
         defaultChecked={initial.same_day}
-        hint="Paraná y Oro Verde. Estas zonas solo se ofrecen antes del horario de corte."
+        hint={`${SAME_DAY_CITIES}. Estas zonas solo se ofrecen antes del horario de corte.`}
       />
 
       <div className="grid gap-4 sm:grid-cols-2">

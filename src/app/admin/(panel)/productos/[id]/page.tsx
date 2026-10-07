@@ -144,7 +144,8 @@ export default async function ProductPage({
 
       {param(query.nuevo) && (
         <Notice tone="success" className="mb-4">
-          Producto creado y publicado. Desde acá podés cambiarle el stock, las fotos o los datos.
+          Producto creado y publicado. Desde acá podés cambiarle el stock, las
+          fotos o los datos.
         </Notice>
       )}
 

@@ -1,3 +1,4 @@
+import { SAME_DAY_CITIES } from "@/lib/site";
 import type { Metadata } from "next";
 
 import { Block, PageShell } from "@/components/store/page-shell";
@@ -24,7 +25,7 @@ export default async function ShippingPage() {
   return (
     <PageShell
       title="Envíos y cambios"
-      intro="Enviamos a todo el país. En Paraná y Oro Verde llegamos en el día."
+      intro={`Enviamos a todo el país. En ${SAME_DAY_CITIES} llegamos en el día.`}
     >
       <Block title="Zonas y costos">
         {settings.freeShippingThresholdCents && (
@@ -64,7 +65,7 @@ export default async function ShippingPage() {
 
       <Block title="Envío en el día">
         <p>
-          En Paraná y Oro Verde entregamos el mismo día
+          En {SAME_DAY_CITIES} entregamos el mismo día
           {settings.sameDayCutoffTime
             ? ` si comprás antes de las ${settings.sameDayCutoffTime}`
             : ""}

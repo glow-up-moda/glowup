@@ -21,9 +21,9 @@ export default function TermsPage() {
 
       <Block title="Quiénes somos">
         <p>
-          MAREA es una tienda de ropa interior y accesorios con base en Paraná,
-          Entre Ríos, Argentina. Los datos de la empresa (razón social, CUIT y
-          domicilio) se publican acá antes del lanzamiento.
+          MAREA es una tienda con base en Paraná, Entre Ríos, Argentina. Los
+          datos de la empresa (razón social, CUIT y domicilio) se publican acá
+          antes del lanzamiento.
         </p>
         <p>
           Comprar en la tienda implica aceptar estos términos. Si algo no te

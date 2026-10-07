@@ -601,7 +601,7 @@ begin
 
     -- Pero sí lee por la vista las claves que muestra la tienda, y solo esas.
     select count(*) into v_count from public.public_settings;
-    if v_count is distinct from 9
+    if v_count is distinct from 11
        or (select value #>> '{}' from public.public_settings where key = 'transfer_discount_percent') is distinct from '10'
        or exists (select 1 from public.public_settings where key in ('bank_alias', 'bank_cbu')) then
       raise exception 'Prueba 15m2, anon lee la configuración de la tienda sin el alias ni el CBU: ve % claves', v_count;
@@ -965,6 +965,30 @@ begin
       end;
       if v_msg is not null then
         raise exception 'Prueba 21c, set_settings acepta kits_label: %', v_msg;
+      end if;
+    end;
+
+    -- 22. Los textos del inicio ----------------------------------------------------
+    -- Un solo objeto con una clave por campo. Guardar uno no puede borrar el
+    -- resto, porque set_settings reemplaza el valor entero: el panel manda todo.
+    begin
+      perform public.set_settings(jsonb_build_object(
+        'home_texts', jsonb_build_object('hero_title', 'Hola', 'benefits',
+          jsonb_build_array('uno', 'dos'))));
+
+      select count(*) into v_count from public.settings
+       where key = 'home_texts' and value ? 'hero_title';
+      if v_count <> 1 then
+        raise exception 'Prueba 22a, home_texts guarda el objeto entero';
+      end if;
+
+      if (select value -> 'benefits' ->> 1 from public.settings where key = 'home_texts')
+         is distinct from 'dos' then
+        raise exception 'Prueba 22b, la lista de beneficios se guarda en orden';
+      end if;
+
+      if not exists (select 1 from public.public_settings where key = 'home_texts') then
+        raise exception 'Prueba 22c, la tienda lee home_texts por la vista pública';
       end if;
     end;
 

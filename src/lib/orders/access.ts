@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 
 // Los números de pedido son correlativos, así que /pedido/[numero] no puede
 // mostrarse solo con el número: o el pedido se hizo en este navegador, o hay
-// que escribir el email con el que se compró (§7, /seguimiento).
+// que escribir el email con el que se compró (§7).
 
 const COOKIE = "glowup-pedidos";
 const MAX_REMEMBERED = 20;

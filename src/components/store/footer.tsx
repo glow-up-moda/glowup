@@ -7,7 +7,6 @@ const help = [
   { href: "/guia-de-talles", label: "Guía de talles" },
   { href: "/envios-y-cambios", label: "Envíos y cambios" },
   { href: "/preguntas-frecuentes", label: "Preguntas frecuentes" },
-  { href: "/seguimiento", label: "Seguir mi pedido" },
 ];
 
 const about = [
