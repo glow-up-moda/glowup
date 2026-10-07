@@ -912,6 +912,37 @@ begin
       end if;
     end;
 
+    -- 20. La foto de la categoría ---------------------------------------------------
+    -- Opcional, pero si está tiene que ser una ruta de verdad: una cadena vacía
+    -- dejaría la tarjeta del inicio pidiendo un archivo que no existe.
+    declare
+      v_cat uuid;
+    begin
+      select id into v_cat from public.categories where slug = 'prueba';
+
+      if exists (select 1 from public.categories where id = v_cat and image_path is not null) then
+        raise exception 'Prueba 20a, una categoría nace sin foto';
+      end if;
+
+      update public.categories set image_path = 'categories/x.webp' where id = v_cat;
+      if not exists (select 1 from public.categories
+                      where id = v_cat and image_path = 'categories/x.webp') then
+        raise exception 'Prueba 20b, la categoría guarda la ruta de su foto';
+      end if;
+
+      v_msg := null;
+      begin
+        update public.categories set image_path = '   ' where id = v_cat;
+      exception when check_violation then
+        v_msg := 'vacía';
+      end;
+      if v_msg is distinct from 'vacía' then
+        raise exception 'Prueba 20c, la ruta de la foto no puede quedar en blanco';
+      end if;
+
+      update public.categories set image_path = null where id = v_cat;
+    end;
+
   exception when others then
     -- La secuencia no vuelve atrás con el rollback: se restaura antes de fallar.
     perform setval('public.order_number_seq', v_seq_last, v_seq_called);
