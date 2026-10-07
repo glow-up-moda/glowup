@@ -498,6 +498,7 @@ Cómo están hechos:
 - Foco visible: anillo azul de 2px con separación (el aqua no tiene contraste suficiente sobre crema).
 - Footer en todas las páginas: link a Defensa del Consumidor, botón de arrepentimiento, QR de Data Fiscal de ARCA, términos y privacidad.
 - Los textos legales se redactan como borrador marcado **"PENDIENTE DE REVISIÓN"** y no se publican sin revisión profesional. Incluye la política de cambios de ropa interior por higiene.
+- **Privacidad es la excepción**: el 7 de octubre de 2026 la dueña pidió sacarle el cartel de borrador y dejarla con dos apartados, "Qué datos pedimos" y "Para qué los usamos". Se quitaron con quién se comparten los datos, la medición, cuánto se guardan y los derechos del titular, que incluían los textos de los artículos 14 y 29 de la Ley 25.326. Es una decisión suya, tomada sabiendo que esos puntos son los que la ley pide en una política de privacidad. Términos y arrepentimiento conservan el cartel.
 - Consentimiento explícito para newsletter y emails de carrito abandonado.
 
 ## 16. Plan de construcción
