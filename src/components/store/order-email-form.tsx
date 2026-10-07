@@ -9,17 +9,15 @@ const fieldClass =
   "min-h-11 w-full rounded-input border-2 border-transparent bg-arena px-3 text-base text-azul placeholder:text-azul/60 focus:border-azul";
 
 /**
- * Pide lo que falta para mostrar un pedido: el email, o el número y el email.
- * Va con `useFormAction` para que un email equivocado no borre lo escrito
- * (§7, formularios).
+ * Pide el email con el que se compró, para abrir un pedido desde un navegador
+ * que no lo recuerda. Va con `useFormAction` para que un email equivocado no
+ * borre lo escrito (§7, formularios).
  */
 export function OrderEmailForm({
   action,
-  askNumber = false,
   submitLabel = "Ver mi pedido",
 }: {
   action: (prev: FindOrderState, formData: FormData) => Promise<FindOrderState>;
-  askNumber?: boolean;
   submitLabel?: string;
 }) {
   const { state, pending, formRef, onSubmit } = useFormAction(action);
@@ -30,18 +28,6 @@ export function OrderEmailForm({
       onSubmit={onSubmit}
       className="flex max-w-md flex-col gap-3"
     >
-      {askNumber && (
-        <label className="flex flex-col gap-1.5">
-          <span className="text-sm font-medium">Número de pedido</span>
-          <input
-            name="numero"
-            required
-            placeholder="GU-001000"
-            autoComplete="off"
-            className={`${fieldClass} uppercase`}
-          />
-        </label>
-      )}
       <label className="flex flex-col gap-1.5">
         <span className="text-sm font-medium">Email con el que compraste</span>
         <input

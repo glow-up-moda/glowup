@@ -42,17 +42,6 @@ export default async function ContactPage() {
         </p>
       </Block>
 
-      <Block title="Por tu pedido">
-        <p>
-          Si ya compraste, tené a mano el número de pedido (empieza con GU-):
-          con eso lo encontramos enseguida.
-        </p>
-        <p>
-          También te escribimos por email en cada paso: cuando recibimos el
-          pedido, cuando se confirma el pago y cuando sale.
-        </p>
-      </Block>
-
       <Block title="Antes de escribir">
         <p>
           Puede que la respuesta ya esté en{" "}
