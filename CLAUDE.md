@@ -231,7 +231,6 @@ Lo nuevo (carrusel horizontal; pasa a "Lo más vendido" cuando haya ventas para 
 Kits: Kit playa, Kit básicos, Kit regalo
 Beneficios: envío en el día en Paraná y Oro Verde, cuotas, transferencia, envío discreto, cambios
 Clientas reales (fotos elegidas a mano; pendiente, ver §17)
-Newsletter con cupón de primera compra
 Footer: links, legales, Data Fiscal, redes
 ```
 
@@ -275,7 +274,7 @@ Tiene que ser cómodo de usar desde el celular.
   - El stock inicial de cada celda entra como ingreso de mercadería, así queda en el historial.
   - **Duplicar** copia los datos y las variantes (con stock en cero y sin SKU, que es único en toda la base) y deja la copia como borrador. Las fotos no se copian: son archivos, y el original se quedaría sin ellas al borrar la copia.
   - Fotos: en la ficha **se suben apenas se eligen**, sin botón aparte. El navegador las achica a 2000 px antes de subirlas (`src/lib/admin/photo.ts`), y el servidor las pasa a WebP con `sharp` (hasta 1600 × 2000 y una miniatura de 480 × 600) y las guarda en Storage. El texto alternativo no se escribe al subir: arranca con el nombre del producto, que es lo que exige la columna, y se puede mejorar después desde "Descripción" en cada foto.
-- **Textos del inicio** (`/admin/inicio`): la portada se edita sin tocar código. El título, el subtítulo y el botón del hero; los títulos de las secciones; el título y los puntos de "Comprar acá es fácil" (uno por línea, hasta seis); el bloque del cupón; la frase del pie; y la foto del hero, que se recorta 4:5 como el arco.
+- **Textos del inicio** (`/admin/inicio`): la portada se edita sin tocar código. El título, el subtítulo y el botón del hero; los títulos de las secciones; el título y los puntos de "Comprar acá es fácil" (uno por línea, hasta seis); la frase del pie; y la foto del hero, que se recorta 4:5 como el arco.
   - Se guardan todos juntos en `settings.home_texts`, un objeto con una clave por campo. **Los valores de fábrica viven en el código** (`homeDefaults` en `src/lib/store/settings.ts`) y no en la base: lo guardado es solo lo que se cambió, así que **vaciar un campo y guardar lo devuelve al original**. Esa es la salida cuando algo queda mal escrito.
   - Cada campo tiene su tope de caracteres, para que un título largo no empuje el botón fuera de la pantalla del celular.
   - Después de guardar, el formulario se rearma con una `key`: `defaultValue` no vuelve a aplicarse sola, y sin eso un campo vaciado seguía viéndose en blanco aunque ya estuviera usando el texto de fábrica.
@@ -303,7 +302,7 @@ Tiene que ser cómodo de usar desde el celular.
 - **Reseñas** (`/admin/resenas`): entran como `pending` y no se ven en la tienda hasta publicarlas. Rechazarlas las esconde sin borrarlas, y desde cualquiera de los dos estados se pueden devolver a la cola.
 - **Avisos de reposición** (`/admin/reposiciones`): quién está esperando cada talle agotado, agrupado por variante y ordenado por cuántas esperan. Al reponer desde Stock, el email sale solo (§9.10).
 - **Reportes** (`/admin/reportes`): facturado, costo y margen, más vendidos y talles más vendidos, por 30 días, 90 o todo. Solo cuenta pedidos cobrados. Las unidades salen de las líneas con variante, así lo que viajó dentro de un kit también cuenta, y la facturación de las líneas de arriba, para no contar dos veces. Las cuentas se hacen en la app y no en la base: con el volumen de una tienda chica alcanza, y si algún día se pone lento se mudan a SQL.
-- **Configuración:** % de descuento por transferencia, monto de envío gratis, alias y CBU, umbral de stock bajo, mensajes de la barra de anuncios, número de WhatsApp y código del cupón de bienvenida.
+- **Configuración:** % de descuento por transferencia, monto de envío gratis, alias y CBU, umbral de stock bajo, mensajes de la barra de anuncios, número de WhatsApp y punto de retiro.
   - Una sola pantalla con todo, validado: CBU de 22 números, alias de 6 a 20 caracteres, WhatsApp solo números, horario de corte HH:MM y hasta 5 mensajes de anuncio de 80 caracteres, uno por línea.
   - Un campo opcional vacío se guarda como el null de JSON. Escribir algo inválido nunca lo borra en silencio: vuelve con el error.
 - **Acceso:** solo usuarios que estén en `admin_users`.
@@ -485,7 +484,7 @@ Cómo están hechos:
 - La reseña se deja desde `/pedido/[numero]`, que ya sabe quién mira (§7): no hace falta cuenta. Se puede reseñar cada producto del pedido una sola vez, y entra como `pending` hasta que se apruebe en el panel.
 - El carrito abandonado sale del mismo job. El carrito vive en el navegador, así que el checkout guarda una copia en `abandoned_carts` **solo** cuando hay email válido y la casilla de novedades marcada; si la desmarca, la copia se borra (§15). Se guardan solo los ids: nombres y precios se leen frescos al mandar y al volver. Se escribe una vez, a las 4 horas del último cambio, nada de más de 7 días, y a los 30 días la copia se borra.
 - La baja (`/baja/[id]`) se confirma con un botón, no con el link: los lectores de correo abren los links solos. El email queda en `marketing_optouts`, así volver a marcar la casilla sin querer no vuelve a suscribir. El mismo link sirve para el newsletter.
-- El newsletter del inicio manda la bienvenida en el momento, no con el job: el cupón es la razón por la que dejó el email. El código no se genera por persona: se manda el que esté en `welcome_coupon_code`, que se carga en Configuración y se crea como cualquier cupón. Sin código, el email es una bienvenida sin descuento.
+- **No hay newsletter.** El bloque del inicio, su formulario, la acción que anotaba el email y el email de bienvenida se sacaron el 7 de octubre de 2026 a pedido de la dueña, y con ellos el campo del cupón de bienvenida en Configuración. Quedan la tabla `newsletter_subscribers` y la clave `welcome_coupon_code`, que ya nadie escribe, y `/baja/[id]`, que sigue haciendo falta para el carrito abandonado.
 
 ## 14. SEO, rendimiento y analítica
 
@@ -507,7 +506,7 @@ Cómo están hechos:
 - Footer en todas las páginas: QR de Data Fiscal de ARCA, términos y privacidad.
 - **Sacados a pedido de la dueña el 7 de octubre de 2026, sabiendo lo que implican:** el botón de arrepentimiento (la página, el link del pie, el bloque de Términos y la entrada del sitemap) y el link a Defensa del Consumidor del pie y de Términos, junto con el apartado "Reclamos". La Resolución 424/2020 de Comercio Interior exige los dos en una tienda online argentina, y son de lo primero que se mira en una inspección. El derecho de arrepentimiento de 10 días de la Ley 24.240 sigue existiendo aunque la web no lo nombre: lo que se sacó es cómo ejercerlo desde el sitio.
 - **El plazo por fallas quedó en 48 hs** en Términos, igual que el de cambios. La garantía legal por defectos de fábrica es de seis meses y no se acorta poniéndolo en la web (§15, pendientes).
-- Los textos legales se redactan como borrador marcado **"PENDIENTE DE REVISIÓN"** y no se publican sin revisión profesional. Incluye la política de cambios de ropa interior por higiene.
+- Los textos legales incluyen la política de cambios de ropa interior por higiene. **El cartel de "PENDIENTE DE REVISIÓN" se sacó de todas las páginas el 7 de octubre de 2026 a pedido de la dueña**, junto con el componente que lo dibujaba. Siguen siendo un borrador sin revisar: lo que cambió es que ya no lo avisan.
 - **La política de cambios se escribe igual en tres lugares**, y si se toca uno hay que tocar los tres: `/envios-y-cambios` (la que vale), la pregunta "¿Puedo cambiar un talle?" de `/preguntas-frecuentes` y el bloque "Cambios" de `/terminos`. Hoy dice, por decisión de la dueña del 7 de octubre de 2026: **48 hs por talle o fallas de fábrica, y sin cambio para ropa interior y mallas por higiene.** Ojo: el plazo de 48 hs vale para el cambio por talle, pero la garantía legal por defectos de fábrica es de seis meses (Ley 24.240) y no se acorta poniéndolo en la web; queda para la revisión profesional.
 - **Privacidad es la excepción**: el 7 de octubre de 2026 la dueña pidió sacarle el cartel de borrador y dejarla con dos apartados, "Qué datos pedimos" y "Para qué los usamos". Se quitaron con quién se comparten los datos, la medición, cuánto se guardan y los derechos del titular, que incluían los textos de los artículos 14 y 29 de la Ley 25.326. Es una decisión suya, tomada sabiendo que esos puntos son los que la ley pide en una política de privacidad. Términos y arrepentimiento conservan el cartel.
 - Consentimiento explícito para newsletter y emails de carrito abandonado.
@@ -565,7 +564,6 @@ Backups y errores:
 - [x] Meta Pixel: `1587022683122205`, cargado en Netlify y verificado en vivo el 1 de octubre de 2026 (la librería carga, el píxel queda registrado y cuenta también las navegaciones internas, que el fragmento suelto de Meta no hace).
 - [ ] Cuenta de Google Analytics y cargar `NEXT_PUBLIC_GA4_ID`: hasta entonces GA4 no mide nada. Ojo: las dos son `NEXT_PUBLIC_`, así que se incrustan en el build y hay que publicar de nuevo después de cargarlas.
 - [ ] Servicio de monitoreo de errores (tipo Sentry). Hoy los errores solo quedan en los logs de Netlify.
-- [ ] Crear el cupón de bienvenida en el panel y cargar su código en Configuración: hasta entonces el newsletter manda un email sin descuento.
 - [ ] ¿Mover el consentimiento de novedades al lado del email en el checkout? Hoy está al final (paso 6), así que el aviso de carrito abandonado casi nunca va a dispararse: quien se va antes de terminar rara vez llegó a marcarlo.
 - [ ] CUIT y QR de Data Fiscal de ARCA para el pie.
 - [ ] Medidas reales para la guía de talles (hoy solo dice cómo medirse y qué talles hay).

@@ -3,7 +3,6 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { KitCardItem, ProductCard } from "@/components/store/product-card";
-import { NewsletterForm } from "@/components/store/newsletter-form";
 import { ButtonLink } from "@/components/ui/button";
 import { Sparkle } from "@/components/ui/icons";
 import { getNavigation, listKits, listProducts } from "@/lib/store/catalog";
@@ -196,16 +195,6 @@ export default async function HomePage() {
               </li>
             ))}
           </ul>
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-6xl px-4 py-10">
-        <div className="rounded-card bg-caracola-suave px-4 py-8 md:px-8">
-          <h2 className="font-display text-2xl font-semibold">
-            {home.newsletterTitle}
-          </h2>
-          <p className="mt-2 max-w-[60ch]">{home.newsletterText}</p>
-          <NewsletterForm />
         </div>
       </section>
     </>

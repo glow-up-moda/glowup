@@ -14,7 +14,6 @@ export const SETTING_KEYS = [
   "bank_alias",
   "bank_cbu",
   "whatsapp_number",
-  "welcome_coupon_code",
   "pickup_address",
   "pickup_hours",
 ] as const;
@@ -32,7 +31,6 @@ export type SettingsValues = {
   bank_alias: string;
   bank_cbu: string;
   whatsapp_number: string;
-  welcome_coupon_code: string;
   pickup_address: string;
   pickup_hours: string;
 };
@@ -61,7 +59,6 @@ export function settingsToForm(stored: Map<string, unknown>): SettingsValues {
     bank_alias: textOf(stored.get("bank_alias")),
     bank_cbu: textOf(stored.get("bank_cbu")),
     whatsapp_number: textOf(stored.get("whatsapp_number")),
-    welcome_coupon_code: textOf(stored.get("welcome_coupon_code")),
     pickup_address: textOf(stored.get("pickup_address")),
     pickup_hours: textOf(stored.get("pickup_hours")),
   };

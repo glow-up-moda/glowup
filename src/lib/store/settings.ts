@@ -37,8 +37,6 @@ export type HomeTexts = {
   kitsTitle: string;
   benefitsTitle: string;
   benefits: string[];
-  newsletterTitle: string;
-  newsletterText: string;
   footerTagline: string;
 };
 
@@ -55,9 +53,6 @@ export const homeDefaults: HomeTexts = {
     "Cambios por fallas o manchas",
     "Productos de buena calidad y durabilidad",
   ],
-  newsletterTitle: "Tu primera compra, con descuento",
-  newsletterText:
-    "Dejanos tu email y te mandamos un código para usar en la primera compra. Después te escribimos solo cuando vale la pena.",
   footerTagline:
     "Prendas y accesorios. Paraná, Entre Ríos. Enviamos a todo el país.",
 };

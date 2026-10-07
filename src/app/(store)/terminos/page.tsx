@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import { LegalDraft } from "@/components/store/legal-draft";
 import { Block, PageShell } from "@/components/store/page-shell";
 
 // Borrador (§15). Los datos de la empresa quedan como huecos a completar: no
@@ -17,8 +16,6 @@ const link = "underline underline-offset-4";
 export default function TermsPage() {
   return (
     <PageShell title="Términos y condiciones">
-      <LegalDraft />
-
       <Block title="Quiénes somos">
         <p>
           MAREA es una tienda con base en Paraná, Entre Ríos, Argentina. Los

@@ -45,8 +45,6 @@ const homeSchema = z.object({
       (list) => list.every((item) => item.length <= 90),
       "Cada punto, hasta 90 caracteres.",
     ),
-  newsletterTitle: linea(60),
-  newsletterText: linea(300),
   footerTagline: linea(140),
 });
 

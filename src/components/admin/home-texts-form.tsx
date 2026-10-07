@@ -123,27 +123,6 @@ export function HomeTextsForm({
 
       <fieldset className="flex flex-col gap-4">
         <legend className="mb-2 font-display text-lg font-semibold">
-          El bloque del cupón
-        </legend>
-        <TextField
-          label="Título"
-          name="newsletterTitle"
-          maxLength={60}
-          defaultValue={initial.newsletterTitle}
-          error={errors.newsletterTitle}
-        />
-        <TextAreaField
-          label="Texto"
-          name="newsletterText"
-          rows={3}
-          maxLength={300}
-          defaultValue={initial.newsletterText}
-          error={errors.newsletterText}
-        />
-      </fieldset>
-
-      <fieldset className="flex flex-col gap-4">
-        <legend className="mb-2 font-display text-lg font-semibold">
           El pie de página
         </legend>
         <TextAreaField
