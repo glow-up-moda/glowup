@@ -6,7 +6,6 @@ import { KitCardItem, ProductCard } from "@/components/store/product-card";
 import { NewsletterForm } from "@/components/store/newsletter-form";
 import { ButtonLink } from "@/components/ui/button";
 import { Sparkle } from "@/components/ui/icons";
-import { formatMoney } from "@/lib/format";
 import { getNavigation, listKits, listProducts } from "@/lib/store/catalog";
 import { productImageUrl } from "@/lib/images";
 import { getStoreSettings } from "@/lib/store/settings";
@@ -58,14 +57,8 @@ export default async function HomePage() {
     settings.sameDayCutoffTime
       ? `Envío en el día en Paraná y Oro Verde, comprando antes de las ${settings.sameDayCutoffTime}`
       : "Envío en el día en Paraná y Oro Verde",
-    settings.freeShippingThresholdCents
-      ? `Envío gratis desde ${formatMoney(settings.freeShippingThresholdCents)}`
-      : "Enviamos a todo el país",
-    settings.transferDiscountPercent > 0
-      ? `${settings.transferDiscountPercent}% de descuento pagando por transferencia`
-      : "Pagás con tarjeta o por transferencia",
-    "Embalaje discreto: nadie ve qué hay adentro",
-    "Cambios sin vueltas dentro de los 15 días",
+    "Cambios por fallas o manchas",
+    "Productos de buena calidad y durabilidad",
   ];
 
   return (
