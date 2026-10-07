@@ -65,13 +65,24 @@ export default async function CategoriesPage({
   const { supabase } = await requireAdmin();
   const message = done[param((await searchParams).hecho)];
 
-  const [{ data: categories, error }, { data: counts }] = await Promise.all([
-    supabase
-      .from("categories")
-      .select("id, name, slug, parent_id, sort_order")
-      .order("sort_order"),
-    supabase.from("products").select("category_id"),
-  ]);
+  const [{ data: categories, error }, { data: counts }, { data: ajustes }] =
+    await Promise.all([
+      supabase
+        .from("categories")
+        .select("id, name, slug, parent_id, sort_order")
+        .order("sort_order"),
+      supabase.from("products").select("category_id"),
+      supabase
+        .from("settings")
+        .select("value")
+        .eq("key", "kits_label")
+        .maybeSingle(),
+    ]);
+
+  const kitsLabel =
+    typeof ajustes?.value === "string" && ajustes.value.trim() !== ""
+      ? ajustes.value
+      : "Combos";
 
   const products = new Map<string, number>();
   for (const row of counts ?? [])
@@ -171,6 +182,27 @@ export default async function CategoriesPage({
           })}
         </ul>
       )}
+
+      <h2 className="mt-8 font-display text-lg font-semibold">
+        También en el menú
+      </h2>
+      <p className="mt-1 text-sm">
+        Los combos no son una categoría, pero se muestran al lado de ellas.
+      </p>
+      <ul className="mt-3 flex flex-col gap-3">
+        <li className="rounded-card bg-arena/60 p-2">
+          <Link
+            href="/admin/categorias/combos"
+            className="flex min-h-14 items-center gap-3 rounded-input px-2 hover:bg-arena"
+          >
+            <span className="flex-1">
+              <span className="block font-medium">{kitsLabel}</span>
+              <span className="block text-sm">/kits · nombre y foto</span>
+            </span>
+            <IconChevronRight className="shrink-0" />
+          </Link>
+        </li>
+      </ul>
     </>
   );
 }

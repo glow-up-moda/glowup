@@ -355,3 +355,118 @@ export async function removeCategoryImage(id: string): Promise<FormState> {
   revalidatePath("/", "layout");
   return { message: "Foto borrada." };
 }
+
+// Los combos (§7). `/kits` es una ruta fija, no una categoría, así que su
+// nombre y su foto viven en `settings` y se editan en su propia pantalla.
+
+const kitsSchema = z.object({
+  kits_label: z
+    .string()
+    .trim()
+    .min(2, "Escribí cómo se llama en el menú.")
+    .max(30, "Hasta 30 caracteres."),
+});
+
+export async function updateKitsLabel(
+  _prev: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  const { supabase } = await requireAdmin();
+  const parsed = kitsSchema.safeParse({ kits_label: text(formData, "name") });
+  if (!parsed.success)
+    return { errors: { name: fieldErrors(parsed.error).kits_label } };
+
+  const { error } = await supabase.rpc("set_settings", {
+    p_values: { kits_label: parsed.data.kits_label },
+  });
+  if (error) return { error: dbErrorMessage(error, "No se pudo guardar.") };
+
+  revalidatePath("/admin", "layout");
+  revalidatePath("/", "layout");
+  return { message: "Nombre guardado." };
+}
+
+async function saveKitsImage(
+  supabase: Supabase,
+  path: string | null,
+): Promise<string | null> {
+  const { error } = await supabase.rpc("set_settings", {
+    p_values: { kits_image_path: path },
+  });
+  return error ? dbErrorMessage(error, "No se pudo guardar la foto.") : null;
+}
+
+async function currentKitsImage(supabase: Supabase): Promise<string | null> {
+  const { data } = await supabase
+    .from("settings")
+    .select("value")
+    .eq("key", "kits_image_path")
+    .maybeSingle();
+  return typeof data?.value === "string" && data.value !== ""
+    ? data.value
+    : null;
+}
+
+export async function uploadKitsImage(
+  _prev: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  const { supabase } = await requireAdmin();
+  const file = formData.get("file");
+
+  if (!(file instanceof File) || file.size === 0)
+    return { errors: { file: "Elegí una foto." } };
+  if (file.size > MAX_UPLOAD_BYTES)
+    return { errors: { file: "La foto pesa demasiado. Probá con otra." } };
+
+  let webp: Buffer;
+  try {
+    webp = await sharp(Buffer.from(await file.arrayBuffer()), {
+      failOn: "error",
+    })
+      .rotate()
+      .resize({ width: 1200, height: 1200, fit: "cover" })
+      .webp({ quality: 90 })
+      .toBuffer();
+  } catch {
+    return {
+      errors: { file: "No pudimos leer esa foto. Probá con una JPG o PNG." },
+    };
+  }
+
+  const anterior = await currentKitsImage(supabase);
+  const path = `categories/kits/${randomUUID()}.webp`;
+  const storage = supabase.storage.from(PRODUCT_IMAGES_BUCKET);
+  const { error: uploadError } = await storage.upload(path, webp, {
+    contentType: "image/webp",
+    cacheControl: "31536000",
+    upsert: false,
+  });
+  if (uploadError)
+    return { error: "No se pudo subir la foto. Probá de nuevo." };
+
+  const problema = await saveKitsImage(supabase, path);
+  if (problema) {
+    await storage.remove([path]);
+    return { error: problema };
+  }
+  if (anterior) await storage.remove([anterior]);
+
+  revalidatePath("/admin", "layout");
+  revalidatePath("/", "layout");
+  return { message: "Foto subida." };
+}
+
+export async function removeKitsImage(): Promise<FormState> {
+  const { supabase } = await requireAdmin();
+  const anterior = await currentKitsImage(supabase);
+  if (!anterior) return { message: "No tenía foto." };
+
+  const problema = await saveKitsImage(supabase, null);
+  if (problema) return { error: problema };
+
+  await supabase.storage.from(PRODUCT_IMAGES_BUCKET).remove([anterior]);
+  revalidatePath("/admin", "layout");
+  revalidatePath("/", "layout");
+  return { message: "Foto borrada." };
+}

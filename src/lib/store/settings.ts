@@ -14,6 +14,9 @@ export type StoreSettings = {
   sameDayCutoffTime: string | null;
   pickupAddress: string | null;
   pickupHours: string | null;
+  /** Cómo se llama el bloque de kits en el menú y en el inicio, y su foto. */
+  kitsLabel: string;
+  kitsImagePath: string | null;
 };
 
 const defaults: StoreSettings = {
@@ -24,6 +27,8 @@ const defaults: StoreSettings = {
   sameDayCutoffTime: null,
   pickupAddress: null,
   pickupHours: null,
+  kitsLabel: "Combos",
+  kitsImagePath: null,
 };
 
 function number(value: unknown): number | null {
@@ -59,6 +64,8 @@ export const getStoreSettings = cache(async (): Promise<StoreSettings> => {
     sameDayCutoffTime: text(stored.get("same_day_cutoff_time")),
     pickupAddress: text(stored.get("pickup_address")),
     pickupHours: text(stored.get("pickup_hours")),
+    kitsLabel: text(stored.get("kits_label")) ?? defaults.kitsLabel,
+    kitsImagePath: text(stored.get("kits_image_path")),
   };
 });
 

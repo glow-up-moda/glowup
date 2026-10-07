@@ -119,7 +119,11 @@ export default async function HomePage() {
               name: category.name,
               imagePath: category.imagePath,
             })),
-            { href: "/kits", name: "Kits", imagePath: null },
+            {
+              href: "/kits",
+              name: settings.kitsLabel,
+              imagePath: settings.kitsImagePath,
+            },
           ].map((category) => (
             <li key={category.href}>
               <Link

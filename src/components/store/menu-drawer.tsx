@@ -9,7 +9,13 @@ import { IconClose, IconMenu } from "@/components/ui/icons";
 import type { Category } from "@/lib/store/catalog";
 
 /** Menú de categorías en el celular. Usa <dialog>: foco y Escape ya funcionan. */
-export function MenuDrawer({ categories }: { categories: Category[] }) {
+export function MenuDrawer({
+  categories,
+  kitsLabel,
+}: {
+  categories: Category[];
+  kitsLabel: string;
+}) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [isOpen, setIsOpen] = useState(false);
 
@@ -95,7 +101,7 @@ export function MenuDrawer({ categories }: { categories: Category[] }) {
                   href="/kits"
                   className="flex min-h-11 items-center font-display text-lg font-medium"
                 >
-                  Kits
+                  {kitsLabel}
                 </Link>
               </li>
             </ul>

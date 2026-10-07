@@ -7,18 +7,23 @@ import { formatMoney, variantText } from "@/lib/format";
 import { listKits } from "@/lib/store/catalog";
 import { getStoreSettings, transferPrice } from "@/lib/store/settings";
 
-export const metadata: Metadata = {
-  title: "Kits · MAREA",
-  description:
-    "Combos armados de ropa interior y accesorios, a un precio mejor que comprándolos sueltos.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { kitsLabel } = await getStoreSettings();
+  return {
+    title: `${kitsLabel} · MAREA`,
+    description:
+      "Combos armados de ropa interior y accesorios, a un precio mejor que comprándolos sueltos.",
+  };
+}
 
 export default async function KitsPage() {
   const [kits, settings] = await Promise.all([listKits(), getStoreSettings()]);
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
-      <h1 className="font-display text-2xl font-semibold md:text-3xl">Kits</h1>
+      <h1 className="font-display text-2xl font-semibold md:text-3xl">
+        {settings.kitsLabel}
+      </h1>
       <p className="mt-2 max-w-[60ch]">
         Combos armados por nosotras: salen mejor que comprando cada cosa por
         separado y llegan listos para regalar.

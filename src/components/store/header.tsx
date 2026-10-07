@@ -3,18 +3,22 @@ import Link from "next/link";
 
 import { IconHeart } from "@/components/ui/icons";
 import { getNavigation } from "@/lib/store/catalog";
+import { getStoreSettings } from "@/lib/store/settings";
 
 import { BagButton } from "./bag-button";
 import { MenuDrawer } from "./menu-drawer";
 import { SearchDialog } from "./search-dialog";
 
 export async function StoreHeader() {
-  const categories = await getNavigation();
+  const [categories, settings] = await Promise.all([
+    getNavigation(),
+    getStoreSettings(),
+  ]);
 
   return (
     <header className="sticky top-0 z-40 border-b border-arena bg-crema/95 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-6xl items-center gap-1 px-4">
-        <MenuDrawer categories={categories} />
+        <MenuDrawer categories={categories} kitsLabel={settings.kitsLabel} />
 
         <Link href="/" className="flex min-h-11 items-center">
           <Image
@@ -44,7 +48,7 @@ export async function StoreHeader() {
                 href="/kits"
                 className="flex min-h-11 items-center rounded-full px-3 hover:bg-arena"
               >
-                Kits
+                {settings.kitsLabel}
               </Link>
             </li>
           </ul>
