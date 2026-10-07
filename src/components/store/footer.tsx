@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 import { getStoreSettings, storeWhatsappLink } from "@/lib/store/settings";
@@ -31,7 +32,14 @@ export async function StoreFooter() {
     <footer className="mt-16 border-t border-arena bg-arena/40">
       <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 sm:grid-cols-2 md:grid-cols-4">
         <div>
-          <p className="font-display text-2xl font-semibold">MAREA</p>
+          <Image
+            src="/brand/logo.png"
+            alt="MAREA"
+            width={104}
+            height={40}
+            priority
+            className="h-10 w-auto"
+          />
           <p className="mt-2 max-w-[30ch] text-sm">
             Ropa interior y accesorios. Paraná, Entre Ríos. Enviamos a todo el
             país.

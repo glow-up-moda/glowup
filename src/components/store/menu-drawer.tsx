@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 
 import { useEffect, useRef, useState } from "react";
@@ -41,7 +42,14 @@ export function MenuDrawer({ categories }: { categories: Category[] }) {
       >
         <div className="flex h-full flex-col">
           <div className="flex items-center justify-between border-b border-arena px-4 py-3">
-            <span className="font-display text-xl font-semibold">MAREA</span>
+            <Image
+              src="/brand/logo.png"
+              alt="MAREA"
+              width={104}
+              height={40}
+              priority
+              className="h-8 w-auto"
+            />
             <button
               type="button"
               onClick={() => setIsOpen(false)}

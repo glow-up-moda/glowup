@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 
 import { PageHeader } from "@/components/admin/page-header";
@@ -103,7 +104,14 @@ export default async function PackingSlipPage({
       <article className="rounded-card border-2 border-arena p-5 md:p-8 print:rounded-none print:border-0 print:p-0">
         <header className="flex items-start justify-between gap-4 border-b-2 border-azul pb-3">
           <div>
-            <p className="font-display text-2xl font-semibold">MAREA</p>
+            <Image
+              src="/brand/logo.png"
+              alt="MAREA"
+              width={104}
+              height={40}
+              priority
+              className="h-10 w-auto"
+            />
             <p className="text-sm">Hoja para armar el pedido</p>
           </div>
           <div className="text-right">
