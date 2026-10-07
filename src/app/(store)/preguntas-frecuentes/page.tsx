@@ -53,28 +53,14 @@ export default async function FaqPage() {
         </p>
       </Block>
 
-      <Block title="¿El paquete dice qué hay adentro?">
-        <p>
-          No. Todo viaja en embalaje discreto: desde afuera no se ve ni la marca
-          ni el contenido.
-        </p>
-      </Block>
-
       <Block title="¿Puedo cambiar un talle?">
         <p>
-          Sí, dentro de los 15 días, con la prenda sin uso y con su etiqueta.
-          Por higiene, las bombachas no se cambian: mirá la{" "}
+          Sí, dentro de las 48 hs, con la prenda sin uso y con su etiqueta. Por
+          higiene, las bombachas no se cambian: mirá la{" "}
           <Link href="/guia-de-talles" className="underline underline-offset-4">
             guía de talles
           </Link>{" "}
           antes de comprar, y si tenés dudas escribinos.
-        </p>
-      </Block>
-
-      <Block title="¿Cómo sigo mi pedido?">
-        <p>
-          Te escribimos por email en cada paso. Si necesitás una mano, mandanos
-          el número de pedido por WhatsApp y lo miramos juntas.
         </p>
       </Block>
     </PageShell>
