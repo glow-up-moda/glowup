@@ -85,14 +85,13 @@ export default async function HomePage() {
               className="rise font-display text-3xl font-semibold text-balance md:text-4xl"
               style={{ animationDelay: "60ms" }}
             >
-              Ropa interior que se siente tan bien como se ve
+              Llevá el verano con vos.
             </h1>
             <p
               className="mt-4 max-w-[45ch] rise text-lg"
               style={{ animationDelay: "180ms" }}
             >
-              Diseños suaves, talles reales y envío en el día en Paraná y Oro
-              Verde.
+              Prendas y accesorios para acompañarte en cada momento.
             </p>
             <div className="mt-6 rise" style={{ animationDelay: "300ms" }}>
               <ButtonLink href="/ropa-interior">Ver la colección</ButtonLink>
