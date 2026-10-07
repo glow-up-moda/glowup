@@ -106,7 +106,7 @@ Reglas de contraste (obligatorias, medidas sobre estos hex):
 - Botón principal: fondo azul, texto crema. Secundario: borde y texto azul, fondo transparente. El azul es el color de los botones porque el aqua no sostiene texto.
 - Links: azul con subrayado.
 - Las estrellas de las reseñas van en azul: en aqua no se distinguen del fondo.
-- **Caracola es el acento de ofertas y descuentos**, y nada más: badge "Oferta", el precio cuando está rebajado (el tachado sigue en azul), la línea del descuento por transferencia, lo que se descuenta en el resumen del checkout y el corazón de favoritos marcado. Fuera de eso no aparece: botones, links, texto común, fondos de sección, anillo de foco y logo siguen en azul. Se eligió por contraste: es el único cálido que pasa 4.5:1 sobre crema **y** sobre arena, que es el fondo de las tarjetas; el coral vivo (`#C9442F`) se queda en 4.1:1 sobre arena. Y no se confunde con el rojo de error, que cereza o terracota sí.
+- **Caracola es el acento de ofertas y descuentos**, y nada más: badge "Oferta", el precio cuando está rebajado (el tachado sigue en azul), lo que se descuenta en el resumen del checkout y el corazón de favoritos marcado. Fuera de eso no aparece: botones, links, texto común, fondos de sección, anillo de foco y logo siguen en azul. Se eligió por contraste: es el único cálido que pasa 4.5:1 sobre crema **y** sobre arena, que es el fondo de las tarjetas; el coral vivo (`#C9442F`) se queda en 4.1:1 sobre arena. Y no se confunde con el rojo de error, que cereza o terracota sí.
 - Aqua puede ser una superficie llena si nada tiene que leerse encima y la información también está en texto (la barra de "te faltan $X para el envío gratis").
 - Sin modo oscuro.
 
@@ -203,7 +203,6 @@ Letras "MAREA" dibujadas a mano en azul profundo, con dos ondas en celeste debaj
 | `/preguntas-frecuentes` | Preguntas frecuentes |
 | `/nosotras` | Historia de la marca |
 | `/contacto` | Formulario + WhatsApp |
-| `/arrepentimiento` | Botón de arrepentimiento |
 | `/terminos`, `/privacidad` | Legales |
 | 404 | Con estilo de marca y links a categorías |
 
@@ -414,6 +413,7 @@ Ninguna es `security definer` salvo `private.is_admin()`, que lee `admin_users` 
 - El cálculo vive en la función `calculate_order_totals` (§8): recibe qué se compra, el cupón, el medio de pago, el método de envío y el id de la zona, y lee todos los montos de la base. `src/lib/pricing` queda para formato y margen.
 - Orden de cálculo: subtotal → cupón → descuento por transferencia → envío. Los descuentos se redondean al peso.
 - Por defecto, cupón y descuento por transferencia no se acumulan: se aplica el mayor, y en empate la transferencia, para no gastar el cupón (`discounts_stack`, ver pendientes).
+- **El descuento por transferencia está en 0 desde el 7 de octubre de 2026**, por decisión de la dueña, y el texto que lo anunciaba se sacó de la ficha, los kits, el checkout, las preguntas frecuentes, Términos y la barra de anuncios. **El cálculo sigue en la base**: con el porcentaje en 0 no descuenta nada, y las líneas del resumen y de los emails solo aparecen cuando hubo descuento, así un pedido viejo sigue mostrando el suyo. Para volver a ofrecerlo alcanza con subir el porcentaje en Configuración, pero hay que volver a escribir el texto.
 - Envío gratis si el subtotal con descuentos ≥ `free_shipping_threshold_cents` (vacío = sin envío gratis). El costo sale siempre de `shipping_zones`; el retiro no lleva zona y el envío en el día solo va a zonas `same_day`.
 - Cupones: se validan al crear el pedido (vigencia, usos máximos y monto mínimo) y otra vez al confirmar el pago. Al confirmar, la vigencia se mide contra la fecha del pedido, y si algo falla el pago no se rechaza, porque ya está cobrado: el pedido queda con `needs_review`.
 - `order_items` guarda el precio del momento; cambiar precios no altera pedidos existentes.
@@ -504,7 +504,9 @@ Cómo están hechos:
 - Cada página tiene un solo `h1` y los títulos no saltan niveles. En el checkout el `h1` es `sr-only`: la página se lee como pasos numerados y un título arriba solo ocuparía pantalla en el celular.
 - Un link que repite a otro que está al lado (la miniatura del carrito) va con `aria-hidden` y fuera del tabulador: si no, se anuncia como un enlace sin nombre.
 - Foco visible: anillo azul de 2px con separación (el aqua no tiene contraste suficiente sobre crema).
-- Footer en todas las páginas: link a Defensa del Consumidor, botón de arrepentimiento, QR de Data Fiscal de ARCA, términos y privacidad.
+- Footer en todas las páginas: QR de Data Fiscal de ARCA, términos y privacidad.
+- **Sacados a pedido de la dueña el 7 de octubre de 2026, sabiendo lo que implican:** el botón de arrepentimiento (la página, el link del pie, el bloque de Términos y la entrada del sitemap) y el link a Defensa del Consumidor del pie y de Términos, junto con el apartado "Reclamos". La Resolución 424/2020 de Comercio Interior exige los dos en una tienda online argentina, y son de lo primero que se mira en una inspección. El derecho de arrepentimiento de 10 días de la Ley 24.240 sigue existiendo aunque la web no lo nombre: lo que se sacó es cómo ejercerlo desde el sitio.
+- **El plazo por fallas quedó en 48 hs** en Términos, igual que el de cambios. La garantía legal por defectos de fábrica es de seis meses y no se acorta poniéndolo en la web (§15, pendientes).
 - Los textos legales se redactan como borrador marcado **"PENDIENTE DE REVISIÓN"** y no se publican sin revisión profesional. Incluye la política de cambios de ropa interior por higiene.
 - **La política de cambios se escribe igual en tres lugares**, y si se toca uno hay que tocar los tres: `/envios-y-cambios` (la que vale), la pregunta "¿Puedo cambiar un talle?" de `/preguntas-frecuentes` y el bloque "Cambios" de `/terminos`. Hoy dice, por decisión de la dueña del 7 de octubre de 2026: **48 hs por talle o fallas de fábrica, y sin cambio para ropa interior y mallas por higiene.** Ojo: el plazo de 48 hs vale para el cambio por talle, pero la garantía legal por defectos de fábrica es de seis meses (Ley 24.240) y no se acorta poniéndolo en la web; queda para la revisión profesional.
 - **Privacidad es la excepción**: el 7 de octubre de 2026 la dueña pidió sacarle el cartel de borrador y dejarla con dos apartados, "Qué datos pedimos" y "Para qué los usamos". Se quitaron con quién se comparten los datos, la medición, cuánto se guardan y los derechos del titular, que incluían los textos de los artículos 14 y 29 de la Ley 25.326. Es una decisión suya, tomada sabiendo que esos puntos son los que la ley pide en una política de privacidad. Términos y arrepentimiento conservan el cartel.
@@ -547,7 +549,7 @@ Backups y errores:
 - [ ] Cambiar el destello de 4 puntas por una onda cuando esté el logo: el destello viene del logo anterior y hoy se usa como motivo y como placeholder de las fotos que faltan (§5).
 - [ ] Catálogo: subcategorías de ropa interior, productos, talles, colores y fotos.
 - [ ] Tabla de talles con medidas reales.
-- [ ] Monto de envío gratis y % de descuento por transferencia.
+- [ ] Monto de envío gratis. (El descuento por transferencia está en 0 a propósito: §10.)
 - [ ] Credenciales de sandbox de Ualá Bis, pedidas a soporte. Mientras tanto se cobra en producción (§2) y la prueba de tarjeta es una compra real que se devuelve.
 - [ ] Una compra con tarjeta pagada de verdad, para probar el último tramo: el aviso de Ualá, el paso a `paid` y el descuento de stock. Crear el cobro y llegar a la pantalla de pago ya está probado (§16, fase 8); lo que falta necesita una tarjeta real. Hacerla por un monto normal: el intento de $25 lo rechazó el banco porque se parece a una prueba de tarjeta robada. Se devuelve desde Ualá después.
 - [ ] Cuotas sin interés: sí o no, y cuántas.

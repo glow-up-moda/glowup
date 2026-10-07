@@ -17,7 +17,6 @@ const about = [
 const legal = [
   { href: "/terminos", label: "Términos y condiciones" },
   { href: "/privacidad", label: "Privacidad" },
-  { href: "/arrepentimiento", label: "Botón de arrepentimiento" },
 ];
 
 export async function StoreFooter() {
@@ -103,16 +102,6 @@ export async function StoreFooter() {
                 </Link>
               </li>
             ))}
-            <li>
-              <a
-                href="https://www.argentina.gob.ar/produccion/defensadelconsumidor/formulario"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex min-h-11 items-center text-sm underline underline-offset-4"
-              >
-                Defensa del Consumidor
-              </a>
-            </li>
           </ul>
         </nav>
       </div>

@@ -117,13 +117,11 @@ function matchZone(
 
 export function CheckoutForm({
   zones,
-  transferDiscountPercent,
   sameDayCutoffTime,
   sameDayOpen,
   pickup,
 }: {
   zones: ShippingZone[];
-  transferDiscountPercent: number;
   sameDayCutoffTime: string | null;
   sameDayOpen: boolean;
   pickup: { address: string | null; hours: string | null };
@@ -589,8 +587,6 @@ export function CheckoutForm({
                 className="size-5 accent-azul"
               />
               Transferencia bancaria
-              {transferDiscountPercent > 0 &&
-                ` (${transferDiscountPercent}% off)`}
             </label>
             <label className="flex min-h-11 cursor-pointer items-center gap-3">
               <input

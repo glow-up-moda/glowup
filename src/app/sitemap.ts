@@ -19,7 +19,6 @@ const STATIC = [
   { path: "/contacto", priority: 0.5 },
   { path: "/terminos", priority: 0.2 },
   { path: "/privacidad", priority: 0.2 },
-  { path: "/arrepentimiento", priority: 0.2 },
 ];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {

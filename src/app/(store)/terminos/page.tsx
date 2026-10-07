@@ -71,27 +71,10 @@ export default function TermsPage() {
         </p>
       </Block>
 
-      <Block title="Botón de arrepentimiento">
-        <p>
-          Podés arrepentirte de la compra dentro de los 10 días corridos de
-          recibirla, sin dar explicaciones y sin costo, como dice el artículo 34
-          de la Ley 24.240 de Defensa del Consumidor. Los gastos de devolución
-          los pagamos nosotras.
-        </p>
-        <p>
-          Se hace desde el{" "}
-          <Link href="/arrepentimiento" className={link}>
-            botón de arrepentimiento
-          </Link>
-          . El producto tiene que volver sin usar y con su etiqueta.
-        </p>
-      </Block>
-
       <Block title="Cambios">
         <p>
-          Además del arrepentimiento, aceptamos cambios por talle o por fallas
-          de fábrica dentro de las 48 hs, con el producto sin usar y con su
-          etiqueta.
+          Aceptamos cambios por talle o por fallas de fábrica dentro de las 48
+          hs, con el producto sin usar y con su etiqueta.
         </p>
         <p>
           Por razones de higiene, la ropa interior y las mallas no se cambian ni
@@ -106,8 +89,8 @@ export default function TermsPage() {
 
       <Block title="Fallas">
         <p>
-          Si un producto viene fallado, escribinos con fotos dentro de los 30
-          días de recibirlo y lo cambiamos o te devolvemos la plata. La garantía
+          Si un producto viene fallado, escribinos con fotos dentro de las 48 hs
+          de recibirlo y lo cambiamos o te devolvemos la plata. La garantía
           legal no cubre el desgaste por uso.
         </p>
       </Block>
@@ -115,8 +98,7 @@ export default function TermsPage() {
       <Block title="Cupones">
         <p>
           Cada cupón tiene su vigencia, su mínimo de compra y su cantidad de
-          usos. No se acumulan entre sí ni con el descuento por transferencia,
-          salvo que digamos lo contrario.
+          usos. No se acumulan entre sí, salvo que digamos lo contrario.
         </p>
       </Block>
 
@@ -127,29 +109,6 @@ export default function TermsPage() {
             privacidad
           </Link>
           .
-        </p>
-      </Block>
-
-      <Block title="Reclamos">
-        <p>
-          Escribinos primero a nosotras:{" "}
-          <Link href="/contacto" className={link}>
-            contacto
-          </Link>
-          . También podés hacer un reclamo ante{" "}
-          <a
-            href="https://www.argentina.gob.ar/produccion/defensadelconsumidor/formulario"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={link}
-          >
-            Defensa del Consumidor
-          </a>
-          .
-        </p>
-        <p>
-          Para cualquier cuestión judicial se aplican las leyes argentinas y son
-          competentes los tribunales de Paraná, Entre Ríos.
         </p>
       </Block>
     </PageShell>

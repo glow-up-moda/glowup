@@ -23,13 +23,9 @@ function chipClass(selected: boolean, soldOut = false): string {
 
 export function ProductPurchase({
   product,
-  transferPriceCents,
-  transferDiscountPercent,
   notifyAction,
 }: {
   product: ProductDetail;
-  transferPriceCents: number;
-  transferDiscountPercent: number;
   notifyAction: (
     variantId: string,
     prev: NotifyState,
@@ -98,12 +94,6 @@ export function ProductPurchase({
           )}
           {onSale && <Badge tone="offer">Oferta</Badge>}
         </p>
-        {transferDiscountPercent > 0 && (
-          <p className="text-sm text-caracola">
-            {formatMoney(transferPriceCents)} pagando por transferencia (
-            {transferDiscountPercent}% off)
-          </p>
-        )}
       </div>
 
       {product.colors.length > 1 && (

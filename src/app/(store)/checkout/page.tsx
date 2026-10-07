@@ -32,7 +32,6 @@ export default async function CheckoutPage() {
   return (
     <CheckoutForm
       zones={zones ?? []}
-      transferDiscountPercent={settings.transferDiscountPercent}
       sameDayCutoffTime={settings.sameDayCutoffTime}
       sameDayOpen={isSameDayOpen(settings.sameDayCutoffTime)}
       pickup={{

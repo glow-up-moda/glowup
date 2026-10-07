@@ -44,12 +44,8 @@ export default async function FaqPage() {
       <Block title="¿Cómo puedo pagar?">
         <p>
           Con tarjeta de crédito, débito o prepaga (el pago lo procesa Ualá Bis)
-          o por transferencia bancaria
-          {settings.transferDiscountPercent > 0
-            ? `, que tiene ${settings.transferDiscountPercent}% de descuento`
-            : ""}
-          . Si elegís transferencia, te mostramos los datos al terminar la
-          compra y guardamos tu pedido 24 horas.
+          o por transferencia bancaria. Si elegís transferencia, te mostramos
+          los datos al terminar la compra y guardamos tu pedido 24 horas.
         </p>
       </Block>
 

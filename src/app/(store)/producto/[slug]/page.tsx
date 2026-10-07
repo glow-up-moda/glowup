@@ -12,7 +12,7 @@ import { formatDate, formatMoney } from "@/lib/format";
 import { productImageUrl } from "@/lib/images";
 import { getNavigation } from "@/lib/store/catalog";
 import { getProductBySlug, listRelatedProducts } from "@/lib/store/product";
-import { getStoreSettings, transferPrice } from "@/lib/store/settings";
+import { getStoreSettings } from "@/lib/store/settings";
 import { JsonLd, productJsonLd } from "@/lib/store/structured-data";
 
 import { notifyWhenBackInStock } from "./actions";
@@ -189,11 +189,6 @@ export default async function ProductPage({
           <div className="mt-5">
             <ProductPurchase
               product={product}
-              transferPriceCents={transferPrice(
-                product.priceCents,
-                settings.transferDiscountPercent,
-              )}
-              transferDiscountPercent={settings.transferDiscountPercent}
               notifyAction={notifyWhenBackInStock}
             />
           </div>

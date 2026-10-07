@@ -5,7 +5,7 @@ import { Block, PageShell } from "@/components/store/page-shell";
 // Reducida a pedido de la dueña el 7 de octubre de 2026: quedan qué datos se
 // piden y para qué. Se sacaron los apartados de con quién se comparten,
 // medición, cuánto se guardan y qué puede hacer la clienta, y también el
-// cartel de borrador, que términos y arrepentimiento sí conservan (§15).
+// cartel de borrador, que términos sí conserva (§15).
 
 export const metadata: Metadata = {
   title: "Privacidad · MAREA",

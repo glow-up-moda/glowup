@@ -5,7 +5,7 @@ import { ProductImage } from "@/components/store/product-image";
 import { Badge } from "@/components/ui/badge";
 import { formatMoney, variantText } from "@/lib/format";
 import { listKits } from "@/lib/store/catalog";
-import { getStoreSettings, transferPrice } from "@/lib/store/settings";
+import { getStoreSettings } from "@/lib/store/settings";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { kitsLabel } = await getStoreSettings();
@@ -39,11 +39,6 @@ export default async function KitsPage() {
             const onSale =
               kit.compareAtPriceCents != null &&
               kit.compareAtPriceCents > kit.priceCents;
-            const withTransfer = transferPrice(
-              kit.priceCents,
-              settings.transferDiscountPercent,
-            );
-
             return (
               <li
                 key={kit.id}
@@ -84,11 +79,6 @@ export default async function KitsPage() {
                       </span>
                     )}
                   </p>
-                  {settings.transferDiscountPercent > 0 && (
-                    <p className="text-sm text-caracola">
-                      {formatMoney(withTransfer)} pagando por transferencia
-                    </p>
-                  )}
 
                   {kit.items.length > 0 && (
                     <>
