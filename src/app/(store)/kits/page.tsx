@@ -12,7 +12,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: `${kitsLabel} · MAREA`,
     description:
-      "Combos armados de ropa interior y accesorios, a un precio mejor que comprándolos sueltos.",
+      "Combos armados, a un precio mejor que comprando cada cosa por separado.",
   };
 }
 

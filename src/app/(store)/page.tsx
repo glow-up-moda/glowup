@@ -8,12 +8,12 @@ import { ButtonLink } from "@/components/ui/button";
 import { Sparkle } from "@/components/ui/icons";
 import { getNavigation, listKits, listProducts } from "@/lib/store/catalog";
 import { productImageUrl } from "@/lib/images";
+import { SAME_DAY_CITIES } from "@/lib/site";
 import { getStoreSettings } from "@/lib/store/settings";
 
 export const metadata: Metadata = {
-  title: "MAREA · Ropa interior y accesorios",
-  description:
-    "Ropa interior y accesorios con envío a todo el país. En Paraná y Oro Verde, envío en el día.",
+  title: "MAREA · Prendas y accesorios",
+  description: `Prendas y accesorios con envío a todo el país. En ${SAME_DAY_CITIES}, envío en el día.`,
 };
 
 function Section({

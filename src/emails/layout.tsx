@@ -260,7 +260,7 @@ export function EmailLayout({
               "Aviso automático del panel de MAREA."
             ) : (
               <>
-                MAREA · Ropa interior y accesorios · Paraná, Entre Ríos.
+                MAREA · Prendas y accesorios · Paraná, Entre Ríos.
                 {footer === "store" && (
                   <>
                     <br />

@@ -4,7 +4,7 @@ import { ImageResponse } from "next/og";
 // (§14). Es provisoria: cuando exista el logo en SVG (§17) se reemplaza por
 // una imagen de verdad. Las páginas de producto usan la foto del producto.
 
-export const alt = "MAREA · Ropa interior y accesorios";
+export const alt = "MAREA · Prendas y accesorios";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -27,7 +27,7 @@ export default function Image() {
       <div style={{ fontSize: 108, fontWeight: 700, letterSpacing: 4 }}>
         MAREA
       </div>
-      <div style={{ fontSize: 40 }}>Ropa interior y accesorios</div>
+      <div style={{ fontSize: 40 }}>Prendas y accesorios</div>
       <div style={{ fontSize: 30, color: "#075477", opacity: 0.8 }}>
         Paraná, Entre Ríos · Envíos a todo el país
       </div>
