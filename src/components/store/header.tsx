@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 import { IconHeart } from "@/components/ui/icons";
@@ -15,11 +16,15 @@ export async function StoreHeader() {
       <div className="mx-auto flex h-16 max-w-6xl items-center gap-1 px-4">
         <MenuDrawer categories={categories} />
 
-        <Link
-          href="/"
-          className="flex min-h-11 items-center font-display text-2xl font-semibold whitespace-nowrap"
-        >
-          MAREA
+        <Link href="/" className="flex min-h-11 items-center">
+          <Image
+            src="/brand/logo.png"
+            alt="MAREA"
+            width={104}
+            height={40}
+            priority
+            className="h-9 w-auto md:h-10"
+          />
         </Link>
 
         <nav aria-label="Categorías" className="ml-8 hidden md:block">

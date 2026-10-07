@@ -1,6 +1,7 @@
 "use client";
 
 import { IconBag } from "@/components/ui/icons";
+import { plural } from "@/lib/format";
 import { useCart } from "@/lib/store/cart";
 
 /** Abre el carrito lateral. El contador rebota al sumar algo (§6). */
@@ -12,7 +13,9 @@ export function BagButton() {
       type="button"
       onClick={open}
       aria-label={
-        count > 0 ? `Abrir el carrito, ${count} productos` : "Abrir el carrito"
+        count > 0
+          ? `Abrir el carrito, ${plural(count, "producto", "productos")}`
+          : "Abrir el carrito"
       }
       className="relative flex size-11 items-center justify-center rounded-full hover:bg-arena"
     >

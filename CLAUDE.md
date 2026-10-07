@@ -127,14 +127,14 @@ Reglas de contraste (obligatorias, medidas sobre estos hex):
 
 ### Logo
 
-El logo se está dibujando con esta paleta (ver pendientes):
-- Letras "MAREA" en azul profundo, con la onda en aqua y celeste brisa.
-- Versiones en `public/brand/`:
-  - `logo-full.svg`: hero, emails, página Nosotras.
-  - `logo-compact.svg`: header (texto + onda chica).
-  - `wave-icon.svg`: favicon, avatar, marca en fotos.
-  - `logo-azul.svg` y `logo-crema.svg`: una sola tinta.
-- Mientras no estén los SVG, usar "MAREA" escrito con la tipografía de títulos como placeholder. No dibujar ni recrear el logo por código.
+Letras "MAREA" dibujadas a mano en azul profundo, con dos ondas en celeste debajo.
+
+- **El original es `public/brand/logo.png`** (600 × 231, con transparencia), recortado del archivo que pasó la dueña. Todavía no hay versión en SVG (ver pendientes), así que todo sale de ese PNG.
+- El header lo usa con `next/image` a 36px de alto (40 en escritorio).
+- El favicon (`src/app/icon.png`) y el ícono de iOS (`src/app/apple-icon.png`) son **la onda del logo en crema sobre azul**: el 55% del medio, porque la onda entera a 16px es una línea. Se generaron del mismo PNG conservando su alfa y cambiándole la tinta, no dibujando una onda nueva.
+- Las tintas del archivo son `#013D64` y `#2CACC4`: parecidas a azul y aqua, pero no las mismas. El logo se usa tal cual vino; no se retoca para que coincida.
+- **Todavía escriben "MAREA" con la tipografía de títulos**, a la espera de las versiones que faltan: el footer (fondo azul, necesita la versión en crema), el menú lateral, el ingreso al panel y la hoja para armar pedidos.
+- No dibujar ni recrear el logo por código.
 
 ### Tipografía
 
@@ -527,7 +527,7 @@ Backups y errores:
 
 ## 17. Pendientes
 
-- [ ] Logo de MAREA en SVG, con todas las versiones. Mientras tanto, el favicon (`src/app/icon.svg`) y la imagen que se ve al compartir un link (`src/app/(store)/opengraph-image.tsx`) son provisorios: una "M" y el nombre escrito, sin el logo.
+- [ ] Logo de MAREA en SVG, con todas las versiones. **El PNG ya está** (`public/brand/logo.png`) y se usa en el header y en el favicon; falta el SVG para que no pixele al agrandarlo, y la versión en una sola tinta crema para el footer, el menú lateral, el ingreso al panel y la hoja de pedidos, que siguen escribiendo "MAREA" con la tipografía. La imagen que se ve al compartir un link (`src/app/(store)/opengraph-image.tsx`) también sigue siendo el nombre escrito.
 - [ ] Cambiar el destello de 4 puntas por una onda cuando esté el logo: el destello viene del logo anterior y hoy se usa como motivo y como placeholder de las fotos que faltan (§5).
 - [ ] Catálogo: subcategorías de ropa interior, productos, talles, colores y fotos.
 - [ ] Tabla de talles con medidas reales.
