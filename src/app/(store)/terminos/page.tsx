@@ -89,14 +89,14 @@ export default function TermsPage() {
 
       <Block title="Cambios">
         <p>
-          Además del arrepentimiento, aceptamos cambios de talle o de color
-          dentro de los 15 días, con el producto sin usar y con su etiqueta.
+          Además del arrepentimiento, aceptamos cambios por talle o por fallas
+          de fábrica dentro de las 48 hs, con el producto sin usar y con su
+          etiqueta.
         </p>
         <p>
-          Por razones de higiene, las bombachas y los trajes de baño no se
-          cambian ni se devuelven, salvo que tengan una falla. Es una excepción
-          que la ley permite y que está avisada antes de comprar, en cada
-          producto y en{" "}
+          Por razones de higiene, la ropa interior y las mallas no se cambian ni
+          se devuelven, salvo que tengan una falla. Es una excepción que la ley
+          permite y que está avisada antes de comprar, en cada producto y en{" "}
           <Link href="/envios-y-cambios" className={link}>
             envíos y cambios
           </Link>
