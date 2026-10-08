@@ -12,7 +12,6 @@ export const revalidate = 3600;
 const STATIC = [
   { path: "/", priority: 1 },
   { path: "/kits", priority: 0.8 },
-  { path: "/guia-de-talles", priority: 0.6 },
   { path: "/envios-y-cambios", priority: 0.6 },
   { path: "/preguntas-frecuentes", priority: 0.5 },
   { path: "/nosotras", priority: 0.5 },

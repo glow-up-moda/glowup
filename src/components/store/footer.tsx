@@ -4,7 +4,6 @@ import Link from "next/link";
 import { getStoreSettings, storeWhatsappLink } from "@/lib/store/settings";
 
 const help = [
-  { href: "/guia-de-talles", label: "Guía de talles" },
   { href: "/envios-y-cambios", label: "Envíos y cambios" },
   { href: "/preguntas-frecuentes", label: "Preguntas frecuentes" },
 ];

@@ -17,11 +17,7 @@ export default function TermsPage() {
   return (
     <PageShell title="Términos y condiciones">
       <Block title="Quiénes somos">
-        <p>
-          MAREA es una tienda con base en Paraná, Entre Ríos, Argentina. Los
-          datos de la empresa (razón social, CUIT y domicilio) se publican acá
-          antes del lanzamiento.
-        </p>
+        <p>MAREA es una tienda con base en Paraná, Entre Ríos, Argentina.</p>
         <p>
           Comprar en la tienda implica aceptar estos términos. Si algo no te
           cierra, escribinos antes de comprar.

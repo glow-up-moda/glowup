@@ -1,6 +1,5 @@
 import { SAME_DAY_CITIES } from "@/lib/site";
 import type { Metadata } from "next";
-import Link from "next/link";
 
 import { Block, PageShell } from "@/components/store/page-shell";
 import { formatMoney } from "@/lib/format";
@@ -52,11 +51,8 @@ export default async function FaqPage() {
       <Block title="¿Puedo cambiar un talle?">
         <p>
           Sí, dentro de las 48 hs, con la prenda sin uso y con su etiqueta. Por
-          higiene, la ropa interior y las mallas no se cambian: mirá la{" "}
-          <Link href="/guia-de-talles" className="underline underline-offset-4">
-            guía de talles
-          </Link>{" "}
-          antes de comprar, y si tenés dudas escribinos.
+          higiene, la ropa interior y las mallas no se cambian: si tenés dudas
+          con el talle, escribinos antes de comprar.
         </p>
       </Block>
     </PageShell>

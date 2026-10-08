@@ -109,14 +109,6 @@ export function MenuDrawer({
             <ul className="mt-6 flex flex-col gap-1 border-t border-arena pt-4 text-sm">
               <li>
                 <Link
-                  href="/guia-de-talles"
-                  className="flex min-h-11 items-center"
-                >
-                  Guía de talles
-                </Link>
-              </li>
-              <li>
-                <Link
                   href="/envios-y-cambios"
                   className="flex min-h-11 items-center"
                 >

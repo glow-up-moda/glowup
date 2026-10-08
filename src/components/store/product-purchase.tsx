@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
@@ -122,15 +121,7 @@ export function ProductPurchase({
 
       {hasSizes && (
         <fieldset>
-          <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <legend className="font-medium">Talle</legend>
-            <Link
-              href="/guia-de-talles"
-              className="inline-flex min-h-11 items-center text-sm underline underline-offset-4"
-            >
-              Guía de talles
-            </Link>
-          </div>
+          <legend className="font-medium">Talle</legend>
           <div className="mt-2 flex flex-wrap gap-2">
             {sizesForColor.map((option) => (
               <label

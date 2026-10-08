@@ -198,7 +198,6 @@ Letras "MAREA" dibujadas a mano en azul profundo, con dos ondas en celeste debaj
 | `/bolsa/[id]` | Link del email de carrito abandonado: devuelve la bolsa con los precios de hoy |
 | `/baja/[id]` | Baja de los avisos de carrito abandonado |
 | `/cuenta` | Opcional: historial de pedidos (ingreso con link por email) |
-| `/guia-de-talles` | Tabla de medidas y cómo medirse |
 | `/envios-y-cambios` | Zonas, costos, plazos, envío discreto, política de cambios |
 | `/preguntas-frecuentes` | Preguntas frecuentes |
 | `/nosotras` | Historia de la marca |
@@ -239,7 +238,6 @@ Footer: links, legales, Data Fiscal, redes
 - Galería con swipe en celular, nombre, precio, precio tachado si hay oferta, precio con transferencia y cuotas.
 - Selector de color y talle. Talles agotados visibles pero deshabilitados, con "Avisame cuando vuelva".
 - "Últimas unidades" cuando el disponible es ≤ 2 (configurable).
-- Link a guía de talles.
 - Pestañas: Descripción, Talle, Envíos y cambios. "Materiales y cuidados" y "La modelo" siguen en la base pero ya no se cargan desde el panel, así que no aparecen.
 - "Combinalo con" (productos o kits relacionados).
 - Reseñas aprobadas.
@@ -267,7 +265,7 @@ Tiene que ser cómodo de usar desde el celular.
 - **Inicio:** ventas del día y la semana, pedidos por preparar y alertas (stock bajo, pedidos para revisar, transferencias por confirmar).
 - **Productos:** crear y editar, variantes opcionales, fotos, costo, precio, precio tachado, publicado sí/no.
   - **El alta es una sola pantalla** (`/admin/productos/nuevo`): datos, stock y fotos juntos. El producto se crea como borrador, se suben las fotos y **recién entonces se publica**, así nunca aparece a medio cargar en la tienda. Las fotos esperan en el navegador hasta que el producto existe, porque se guardan en una carpeta con su id; por eso `createProduct` devuelve el id en vez de redirigir, y el formulario sigue desde el navegador.
-  - **Las variantes son opcionales.** Por defecto el alta pide un solo número de stock y crea una fila sin color ni talle: esa fila **es** el producto (§8). Un botón cambia a la grilla cuando sí tiene colores o talles. En la tienda cada selector aparece solo si hay algo que elegir: sin talles no se muestra el talle ni el link a la guía, y sin nada que elegir el botón de comprar está habilitado de entrada. El nombre de la variante lo arma `variantText` (`src/lib/format.ts`): "Rosa · Talle 85", "Rosa" o "Talle 85", y nada si no tiene ninguno.
+  - **Las variantes son opcionales.** Por defecto el alta pide un solo número de stock y crea una fila sin color ni talle: esa fila **es** el producto (§8). Un botón cambia a la grilla cuando sí tiene colores o talles. En la tienda cada selector aparece solo si hay algo que elegir: sin talles no se muestra el talle, y sin nada que elegir el botón de comprar está habilitado de entrada. El nombre de la variante lo arma `variantText` (`src/lib/format.ts`): "Rosa · Talle 85", "Rosa" o "Talle 85", y nada si no tiene ninguno.
   - El formulario tiene solo lo que la dueña quiere escribir: nombre, categoría, precio, precio tachado, costo, descripción y talle. **La dirección de la tienda sale del nombre** (`freeSlug` en las acciones): no se escribe, y si dos productos se llaman igual al segundo se le suma un número. Renombrar un producto le cambia el link. El título para Google también sale del nombre y la descripción para Google queda vacía; las columnas `slug`, `seo_title`, `seo_description`, `materials_care` y `model_info` siguen existiendo en la base, pero ya no se editan.
   - En la ficha de un producto ya creado, **"Datos del producto" va plegado**: lo que se mira todos los días es el stock y las fotos. Publicar y despublicar es un botón en el encabezado, no un tilde adentro de un formulario.
   - **Grilla de variantes** (`src/components/admin/variant-grid.tsx`): se escriben los colores y los talles separados por coma, y aparece un bloque por color con un campo de stock por talle. **Los dos campos son opcionales y se usan sueltos:** solo colores (tres colores de talle único), solo talles (cuatro talles de un color) o los dos cruzados; lo que quede vacío se guarda en null. Una celda vacía no crea nada; un 0 crea la variante sin stock. Dos colores por cuatro talles entran en un solo envío en vez de ocho. En la ficha de un producto la misma grilla marca "ya está" las combinaciones que existen, porque la base no admite repetir color y talle. No es una tabla a propósito: a 375px una de cuatro talles pedía 443px y había que scrollear de costado.
@@ -547,7 +545,6 @@ Backups y errores:
 - [ ] Logo de MAREA en SVG. **El PNG ya está** (`public/brand/logo.png`, y `logo-crema.png` en una sola tinta) y se usa en el header, el footer, el menú lateral, el ingreso al panel, la hoja de pedidos y el favicon. Falta el SVG, para que no pixele al agrandarlo. La imagen que se ve al compartir un link (`src/app/(store)/opengraph-image.tsx`) y los emails siguen con el nombre escrito.
 - [ ] Cambiar el destello de 4 puntas por una onda cuando esté el logo: el destello viene del logo anterior y hoy se usa como motivo y como placeholder de las fotos que faltan (§5).
 - [ ] Catálogo: subcategorías de ropa interior, productos, talles, colores y fotos.
-- [ ] Tabla de talles con medidas reales.
 - [ ] Monto de envío gratis. (El descuento por transferencia está en 0 a propósito: §10.)
 - [ ] Credenciales de sandbox de Ualá Bis, pedidas a soporte. Mientras tanto se cobra en producción (§2) y la prueba de tarjeta es una compra real que se devuelve.
 - [ ] Una compra con tarjeta pagada de verdad, para probar el último tramo: el aviso de Ualá, el paso a `paid` y el descuento de stock. Crear el cobro y llegar a la pantalla de pago ya está probado (§16, fase 8); lo que falta necesita una tarjeta real. Hacerla por un monto normal: el intento de $25 lo rechazó el banco porque se parece a una prueba de tarjeta robada. Se devuelve desde Ualá después.
@@ -566,4 +563,3 @@ Backups y errores:
 - [ ] Servicio de monitoreo de errores (tipo Sentry). Hoy los errores solo quedan en los logs de Netlify.
 - [ ] ¿Mover el consentimiento de novedades al lado del email en el checkout? Hoy está al final (paso 6), así que el aviso de carrito abandonado casi nunca va a dispararse: quien se va antes de terminar rara vez llegó a marcarlo.
 - [ ] CUIT y QR de Data Fiscal de ARCA para el pie.
-- [ ] Medidas reales para la guía de talles (hoy solo dice cómo medirse y qué talles hay).
