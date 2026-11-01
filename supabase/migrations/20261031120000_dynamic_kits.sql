@@ -637,7 +637,7 @@ begin
     (v_totals ->> 'shipping_cents')::integer,
     (v_totals ->> 'total_cents')::integer,
     case when (v_totals #>> '{coupon,applied}')::boolean then (v_totals #>> '{coupon,id}')::uuid end,
-    now() + case v_payment when 'mercadopago' then interval '30 minutes' else interval '24 hours' end
+    now() + case v_payment when 'card' then interval '30 minutes' else interval '24 hours' end
   )
   returning * into v_order;
 
