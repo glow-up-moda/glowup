@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { ConfirmAction } from "@/components/admin/confirm-action";
 import { KitForm } from "@/components/admin/kit-form";
+import { KitCoverImage } from "@/components/admin/kit-cover-image";
 import { PageHeader, Section } from "@/components/admin/page-header";
 import { Notice } from "@/components/ui/notice";
 import { categoryOptions } from "@/lib/admin/catalog";
@@ -11,7 +12,12 @@ import { requireAdmin } from "@/lib/auth/admin";
 import { centsToPesosInput } from "@/lib/format";
 import { isUuid, param } from "@/lib/params";
 
-import { deleteKit, updateKit } from "../actions";
+import {
+  deleteKit,
+  removeKitCoverImage,
+  updateKit,
+  uploadKitCoverImage,
+} from "../actions";
 
 export const metadata: Metadata = { title: "Kit" };
 
@@ -33,7 +39,7 @@ export default async function KitPage({
     supabase
       .from("kits")
       .select(
-        "id, name, slug, price_cents, compare_at_price_cents, is_published, is_dynamic, discount_percent, kit_items(variant_id, quantity), kit_components(id, category_id, quantity, sort_order)",
+        "id, name, slug, price_cents, compare_at_price_cents, is_published, is_dynamic, discount_percent, cover_image_path, kit_items(variant_id, quantity), kit_components(id, category_id, quantity, sort_order)",
       )
       .eq("id", id)
       .maybeSingle(),
@@ -70,6 +76,18 @@ export default async function KitPage({
             items: kit.kit_items,
             components: kit.kit_components,
           }}
+        />
+      </Section>
+
+      <Section
+        title="Imagen principal"
+        description="Esta imagen reemplaza las fotos automáticas de los productos en la tarjeta del kit."
+      >
+        <KitCoverImage
+          name={kit.name}
+          imagePath={kit.cover_image_path}
+          uploadAction={uploadKitCoverImage.bind(null, id)}
+          removeAction={removeKitCoverImage.bind(null, id)}
         />
       </Section>
 

@@ -1,7 +1,10 @@
 "use server";
 
+import { randomUUID } from "node:crypto";
+
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import sharp from "sharp";
 import { z } from "zod";
 
 import { dbErrorMessage } from "@/lib/admin/errors";
@@ -9,6 +12,7 @@ import { fieldErrors, type FormState, text } from "@/lib/admin/forms";
 import { requireAdmin } from "@/lib/auth/admin";
 import { parsePesos, slugify } from "@/lib/format";
 import { isUuid } from "@/lib/params";
+import { MAX_UPLOAD_BYTES, PRODUCT_IMAGES_BUCKET } from "@/lib/images";
 
 const pesosObligatorio = (mensaje: string) =>
   z.string().transform((value, ctx) => {
@@ -277,10 +281,132 @@ export async function updateKit(
   redirect(`/admin/kits/${id}?hecho=guardado`);
 }
 
+/** Guarda una portada propia, independiente de las fotos de los productos. */
+export async function uploadKitCoverImage(
+  kitId: string,
+  _prev: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  const { supabase } = await requireAdmin();
+  if (!isUuid(kitId)) return { error: "No encontramos ese kit." };
+
+  const file = formData.get("file");
+  if (!(file instanceof File) || file.size === 0)
+    return { errors: { file: "Elegí una imagen." } };
+  if (file.size > MAX_UPLOAD_BYTES)
+    return { errors: { file: "La imagen pesa demasiado. Probá con otra." } };
+
+  let webp: Buffer;
+  try {
+    const source = sharp(Buffer.from(await file.arrayBuffer()), {
+      failOn: "error",
+    }).rotate();
+    webp = await source
+      .clone()
+      .resize({ width: 1200, height: 1500, fit: "cover" })
+      .webp({ quality: 82 })
+      .toBuffer();
+
+    // El bucket product-images admite archivos de hasta 2 MB.
+    if (webp.byteLength > 2 * 1024 * 1024) {
+      webp = await source
+        .clone()
+        .resize({ width: 900, height: 1125, fit: "cover" })
+        .webp({ quality: 75 })
+        .toBuffer();
+    }
+    if (webp.byteLength > 2 * 1024 * 1024) {
+      return {
+        errors: { file: "La imagen sigue siendo muy pesada después de optimizarla. Probá con otra." },
+      };
+    }
+  } catch {
+    return {
+      errors: { file: "No pudimos leer esa imagen. Probá con una JPG o PNG." },
+    };
+  }
+
+  const { data: kit } = await supabase
+    .from("kits")
+    .select("cover_image_path")
+    .eq("id", kitId)
+    .maybeSingle();
+  if (!kit) return { error: "No encontramos ese kit." };
+
+  // Se usa un nombre nuevo para evitar que la caché de un año muestre la foto anterior.
+  const path = `kits/${kitId}/${randomUUID()}.webp`;
+  const storage = supabase.storage.from(PRODUCT_IMAGES_BUCKET);
+  const { error: uploadError } = await storage.upload(path, webp, {
+    contentType: "image/webp",
+    cacheControl: "31536000",
+    upsert: false,
+  });
+  if (uploadError)
+    return { error: "No se pudo subir la imagen. Probá de nuevo." };
+
+  const { error: updateError } = await supabase
+    .from("kits")
+    .update({ cover_image_path: path })
+    .eq("id", kitId);
+  if (updateError) {
+    await storage.remove([path]);
+    return {
+      error: dbErrorMessage(updateError, "No se pudo guardar la imagen."),
+    };
+  }
+
+  if (kit.cover_image_path) await storage.remove([kit.cover_image_path]);
+
+  revalidatePath("/admin", "layout");
+  revalidatePath("/kits");
+  revalidatePath("/");
+  return { message: "Imagen principal actualizada." };
+}
+
+export async function removeKitCoverImage(
+  kitId: string,
+  _prev: FormState,
+): Promise<FormState> {
+  const { supabase } = await requireAdmin();
+  if (!isUuid(kitId)) return { error: "No encontramos ese kit." };
+
+  const { data: kit } = await supabase
+    .from("kits")
+    .select("cover_image_path")
+    .eq("id", kitId)
+    .maybeSingle();
+  if (!kit) return { error: "No encontramos ese kit." };
+  if (!kit.cover_image_path)
+    return { message: "El kit ya usa las fotos de sus productos." };
+
+  const { error } = await supabase
+    .from("kits")
+    .update({ cover_image_path: null })
+    .eq("id", kitId);
+  if (error)
+    return { error: dbErrorMessage(error, "No se pudo quitar la imagen.") };
+
+  await supabase.storage
+    .from(PRODUCT_IMAGES_BUCKET)
+    .remove([kit.cover_image_path]);
+
+  revalidatePath("/admin", "layout");
+  revalidatePath("/kits");
+  revalidatePath("/");
+  return {
+    message: "Imagen propia quitada. Se volvieron a usar las fotos de los productos.",
+  };
+}
+
 export async function deleteKit(id: string): Promise<FormState> {
   const { supabase } = await requireAdmin();
   if (!isUuid(id)) return { error: "No encontramos ese kit." };
 
+  const { data: kit } = await supabase
+    .from("kits")
+    .select("cover_image_path")
+    .eq("id", id)
+    .maybeSingle();
   const { error } = await supabase.from("kits").delete().eq("id", id);
   if (error) {
     return {
@@ -290,6 +416,11 @@ export async function deleteKit(id: string): Promise<FormState> {
           : dbErrorMessage(error, "No se pudo borrar el kit."),
     };
   }
+
+  if (kit?.cover_image_path)
+    await supabase.storage
+      .from(PRODUCT_IMAGES_BUCKET)
+      .remove([kit.cover_image_path]);
 
   revalidatePath("/admin", "layout");
   revalidatePath("/kits");

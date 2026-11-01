@@ -319,6 +319,7 @@ export type Database = {
       kits: {
         Row: {
           compare_at_price_cents: number | null
+          cover_image_path: string | null
           created_at: string
           discount_percent: number
           id: string
@@ -331,6 +332,7 @@ export type Database = {
         }
         Insert: {
           compare_at_price_cents?: number | null
+          cover_image_path?: string | null
           created_at?: string
           discount_percent?: number
           id?: string
@@ -343,6 +345,7 @@ export type Database = {
         }
         Update: {
           compare_at_price_cents?: number | null
+          cover_image_path?: string | null
           created_at?: string
           discount_percent?: number
           id?: string
