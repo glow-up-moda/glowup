@@ -102,10 +102,21 @@ export function KitCardItem({ kit }: { kit: KitCard }) {
           </span>
         </span>
         <h3 className="mt-3 font-medium">{kit.name}</h3>
-        <Price
-          priceCents={kit.priceCents}
-          compareAtPriceCents={kit.compareAtPriceCents}
-        />
+        {kit.isDynamic ? (
+          <p className="mt-1 flex flex-wrap items-baseline gap-2">
+            <span className="font-medium">Elegí tus productos</span>
+            {kit.discountPercent > 0 && (
+              <span className="text-sm text-caracola">
+                {kit.discountPercent}% OFF
+              </span>
+            )}
+          </p>
+        ) : (
+          <Price
+            priceCents={kit.priceCents}
+            compareAtPriceCents={kit.compareAtPriceCents}
+          />
+        )}
       </Link>
     </article>
   );

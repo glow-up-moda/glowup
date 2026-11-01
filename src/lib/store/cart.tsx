@@ -21,11 +21,25 @@ const STORAGE_KEY = "glowup-carrito";
 /** Tope por línea: una reserva por transferencia inmoviliza stock 24 horas (§8). */
 export const MAX_PER_LINE = 10;
 
+export type KitSelection = {
+  componentId: string;
+  variantId: string;
+  componentName: string;
+  productName: string;
+  color: string | null;
+  size: string | null;
+  quantity: number;
+};
+
 export type CartItem = {
   /** Qué se vende: una variante suelta o un kit armado (§8). */
   kind: "variant" | "kit";
-  /** Id de la variante o del kit, según kind: identifica la línea. */
+  /** Id de la variante o del kit, según kind. */
   id: string;
+  /** Identidad propia de cada combinación dinámica del mismo kit. */
+  cartKey?: string;
+  /** Variantes elegidas en un kit combinable. */
+  selections?: KitSelection[];
   /** A dónde lleva el nombre en el carrito. */
   href: string;
   name: string;
@@ -38,6 +52,10 @@ export type CartItem = {
 };
 
 const EMPTY: CartItem[] = [];
+
+export function cartItemKey(item: Pick<CartItem, "kind" | "id" | "cartKey">): string {
+  return item.cartKey ?? `${item.kind}:${item.id}`;
+}
 
 let snapshot: CartItem[] = EMPTY;
 let loaded = false;
@@ -132,11 +150,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const add = useCallback((item: Omit<CartItem, "quantity">, quantity = 1) => {
     const current = getSnapshot();
-    const existing = current.find((line) => line.id === item.id);
+    const key = cartItemKey(item as CartItem);
+    const existing = current.find((line) => cartItemKey(line) === key);
     write(
       existing
         ? current.map((line) =>
-            line.id === item.id
+            cartItemKey(line) === key
               ? {
                   ...line,
                   ...item,
@@ -153,9 +172,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     const current = getSnapshot();
     write(
       quantity <= 0
-        ? current.filter((line) => line.id !== id)
+        ? current.filter((line) => cartItemKey(line) !== id)
         : current.map((line) =>
-            line.id === id
+            cartItemKey(line) === id
               ? { ...line, quantity: Math.min(quantity, MAX_PER_LINE) }
               : line,
           ),
@@ -163,18 +182,20 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const remove = useCallback((id: string) => {
-    write(getSnapshot().filter((line) => line.id !== id));
+    write(getSnapshot().filter((line) => cartItemKey(line) !== id));
   }, []);
 
   const setPrice = useCallback((id: string, priceCents: number) => {
     const current = getSnapshot();
     if (
-      !current.some((line) => line.id === id && line.priceCents !== priceCents)
+      !current.some((line) => cartItemKey(line) === id && line.priceCents !== priceCents)
     ) {
       return;
     }
     write(
-      current.map((line) => (line.id === id ? { ...line, priceCents } : line)),
+      current.map((line) =>
+        cartItemKey(line) === id ? { ...line, priceCents } : line,
+      ),
     );
   }, []);
 

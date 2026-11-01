@@ -26,7 +26,7 @@ export default async function KitsPage({
 
   const { data: kits, error } = await supabase
     .from("kits")
-    .select("id, name, price_cents, is_published, kit_items(quantity)")
+    .select("id, name, price_cents, is_published, is_dynamic, discount_percent, kit_items(quantity), kit_components(quantity)")
     .order("name");
 
   return (
@@ -57,8 +57,9 @@ export default async function KitsPage({
                     {!kit.is_published && <Badge>Borrador</Badge>}
                   </span>
                   <span className="block text-sm">
-                    {formatMoney(kit.price_cents)} ·{" "}
-                    {plural(kit.kit_items.length, "producto", "productos")}
+                    {kit.is_dynamic
+                      ? `${kit.discount_percent}% OFF · ${plural(kit.kit_components.length, "categoría", "categorías")}`
+                      : `${formatMoney(kit.price_cents)} · ${plural(kit.kit_items.length, "producto", "productos")}`}
                   </span>
                 </span>
                 <IconChevronRight className="shrink-0" />
