@@ -12,7 +12,12 @@ import { requireAdmin } from "@/lib/auth/admin";
 import { centsToPesosInput } from "@/lib/format";
 import { isUuid, param } from "@/lib/params";
 
-import { deleteKit, removeKitCoverImage, updateKit, uploadKitCoverImage } from "../actions";
+import {
+  deleteKit,
+  removeKitCoverImage,
+  updateKit,
+  uploadKitCoverImage,
+} from "../actions";
 
 export const metadata: Metadata = { title: "Kit" };
 
