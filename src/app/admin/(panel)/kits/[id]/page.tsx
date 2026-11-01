@@ -5,6 +5,7 @@ import { ConfirmAction } from "@/components/admin/confirm-action";
 import { KitForm } from "@/components/admin/kit-form";
 import { PageHeader, Section } from "@/components/admin/page-header";
 import { Notice } from "@/components/ui/notice";
+import { categoryOptions } from "@/lib/admin/catalog";
 import { variantOptions } from "@/lib/admin/kits";
 import { requireAdmin } from "@/lib/auth/admin";
 import { centsToPesosInput } from "@/lib/format";
@@ -28,15 +29,16 @@ export default async function KitPage({
   if (!isUuid(id)) notFound();
   const message = done[param((await searchParams).hecho)];
 
-  const [{ data: kit }, variants] = await Promise.all([
+  const [{ data: kit }, variants, categories] = await Promise.all([
     supabase
       .from("kits")
       .select(
-        "id, name, slug, price_cents, compare_at_price_cents, is_published, kit_items(variant_id, quantity)",
+        "id, name, slug, price_cents, compare_at_price_cents, is_published, is_dynamic, discount_percent, kit_items(variant_id, quantity), kit_components(id, category_id, quantity, sort_order)",
       )
       .eq("id", id)
       .maybeSingle(),
     variantOptions(supabase),
+    categoryOptions(supabase),
   ]);
   if (!kit) notFound();
 
@@ -53,6 +55,7 @@ export default async function KitPage({
         <KitForm
           action={updateKit.bind(null, id)}
           variants={variants}
+          categories={categories}
           mode="edit"
           initial={{
             name: kit.name,
@@ -62,7 +65,10 @@ export default async function KitPage({
               kit.compare_at_price_cents,
             ),
             is_published: kit.is_published,
+            is_dynamic: kit.is_dynamic,
+            discount_percent: String(kit.discount_percent),
             items: kit.kit_items,
+            components: kit.kit_components,
           }}
         />
       </Section>

@@ -9,22 +9,47 @@ import { createAdminClient } from "@/lib/supabase/admin";
 // Se guardan solo los ids (§10): nombres, precios y fotos se leen frescos, y
 // lo que ya no está publicado no vuelve.
 
+export type SavedSelection = {
+  componentId: string;
+  variantId: string;
+  componentName: string;
+  productName: string;
+  color: string | null;
+  size: string | null;
+  quantity: number;
+};
+
 export type SavedItem = {
   kind: "variant" | "kit";
   id: string;
+  cartKey?: string;
+  selections?: SavedSelection[];
   quantity: number;
 };
 
 export function savedItems(value: unknown): SavedItem[] {
   if (!Array.isArray(value)) return [];
-  return value.filter(
-    (item): item is SavedItem =>
-      typeof item === "object" &&
-      item !== null &&
-      (item as SavedItem).kind != null &&
-      typeof (item as SavedItem).id === "string" &&
-      typeof (item as SavedItem).quantity === "number",
-  );
+  return value.filter((item): item is SavedItem => {
+    if (
+      typeof item !== "object" ||
+      item === null ||
+      !["variant", "kit"].includes(String((item as SavedItem).kind)) ||
+      typeof (item as SavedItem).id !== "string" ||
+      typeof (item as SavedItem).quantity !== "number"
+    ) {
+      return false;
+    }
+    const selections = (item as SavedItem).selections;
+    return selections === undefined || (
+      Array.isArray(selections) &&
+      selections.every((selection) =>
+        typeof selection.componentId === "string" &&
+        typeof selection.variantId === "string" &&
+        typeof selection.componentName === "string" &&
+        typeof selection.productName === "string"
+      )
+    );
+  });
 }
 
 export type SavedCart = { id: string; email: string; items: CartItem[] };
@@ -54,13 +79,41 @@ export async function getSavedCart(id: string): Promise<SavedCart | null> {
     kitIds.length
       ? supabase
           .from("kits")
-          .select("id, name, slug, price_cents, is_published")
+          .select("id, name, slug, price_cents, is_published, is_dynamic")
           .in("id", kitIds)
       : Promise.resolve({ data: [] }),
   ]);
 
   const byVariant = new Map((variants ?? []).map((v) => [v.id, v]));
   const byKit = new Map((kits ?? []).map((k) => [k.id, k]));
+
+  const { data: quoted } = await supabase.rpc("quote_cart", {
+    payload: {
+      items: saved.map((line) => ({
+        ...(line.kind === "variant"
+          ? { variant_id: line.id }
+          : {
+              kit_id: line.id,
+              selections: line.selections?.map((selection) => ({
+                component_id: selection.componentId,
+                variant_id: selection.variantId,
+              })),
+            }),
+        line_key: line.cartKey ?? `${line.kind}:${line.id}`,
+        quantity: line.quantity,
+      })),
+      coupon_code: null,
+      payment_method: null,
+      shipping_method: null,
+      shipping_zone_id: null,
+    },
+  });
+  const quoteLines = (quoted as {
+    lines?: { line_key?: string; variant_id: string | null; kit_id: string | null; unit_price_cents?: number }[];
+  } | null)?.lines ?? [];
+  const quoteByKey = new Map(
+    quoteLines.map((line) => [line.line_key ?? line.variant_id ?? line.kit_id ?? "", line]),
+  );
 
   const items: CartItem[] = [];
   for (const line of saved) {
@@ -78,7 +131,10 @@ export async function getSavedCart(id: string): Promise<SavedCart | null> {
         name: product.name,
         color: variant.color,
         size: variant.size,
-        priceCents: product.price_cents,
+        cartKey: line.cartKey,
+        priceCents:
+          quoteByKey.get(line.cartKey ?? `variant:${line.id}`)?.unit_price_cents ??
+          product.price_cents,
         imagePath: image?.path ?? null,
         quantity: line.quantity,
       });
@@ -92,7 +148,11 @@ export async function getSavedCart(id: string): Promise<SavedCart | null> {
         name: kit.name,
         color: null,
         size: null,
-        priceCents: kit.price_cents,
+        cartKey: line.cartKey,
+        selections: line.selections,
+        priceCents:
+          quoteByKey.get(line.cartKey ?? `kit:${line.id}`)?.unit_price_cents ??
+          (kit.is_dynamic ? 0 : kit.price_cents),
         imagePath: null,
         quantity: line.quantity,
       });

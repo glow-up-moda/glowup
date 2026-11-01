@@ -12,7 +12,7 @@ import {
   Sparkle,
 } from "@/components/ui/icons";
 import { formatMoney, variantText } from "@/lib/format";
-import { MAX_PER_LINE, useCart } from "@/lib/store/cart";
+import { cartItemKey, MAX_PER_LINE, useCart } from "@/lib/store/cart";
 import { productImageUrl } from "@/lib/images";
 
 /** Cuánto falta para el envío gratis (§7). null cuando no hay monto configurado. */
@@ -64,6 +64,8 @@ export function CartDrawer({
       items.map((line) => ({
         kind: line.kind,
         id: line.id,
+        cartKey: line.cartKey,
+        selections: line.selections,
         quantity: line.quantity,
       })),
     ).then((quote) => {
@@ -73,7 +75,7 @@ export function CartDrawer({
       for (const line of quote.lines) {
         if (line.unavailable) issues[line.id] = "no-disponible";
         else if (line.outOfStock) issues[line.id] = "agotado";
-        const saved = items.find((item) => item.id === line.id);
+        const saved = items.find((item) => cartItemKey(item) === line.id);
         if (
           saved &&
           !line.unavailable &&
@@ -156,7 +158,7 @@ export function CartDrawer({
 
             <ul className="flex-1 divide-y divide-arena overflow-y-auto px-4">
               {items.map((item) => (
-                <li key={item.id} className="flex gap-3 py-4">
+                <li key={cartItemKey(item)} className="flex gap-3 py-4">
                   {/* Repite el link del nombre que está al lado, así que para
                       un lector de pantalla y para el teclado no existe. */}
                   <Link
@@ -186,7 +188,20 @@ export function CartDrawer({
                       {item.name}
                     </Link>
                     {item.kind === "kit" ? (
-                      <p className="text-sm">Kit armado</p>
+                      item.selections?.length ? (
+                        <ul className="mt-1 text-sm text-azul/80">
+                          {item.selections.map((selection) => (
+                            <li key={selection.componentId}>
+                              {selection.componentName}: {selection.productName}
+                              {variantText(selection.color, selection.size)
+                                ? ` · ${variantText(selection.color, selection.size)}`
+                                : ""}
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p className="text-sm">Kit armado</p>
+                      )
                     ) : (
                       variantText(item.color, item.size) && (
                         <p className="text-sm">
@@ -204,7 +219,7 @@ export function CartDrawer({
                         <select
                           value={item.quantity}
                           onChange={(event) =>
-                            setQuantity(item.id, Number(event.target.value))
+                            setQuantity(cartItemKey(item), Number(event.target.value))
                           }
                           className="min-h-11 rounded-input border-2 border-transparent bg-arena px-2 text-base"
                         >
@@ -222,7 +237,7 @@ export function CartDrawer({
                         {formatMoney(item.priceCents * item.quantity)}
                       </span>
                     </div>
-                    {checked.issues[item.id] && (
+                    {checked.issues[cartItemKey(item)] && (
                       <p className="mt-1 flex items-start gap-1.5 text-sm text-error">
                         <IconAlert
                           width={16}
@@ -237,7 +252,7 @@ export function CartDrawer({
                   </div>
                   <button
                     type="button"
-                    onClick={() => remove(item.id)}
+                    onClick={() => remove(cartItemKey(item))}
                     aria-label={`Sacar ${item.name} del carrito`}
                     className="flex size-11 shrink-0 items-center justify-center self-start rounded-full hover:bg-arena"
                   >

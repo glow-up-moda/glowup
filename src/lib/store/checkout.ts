@@ -98,6 +98,7 @@ type TotalsResponse = {
   lines: {
     variant_id: string | null;
     kit_id: string | null;
+    line_key?: string;
     name?: string;
     quantity: number;
     line_total_cents?: number;
@@ -129,7 +130,7 @@ export function toCheckoutTotals(data: unknown): CheckoutTotals {
     remainingForFreeShippingCents: totals.remaining_for_free_shipping_cents,
     coupon: totals.coupon,
     lines: totals.lines.map((line) => ({
-      id: line.variant_id ?? line.kit_id ?? "",
+      id: line.line_key ?? line.variant_id ?? line.kit_id ?? "",
       name: line.name ?? "",
       quantity: line.quantity,
       lineTotalCents: line.line_total_cents ?? 0,

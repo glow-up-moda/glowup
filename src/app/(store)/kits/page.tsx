@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { DynamicKitBuilder } from "@/components/store/dynamic-kit-builder";
 import { AddToCartButton } from "@/components/store/add-to-cart";
 import { ProductImage } from "@/components/store/product-image";
 import { Badge } from "@/components/ui/badge";
@@ -12,7 +13,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: `${kitsLabel} · MAREA`,
     description:
-      "Combos armados, a un precio mejor que comprando cada cosa por separado.",
+      "Armá tu combinación eligiendo tus productos favoritos y aprovechá el descuento del kit.",
   };
 }
 
@@ -25,8 +26,7 @@ export default async function KitsPage() {
         {settings.kitsLabel}
       </h1>
       <p className="mt-2 max-w-[60ch]">
-        Combos armados por nosotras: salen mejor que comprando cada cosa por
-        separado y llegan listos para regalar.
+        Elegí tus favoritos y armá una combinación con descuento.
       </p>
 
       {kits.length === 0 ? (
@@ -37,6 +37,7 @@ export default async function KitsPage() {
         <ul className="mt-8 flex flex-col gap-8">
           {kits.map((kit) => {
             const onSale =
+              !kit.isDynamic &&
               kit.compareAtPriceCents != null &&
               kit.compareAtPriceCents > kit.priceCents;
             return (
@@ -57,6 +58,9 @@ export default async function KitsPage() {
                     <h2 className="font-display text-xl font-semibold">
                       {kit.name}
                     </h2>
+                    {kit.isDynamic && kit.discountPercent > 0 && (
+                      <Badge tone="offer">{kit.discountPercent}% OFF</Badge>
+                    )}
                     {onSale && <Badge tone="offer">Oferta</Badge>}
                     {!kit.isAvailable ? (
                       <Badge>Sin stock</Badge>
@@ -67,50 +71,65 @@ export default async function KitsPage() {
                     )}
                   </div>
 
-                  <p className="mt-2 flex flex-wrap items-baseline gap-2">
-                    <span
-                      className={`font-display text-xl font-semibold ${onSale ? "text-caracola" : ""}`}
-                    >
-                      {formatMoney(kit.priceCents)}
-                    </span>
-                    {onSale && (
-                      <span className="line-through">
-                        {formatMoney(kit.compareAtPriceCents ?? 0)}
-                      </span>
-                    )}
-                  </p>
-
-                  {kit.items.length > 0 && (
+                  {kit.isDynamic ? (
+                    <p className="mt-2 text-sm text-azul/80">
+                      Combiná un producto de cada categoría.
+                      {kit.discountPercent > 0
+                        ? ` Tenés ${kit.discountPercent}% de descuento sobre el total de tu selección.`
+                        : " El precio se calcula según los productos que elijas."}
+                    </p>
+                  ) : (
                     <>
-                      <h3 className="mt-4 font-medium">Qué incluye</h3>
-                      <ul className="mt-1 flex flex-col gap-1 text-sm">
-                        {kit.items.map((item, index) => (
-                          <li key={`${kit.id}-${index}`}>
-                            {item.quantity} × {item.name}
-                            {variantText(item.color, item.size) &&
-                              ` · ${variantText(item.color, item.size)}`}
-                          </li>
-                        ))}
-                      </ul>
+                      <p className="mt-2 flex flex-wrap items-baseline gap-2">
+                        <span
+                          className={`font-display text-xl font-semibold ${onSale ? "text-caracola" : ""}`}
+                        >
+                          {formatMoney(kit.priceCents)}
+                        </span>
+                        {onSale && (
+                          <span className="line-through">
+                            {formatMoney(kit.compareAtPriceCents ?? 0)}
+                          </span>
+                        )}
+                      </p>
+
+                      {kit.items.length > 0 && (
+                        <>
+                          <h3 className="mt-4 font-medium">Qué incluye</h3>
+                          <ul className="mt-1 flex flex-col gap-1 text-sm">
+                            {kit.items.map((item, index) => (
+                              <li key={`${kit.id}-${index}`}>
+                                {item.quantity} × {item.name}
+                                {variantText(item.color, item.size) &&
+                                  ` · ${variantText(item.color, item.size)}`}
+                              </li>
+                            ))}
+                          </ul>
+                        </>
+                      )}
                     </>
                   )}
 
-                  <div className="mt-5">
-                    <AddToCartButton
-                      item={{
-                        kind: "kit",
-                        id: kit.id,
-                        href: `/kits#${kit.slug}`,
-                        name: kit.name,
-                        color: null,
-                        size: null,
-                        priceCents: kit.priceCents,
-                        imagePath: kit.images[0]?.path ?? null,
-                      }}
-                      disabled={!kit.isAvailable}
-                      label={kit.isAvailable ? "Sumar el kit" : "Sin stock"}
-                    />
-                  </div>
+                  {kit.isDynamic ? (
+                    <DynamicKitBuilder kit={kit} />
+                  ) : (
+                    <div className="mt-5">
+                      <AddToCartButton
+                        item={{
+                          kind: "kit",
+                          id: kit.id,
+                          href: `/kits#${kit.slug}`,
+                          name: kit.name,
+                          color: null,
+                          size: null,
+                          priceCents: kit.priceCents,
+                          imagePath: kit.images[0]?.path ?? null,
+                        }}
+                        disabled={!kit.isAvailable}
+                        label={kit.isAvailable ? "Sumar el kit" : "Sin stock"}
+                      />
+                    </div>
+                  )}
                 </div>
               </li>
             );

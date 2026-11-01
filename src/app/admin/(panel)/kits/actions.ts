@@ -10,13 +10,10 @@ import { requireAdmin } from "@/lib/auth/admin";
 import { parsePesos, slugify } from "@/lib/format";
 import { isUuid } from "@/lib/params";
 
-// Kits (§7). No tienen stock propio: el disponible sale de sus componentes
-// (§9.7), así que acá se edita qué trae, cuánto sale y si está publicado.
-
 const pesosObligatorio = (mensaje: string) =>
   z.string().transform((value, ctx) => {
     const cents = parsePesos(value);
-    if (cents == null) {
+    if (cents == null || cents <= 0) {
       ctx.addIssue({ code: "custom", message: mensaje });
       return z.NEVER;
     }
@@ -46,62 +43,120 @@ const kitSchema = z.object({
     "Escribí el precio tachado en pesos, o dejalo vacío.",
   ),
   is_published: z.string().transform((value) => value === "on"),
+  is_dynamic: z.boolean(),
+  discount_percent: z.number().int().min(0).max(90),
 });
 
 type KitItem = { variant_id: string; quantity: number };
+type KitComponent = { category_id: string; quantity: number; sort_order: number };
 
-/** Las líneas del kit: una variante y cuántas trae. */
 function parseItems(formData: FormData): KitItem[] | null {
   const variantes = formData.getAll("item_variante").map(String);
   const cantidades = formData.getAll("item_cantidad").map(String);
-
   const items: KitItem[] = [];
+
   for (const [index, variantId] of variantes.entries()) {
     if (!variantId) continue;
     if (!isUuid(variantId)) return null;
     const quantity = Number.parseInt(cantidades[index] ?? "", 10);
-    if (!Number.isInteger(quantity) || quantity < 1 || quantity > 99) {
-      return null;
-    }
-    // Una variante repetida rompería la clave primaria: se suman.
-    const existente = items.find((item) => item.variant_id === variantId);
-    if (existente) existente.quantity += quantity;
+    if (!Number.isInteger(quantity) || quantity < 1 || quantity > 99) return null;
+    const existing = items.find((item) => item.variant_id === variantId);
+    if (existing) existing.quantity += quantity;
     else items.push({ variant_id: variantId, quantity });
   }
   return items;
 }
 
+function parseComponents(formData: FormData): KitComponent[] | null {
+  const categories = formData.getAll("component_category").map(String);
+  const components: KitComponent[] = [];
+
+  for (const categoryId of categories) {
+    if (!categoryId) continue;
+    if (!isUuid(categoryId) || components.some((item) => item.category_id === categoryId)) {
+      return null;
+    }
+    components.push({
+      category_id: categoryId,
+      quantity: 1,
+      sort_order: components.length,
+    });
+  }
+  return components;
+}
+
+
+async function componentCategoryError(
+  supabase: Awaited<ReturnType<typeof requireAdmin>>["supabase"],
+  components: KitComponent[],
+): Promise<string | null> {
+  if (components.length === 0) return null;
+
+  const ids = components.map((component) => component.category_id);
+  const { data, error } = await supabase
+    .from("categories")
+    .select("id, parent_id")
+    .in("id", ids);
+
+  if (error || !data || data.length !== ids.length) {
+    return "No pudimos validar las categorías seleccionadas.";
+  }
+
+  const selected = new Set(ids);
+  if (data.some((category) => category.parent_id && selected.has(category.parent_id))) {
+    return "Elegí una categoría principal o una de sus subcategorías, no ambas.";
+  }
+
+  return null;
+}
+
 function parse(formData: FormData) {
+  const isDynamic = text(formData, "kit_type") === "dynamic";
+  const rawDiscount = isDynamic ? Number(text(formData, "discount_percent")) : 0;
   return kitSchema.safeParse({
     name: text(formData, "name"),
     slug: text(formData, "slug"),
-    price_cents: text(formData, "price_cents"),
-    compare_at_price_cents: text(formData, "compare_at_price_cents"),
+    price_cents: isDynamic ? "1" : text(formData, "price_cents"),
+    compare_at_price_cents: isDynamic ? "" : text(formData, "compare_at_price_cents"),
     is_published: text(formData, "is_published"),
+    is_dynamic: isDynamic,
+    discount_percent: Number.isInteger(rawDiscount) ? rawDiscount : -1,
   });
 }
 
-/** El slug se escribe solo desde el nombre si no lo completaron. */
 function slugOf(values: { slug: string; name: string }): string {
   return slugify(values.slug || values.name);
 }
 
-async function guardarItems(
+async function guardarContenido(
   supabase: Awaited<ReturnType<typeof requireAdmin>>["supabase"],
   kitId: string,
+  isDynamic: boolean,
   items: KitItem[],
+  components: KitComponent[],
 ): Promise<string | null> {
-  const { error: borrado } = await supabase
-    .from("kit_items")
-    .delete()
-    .eq("kit_id", kitId);
-  if (borrado) return dbErrorMessage(borrado, "No se pudo guardar qué trae.");
+  const [{ error: deleteItemsError }, { error: deleteComponentsError }] =
+    await Promise.all([
+      supabase.from("kit_items").delete().eq("kit_id", kitId),
+      supabase.from("kit_components").delete().eq("kit_id", kitId),
+    ]);
+
+  if (deleteItemsError) return dbErrorMessage(deleteItemsError, "No se pudo actualizar el contenido del kit.");
+  if (deleteComponentsError) return dbErrorMessage(deleteComponentsError, "No se pudo actualizar las categorías del kit.");
+
+  if (isDynamic) {
+    if (components.length === 0) return null;
+    const { error } = await supabase
+      .from("kit_components")
+      .insert(components.map((component) => ({ ...component, kit_id: kitId })));
+    return error ? dbErrorMessage(error, "No se pudieron guardar las categorías.") : null;
+  }
 
   if (items.length === 0) return null;
   const { error } = await supabase
     .from("kit_items")
     .insert(items.map((item) => ({ ...item, kit_id: kitId })));
-  return error ? dbErrorMessage(error, "No se pudo guardar qué trae.") : null;
+  return error ? dbErrorMessage(error, "No se pudo guardar qué trae el kit.") : null;
 }
 
 const duplicado = "Ya hay un kit con ese nombre o esa dirección.";
@@ -115,29 +170,51 @@ export async function createKit(
   if (!parsed.success) return { errors: fieldErrors(parsed.error) };
 
   const items = parseItems(formData);
-  if (!items) return { error: "Revisá las cantidades de lo que trae el kit." };
+  const components = parseComponents(formData);
+  if (!items || !components) return { error: "Revisá los productos, categorías y cantidades." };
+  if (parsed.data.is_dynamic) {
+    const categoryError = await componentCategoryError(supabase, components);
+    if (categoryError) return { error: categoryError };
+  }
+  if (parsed.data.is_published && (parsed.data.is_dynamic ? components.length === 0 : items.length === 0)) {
+    return { error: parsed.data.is_dynamic
+      ? "Un kit combinable publicado tiene que incluir al menos una categoría."
+      : "Un kit publicado tiene que traer al menos un producto." };
+  }
 
   const slug = slugOf(parsed.data);
   if (!slug) return { errors: { name: "Ese nombre no sirve como dirección." } };
 
   const { data, error } = await supabase
     .from("kits")
-    .insert({ ...parsed.data, slug })
+    .insert({
+      ...parsed.data,
+      slug,
+      price_cents: parsed.data.is_dynamic ? 0 : parsed.data.price_cents,
+      compare_at_price_cents: parsed.data.is_dynamic ? null : parsed.data.compare_at_price_cents,
+    })
     .select("id")
     .maybeSingle();
+
   if (error || !data) {
     return {
-      error:
-        error?.code === "23505"
-          ? duplicado
-          : dbErrorMessage(error, "No se pudo crear el kit."),
+      error: error?.code === "23505"
+        ? duplicado
+        : dbErrorMessage(error, "No se pudo crear el kit."),
     };
   }
 
-  const problema = await guardarItems(supabase, data.id, items);
-  if (problema) return { error: problema };
+  const problem = await guardarContenido(
+    supabase,
+    data.id,
+    parsed.data.is_dynamic,
+    items,
+    components,
+  );
+  if (problem) return { error: problem };
 
   revalidatePath("/admin", "layout");
+  revalidatePath("/kits");
   redirect(`/admin/kits/${data.id}?hecho=creado`);
 }
 
@@ -153,33 +230,50 @@ export async function updateKit(
   if (!parsed.success) return { errors: fieldErrors(parsed.error) };
 
   const items = parseItems(formData);
-  if (!items) return { error: "Revisá las cantidades de lo que trae el kit." };
+  const components = parseComponents(formData);
+  if (!items || !components) return { error: "Revisá los productos, categorías y cantidades." };
+  if (parsed.data.is_dynamic) {
+    const categoryError = await componentCategoryError(supabase, components);
+    if (categoryError) return { error: categoryError };
+  }
+  if (parsed.data.is_published && (parsed.data.is_dynamic ? components.length === 0 : items.length === 0)) {
+    return { error: parsed.data.is_dynamic
+      ? "Un kit combinable publicado tiene que incluir al menos una categoría."
+      : "Un kit publicado tiene que traer al menos un producto." };
+  }
 
   const slug = slugOf(parsed.data);
   if (!slug) return { errors: { name: "Ese nombre no sirve como dirección." } };
 
-  // Un kit publicado sin componentes no se puede armar.
-  if (parsed.data.is_published && items.length === 0) {
-    return { error: "Un kit publicado tiene que traer al menos un producto." };
-  }
-
   const { error } = await supabase
     .from("kits")
-    .update({ ...parsed.data, slug })
+    .update({
+      ...parsed.data,
+      slug,
+      price_cents: parsed.data.is_dynamic ? 0 : parsed.data.price_cents,
+      compare_at_price_cents: parsed.data.is_dynamic ? null : parsed.data.compare_at_price_cents,
+    })
     .eq("id", id);
+
   if (error) {
     return {
-      error:
-        error.code === "23505"
-          ? duplicado
-          : dbErrorMessage(error, "No se pudo guardar el kit."),
+      error: error.code === "23505"
+        ? duplicado
+        : dbErrorMessage(error, "No se pudo guardar el kit."),
     };
   }
 
-  const problema = await guardarItems(supabase, id, items);
-  if (problema) return { error: problema };
+  const problem = await guardarContenido(
+    supabase,
+    id,
+    parsed.data.is_dynamic,
+    items,
+    components,
+  );
+  if (problem) return { error: problem };
 
   revalidatePath("/admin", "layout");
+  revalidatePath("/kits");
   redirect(`/admin/kits/${id}?hecho=guardado`);
 }
 
@@ -198,5 +292,6 @@ export async function deleteKit(id: string): Promise<FormState> {
   }
 
   revalidatePath("/admin", "layout");
+  revalidatePath("/kits");
   redirect("/admin/kits?hecho=borrado");
 }

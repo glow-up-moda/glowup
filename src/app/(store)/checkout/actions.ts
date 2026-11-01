@@ -21,6 +21,16 @@ import { createCheckout, isUalaReady, MIN_CARD_CENTS } from "@/lib/uala/client";
 const itemSchema = z.object({
   kind: z.enum(["variant", "kit"]),
   id: z.uuid(),
+  cartKey: z.string().trim().min(1).max(2000).optional(),
+  selections: z.array(z.object({
+    componentId: z.uuid(),
+    variantId: z.uuid(),
+    componentName: z.string().max(100).optional(),
+    productName: z.string().max(120).optional(),
+    color: z.string().max(80).nullable().optional(),
+    size: z.string().max(80).nullable().optional(),
+    quantity: z.number().int().min(1).max(10).optional(),
+  })).max(20).optional(),
   quantity: z.number().int().min(1).max(10),
 });
 
@@ -35,11 +45,19 @@ const quoteSchema = z.object({
 type QuoteInput = z.infer<typeof quoteSchema>;
 
 function toItems(items: QuoteInput["items"]) {
-  return items.map((item) =>
-    item.kind === "variant"
-      ? { variant_id: item.id, quantity: item.quantity }
-      : { kit_id: item.id, quantity: item.quantity },
-  );
+  return items.map((item) => ({
+    ...(item.kind === "variant"
+      ? { variant_id: item.id }
+      : {
+          kit_id: item.id,
+          selections: item.selections?.map((selection) => ({
+            component_id: selection.componentId,
+            variant_id: selection.variantId,
+          })),
+        }),
+    line_key: item.cartKey ?? `${item.kind}:${item.id}`,
+    quantity: item.quantity,
+  }));
 }
 
 export async function quoteCheckout(

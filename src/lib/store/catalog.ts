@@ -1,5 +1,6 @@
 import { cache } from "react";
 
+import { variantText } from "@/lib/format";
 import { compareSizes } from "@/lib/sizes";
 import { createCatalogClient } from "@/lib/supabase/catalog";
 
@@ -22,12 +23,32 @@ export type ProductCard = {
   isLastUnits: boolean;
 };
 
+export type KitOption = {
+  variantId: string;
+  productName: string;
+  label: string;
+  color: string | null;
+  size: string | null;
+  priceCents: number;
+  imagePath: string | null;
+};
+
+export type KitComponentCard = {
+  id: string;
+  categoryId: string;
+  name: string;
+  quantity: number;
+  options: KitOption[];
+};
+
 export type KitCard = {
   id: string;
   name: string;
   slug: string;
   priceCents: number;
   compareAtPriceCents: number | null;
+  isDynamic: boolean;
+  discountPercent: number;
   images: { path: string; alt: string }[];
   items: {
     name: string;
@@ -36,6 +57,7 @@ export type KitCard = {
     size: string;
     quantity: number;
   }[];
+  components: KitComponentCard[];
   isAvailable: boolean;
   isLastUnits: boolean;
 };
@@ -277,13 +299,13 @@ export async function getCategoryBySlug(slug: string): Promise<{
   return null;
 }
 
-/** Kits publicados, con la foto del primer producto que los compone. */
+/** Kits publicados: fijos y combinables, con opciones que tienen stock. */
 export async function listKits(limit?: number): Promise<KitCard[]> {
   const supabase = createCatalogClient();
   let query = supabase
     .from("kits")
     .select(
-      "id, name, slug, price_cents, compare_at_price_cents, created_at, kit_items(quantity, product_variants(product_id, color, size, products(name, slug)))",
+      "id, name, slug, price_cents, compare_at_price_cents, is_dynamic, discount_percent, created_at, kit_items(quantity, product_variants(product_id, color, size, products(name, slug))), kit_components(id, category_id, quantity, sort_order)",
     )
     .order("created_at", { ascending: false });
   if (limit) query = query.limit(limit);
@@ -296,8 +318,94 @@ export async function listKits(limit?: number): Promise<KitCard[]> {
   ]);
   if (!kits?.length) return [];
 
-  // Los kits no tienen fotos propias: muestran las de sus productos.
-  const productIds = [
+  const states = new Map(
+    (availability ?? []).map((row) => [row.kit_id, row] as const),
+  );
+
+  const allComponents = kits
+    .filter((kit) => kit.is_dynamic)
+    .flatMap((kit) => kit.kit_components);
+  const categoryIds = [...new Set(allComponents.map((component) => component.category_id))];
+
+  const { data: categories } = categoryIds.length
+    ? await supabase
+        .from("categories")
+        .select("id, name, parent_id")
+        .in("id", categoryIds)
+    : { data: [] };
+
+  const { data: allCategories } = categoryIds.length
+    ? await supabase.from("categories").select("id, parent_id")
+    : { data: [] };
+  const childCategoryIds = (allCategories ?? [])
+    .filter((category) => category.parent_id && categoryIds.includes(category.parent_id))
+    .map((category) => category.id);
+  const expandedCategoryIds = [...new Set([...categoryIds, ...childCategoryIds])];
+  const parentByCategory = new Map(
+    (allCategories ?? []).map((category) => [category.id, category.parent_id]),
+  );
+
+  const { data: dynamicProducts } = expandedCategoryIds.length
+    ? await supabase
+        .from("products")
+        .select(
+          "id, name, category_id, price_cents, product_images(path, alt, sort_order), product_variants(id, color, size)",
+        )
+        .in("category_id", expandedCategoryIds)
+        .eq("is_published", true)
+        .order("name")
+    : { data: [] };
+
+  const variantIds = (dynamicProducts ?? []).flatMap((product) =>
+    product.product_variants.map((variant) => variant.id),
+  );
+  const { data: variantStates } = variantIds.length
+    ? await supabase
+        .from("variant_availability")
+        .select("variant_id, is_available")
+        .in("variant_id", variantIds)
+    : { data: [] };
+
+  const availableVariants = new Set(
+    (variantStates ?? [])
+      .filter((row) => row.is_available)
+      .map((row) => row.variant_id),
+  );
+  const categoryNames = new Map(
+    (categories ?? []).map((category) => [category.id, category.name]),
+  );
+
+  const dynamicOptionsByCategory = new Map<string, KitOption[]>();
+  for (const product of dynamicProducts ?? []) {
+    const productImages = [...product.product_images].sort(
+      (a, b) => a.sort_order - b.sort_order,
+    );
+    for (const variant of product.product_variants) {
+      if (!availableVariants.has(variant.id)) continue;
+      const details = variantText(variant.color, variant.size);
+      const option = {
+        variantId: variant.id,
+        productName: product.name,
+        label: details ? `${product.name} · ${details}` : product.name,
+        color: variant.color,
+        size: variant.size,
+        priceCents: product.price_cents,
+        imagePath: productImages[0]?.path ?? null,
+      };
+      const matchingCategories = categoryIds.filter(
+        (categoryId) =>
+          categoryId === product.category_id ||
+          parentByCategory.get(product.category_id) === categoryId,
+      );
+      for (const categoryId of matchingCategories) {
+        const options = dynamicOptionsByCategory.get(categoryId) ?? [];
+        options.push(option);
+        dynamicOptionsByCategory.set(categoryId, options);
+      }
+    }
+  }
+
+  const fixedProductIds = [
     ...new Set(
       kits.flatMap((kit) =>
         kit.kit_items
@@ -306,32 +414,52 @@ export async function listKits(limit?: number): Promise<KitCard[]> {
       ),
     ),
   ];
-  const supabaseImages = await createCatalogClient()
+  const fixedImages = await createCatalogClient()
     .from("product_images")
     .select("product_id, path, alt, sort_order")
     .in(
       "product_id",
-      productIds.length ? productIds : ["00000000-0000-0000-0000-000000000000"],
+      fixedProductIds.length
+        ? fixedProductIds
+        : ["00000000-0000-0000-0000-000000000000"],
     )
     .order("sort_order");
+
   const imagesByProduct = new Map<string, { path: string; alt: string }[]>();
-  for (const image of supabaseImages.data ?? []) {
+  for (const image of fixedImages.data ?? []) {
     const list = imagesByProduct.get(image.product_id) ?? [];
     list.push({ path: image.path, alt: image.alt });
     imagesByProduct.set(image.product_id, list);
   }
 
-  const states = new Map(
-    (availability ?? []).map((row) => [row.kit_id, row] as const),
-  );
-
   return kits.map((kit) => {
     const state = states.get(kit.id);
-    const images = kit.kit_items
+    const components = kit.kit_components
+      .slice()
+      .sort((a, b) => a.sort_order - b.sort_order)
+      .map((component) => ({
+        id: component.id,
+        categoryId: component.category_id,
+        name: categoryNames.get(component.category_id) ?? "Categoría",
+        quantity: component.quantity,
+        options: dynamicOptionsByCategory.get(component.category_id) ?? [],
+      }));
+
+    const fixedImagesForKit = kit.kit_items
       .map((item) => item.product_variants?.product_id)
       .filter((id): id is string => Boolean(id))
       .flatMap((productId) => imagesByProduct.get(productId) ?? [])
       .slice(0, 2);
+
+    const dynamicImages = components
+      .flatMap((component) => component.options)
+      .filter((option) => option.imagePath)
+      .slice(0, 2)
+      .map((option) => ({
+        path: option.imagePath as string,
+        alt: option.productName,
+      }));
+
     const items = kit.kit_items
       .map((item) => ({
         name: item.product_variants?.products?.name ?? "",
@@ -342,16 +470,22 @@ export async function listKits(limit?: number): Promise<KitCard[]> {
       }))
       .filter((item) => item.name)
       .sort((a, b) => a.name.localeCompare(b.name, "es"));
+
     return {
       id: kit.id,
       name: kit.name,
       slug: kit.slug,
-      priceCents: kit.price_cents,
-      compareAtPriceCents: kit.compare_at_price_cents,
-      images,
+      priceCents: kit.is_dynamic ? 0 : kit.price_cents,
+      compareAtPriceCents: kit.is_dynamic ? null : kit.compare_at_price_cents,
+      isDynamic: kit.is_dynamic,
+      discountPercent: kit.discount_percent,
+      images: kit.is_dynamic ? dynamicImages : fixedImagesForKit,
       items,
-      isAvailable: state?.is_available === true,
-      isLastUnits: state?.is_last_units === true,
+      components,
+      isAvailable:
+        state?.is_available === true &&
+        (!kit.is_dynamic || components.every((component) => component.options.length > 0)),
+      isLastUnits: !kit.is_dynamic && state?.is_last_units === true,
     };
   });
 }

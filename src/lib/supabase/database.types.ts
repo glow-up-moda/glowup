@@ -274,11 +274,55 @@ export type Database = {
           },
         ]
       }
+      kit_components: {
+        Row: {
+          category_id: string
+          created_at: string
+          id: string
+          kit_id: string
+          quantity: number
+          sort_order: number
+        }
+        Insert: {
+          category_id: string
+          created_at?: string
+          id?: string
+          kit_id: string
+          quantity?: number
+          sort_order?: number
+        }
+        Update: {
+          category_id?: string
+          created_at?: string
+          id?: string
+          kit_id?: string
+          quantity?: number
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kit_components_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_components_kit_id_fkey"
+            columns: ["kit_id"]
+            isOneToOne: false
+            referencedRelation: "kits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       kits: {
         Row: {
           compare_at_price_cents: number | null
           created_at: string
+          discount_percent: number
           id: string
+          is_dynamic: boolean
           is_published: boolean
           name: string
           price_cents: number
@@ -288,7 +332,9 @@ export type Database = {
         Insert: {
           compare_at_price_cents?: number | null
           created_at?: string
+          discount_percent?: number
           id?: string
+          is_dynamic?: boolean
           is_published?: boolean
           name: string
           price_cents: number
@@ -298,7 +344,9 @@ export type Database = {
         Update: {
           compare_at_price_cents?: number | null
           created_at?: string
+          discount_percent?: number
           id?: string
+          is_dynamic?: boolean
           is_published?: boolean
           name?: string
           price_cents?: number

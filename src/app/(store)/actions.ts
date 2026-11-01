@@ -11,9 +11,21 @@ import type { FormState } from "@/lib/use-form-action";
 // servidor (§10). `quote_cart` no está abierta a la API pública, por eso se
 // llama desde acá.
 
+const selectionSchema = z.object({
+  componentId: z.uuid(),
+  variantId: z.uuid(),
+  componentName: z.string().max(100).optional(),
+  productName: z.string().max(120).optional(),
+  color: z.string().max(80).nullable().optional(),
+  size: z.string().max(80).nullable().optional(),
+  quantity: z.number().int().min(1).max(10).optional(),
+});
+
 const lineSchema = z.object({
   kind: z.enum(["variant", "kit"]),
   id: z.uuid(),
+  cartKey: z.string().trim().min(1).max(2000).optional(),
+  selections: z.array(selectionSchema).max(20).optional(),
   quantity: z.number().int().min(1).max(10),
 });
 
@@ -36,6 +48,7 @@ type QuoteResponse = {
   lines: {
     variant_id: string | null;
     kit_id: string | null;
+    line_key?: string;
     name?: string;
     unit_price_cents?: number;
     in_stock?: boolean;
@@ -52,11 +65,19 @@ export async function quoteCart(items: unknown): Promise<CartQuote | null> {
   const supabase = createAdminClient();
   const { data, error } = await supabase.rpc("quote_cart", {
     payload: {
-      items: parsed.data.map((line) =>
-        line.kind === "variant"
-          ? { variant_id: line.id, quantity: line.quantity }
-          : { kit_id: line.id, quantity: line.quantity },
-      ),
+      items: parsed.data.map((line) => ({
+      ...(line.kind === "variant"
+        ? { variant_id: line.id }
+        : {
+            kit_id: line.id,
+            selections: line.selections?.map((selection) => ({
+              component_id: selection.componentId,
+              variant_id: selection.variantId,
+            })),
+          }),
+      line_key: line.cartKey ?? `${line.kind}:${line.id}`,
+      quantity: line.quantity,
+    })),
     },
   });
   if (error || !data) return null;
@@ -65,7 +86,7 @@ export async function quoteCart(items: unknown): Promise<CartQuote | null> {
   return {
     subtotalCents: quote.subtotal_cents,
     lines: quote.lines.map((line) => ({
-      id: line.variant_id ?? line.kit_id ?? "",
+      id: line.line_key ?? line.variant_id ?? line.kit_id ?? "",
       name: line.name ?? "",
       unitPriceCents: line.unit_price_cents ?? 0,
       unavailable: line.unavailable,

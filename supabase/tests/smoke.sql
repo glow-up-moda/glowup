@@ -75,6 +75,39 @@ from kit
 cross join (values ('PRUEBA-CLAS-NEG-M', 2), ('PRUEBA-CLAS-BLA-M', 1)) as x (sku, quantity)
 join public.product_variants v on v.sku = x.sku;
 
+insert into public.categories (name, slug) values
+  ('Prueba lentes', 'prueba-lentes'),
+  ('Prueba remeras', 'prueba-remeras');
+
+insert into public.products (category_id, name, slug, price_cents, is_published)
+select c.id, x.name, x.slug, x.price_cents, true
+from (values
+  ('prueba-lentes', 'Prueba lente dinámico', 'prueba-dynamic-lens', 2000000),
+  ('prueba-remeras', 'Prueba remera dinámica', 'prueba-dynamic-shirt', 3000000)
+) as x(category_slug, name, slug, price_cents)
+join public.categories c on c.slug = x.category_slug;
+
+insert into public.product_variants (product_id, color, size, sku, stock_on_hand)
+select p.id, null, null, x.sku, x.stock
+from (values
+  ('prueba-dynamic-lens', 'PRUEBA-DYNAMIC-LENS', 3),
+  ('prueba-dynamic-lens', 'PRUEBA-DYNAMIC-LENS-ALT', 2),
+  ('prueba-dynamic-shirt', 'PRUEBA-DYNAMIC-SHIRT', 2)
+) as x(product_slug, sku, stock)
+join public.products p on p.slug = x.product_slug;
+
+with kit as (
+  insert into public.kits (
+    name, slug, price_cents, is_dynamic, discount_percent, is_published
+  )
+  values ('Prueba kit combinable', 'prueba-kit-dynamic', 0, true, 15, true)
+  returning id
+)
+insert into public.kit_components (kit_id, category_id, quantity, sort_order)
+select kit.id, c.id, 1, row_number() over (order by c.slug)::integer
+from kit
+join public.categories c on c.slug in ('prueba-lentes', 'prueba-remeras');
+
 insert into public.shipping_zones (name, provinces, price_cents, eta_text, same_day) values
   ('Prueba envío', '{"Entre Ríos"}', 650000, 'De 2 a 4 días hábiles', false),
   ('Prueba en el día', '{"Entre Ríos"}', 350000, 'En el día', true);
@@ -113,6 +146,13 @@ declare
   v_luna_product uuid;
   v_hidden_product uuid;
   v_kit uuid;
+  v_dynamic_kit uuid;
+  v_dynamic_lens_variant uuid;
+  v_dynamic_lens_alt_variant uuid;
+  v_dynamic_shirt_variant uuid;
+  v_dynamic_lens_component uuid;
+  v_dynamic_shirt_component uuid;
+  v_dynamic_order uuid;
   v_zone uuid;
   v_zone_same_day uuid;
   v_admin uuid := gen_random_uuid();
@@ -135,6 +175,16 @@ begin
     select id into v_luna_product from public.products where slug = 'prueba-luna';
     select id into v_hidden_product from public.products where slug = 'prueba-oculto';
     select id into v_kit from public.kits where slug = 'prueba-kit';
+    select id into v_dynamic_kit from public.kits where slug = 'prueba-kit-dynamic';
+    select id into v_dynamic_lens_variant from public.product_variants where sku = 'PRUEBA-DYNAMIC-LENS';
+    select id into v_dynamic_lens_alt_variant from public.product_variants where sku = 'PRUEBA-DYNAMIC-LENS-ALT';
+    select id into v_dynamic_shirt_variant from public.product_variants where sku = 'PRUEBA-DYNAMIC-SHIRT';
+    select id into v_dynamic_lens_component from public.kit_components kc
+      join public.categories c on c.id = kc.category_id
+      where kc.kit_id = v_dynamic_kit and c.slug = 'prueba-lentes';
+    select id into v_dynamic_shirt_component from public.kit_components kc
+      join public.categories c on c.id = kc.category_id
+      where kc.kit_id = v_dynamic_kit and c.slug = 'prueba-remeras';
     select id into v_zone from public.shipping_zones where name = 'Prueba envío';
     select id into v_zone_same_day from public.shipping_zones where name = 'Prueba en el día';
 
@@ -352,6 +402,91 @@ begin
     end if;
     if r.total_cents is distinct from 2421000 or r.transfer_discount_cents is distinct from 269000 then
       raise exception 'Prueba 7e, total del kit con transferencia: % (descuento %)', r.total_cents, r.transfer_discount_cents;
+    end if;
+
+    -- 7f --------------------------------------------------------------------
+    -- Un kit dinámico calcula el precio con los productos elegidos y el
+    -- porcentaje guardado en la configuración del kit.
+    v_res := public.quote_cart(jsonb_build_object(
+      'items', jsonb_build_array(jsonb_build_object(
+        'kit_id', v_dynamic_kit,
+        'line_key', 'prueba-combinacion-dinamica',
+        'quantity', 1,
+        'selections', jsonb_build_array(
+          jsonb_build_object('component_id', v_dynamic_lens_component, 'variant_id', v_dynamic_lens_variant),
+          jsonb_build_object('component_id', v_dynamic_shirt_component, 'variant_id', v_dynamic_shirt_variant)
+        )
+      )),
+      'payment_method', 'card',
+      'shipping_method', 'pickup'
+    ));
+    if (v_res ->> 'subtotal_cents')::integer is distinct from 4250000
+       or (v_res #>> '{lines,0,unit_price_cents}')::integer is distinct from 4250000
+       or (v_res #>> '{lines,0,in_stock}')::boolean is not true then
+      raise exception 'Prueba 7f, precio dinámico con 15%% de descuento y stock: %', v_res;
+    end if;
+
+    -- 7g --------------------------------------------------------------------
+    -- El checkout guarda cada variante como línea hija y la reserva por
+    -- separado, aunque el kit tenga un único precio.
+    v_res := public.create_order_with_reservation(v_base || jsonb_build_object(
+      'payment_method', 'card',
+      'shipping_method', 'pickup',
+      'items', jsonb_build_array(jsonb_build_object(
+        'kit_id', v_dynamic_kit,
+        'line_key', 'prueba-combinacion-dinamica',
+        'quantity', 1,
+        'selections', jsonb_build_array(
+          jsonb_build_object('component_id', v_dynamic_lens_component, 'variant_id', v_dynamic_lens_variant),
+          jsonb_build_object('component_id', v_dynamic_shirt_component, 'variant_id', v_dynamic_shirt_variant)
+        )
+      ))
+    ));
+    v_dynamic_order := (v_res ->> 'order_id')::uuid;
+    select count(*) into v_count
+    from public.order_items
+    where order_id = v_dynamic_order and parent_item_id is not null;
+    if v_count is distinct from 2
+       or (select stock_reserved from public.product_variants where id = v_dynamic_lens_variant) is distinct from 1
+       or (select stock_reserved from public.product_variants where id = v_dynamic_shirt_variant) is distinct from 1 then
+      raise exception 'Prueba 7g, se guardan y reservan las dos variantes del kit: %', v_count;
+    end if;
+
+    -- 7h --------------------------------------------------------------------
+    perform public.release_order_reservation(v_dynamic_order, 'Prueba dinámica');
+    if (select stock_reserved from public.product_variants where id = v_dynamic_lens_variant) is distinct from 0
+       or (select stock_reserved from public.product_variants where id = v_dynamic_shirt_variant) is distinct from 0 then
+      raise exception 'Prueba 7h, cancelar el pedido libera el inventario de cada componente';
+    end if;
+
+    -- 7h2 -------------------------------------------------------------------
+    -- Una venta individual que agota un modelo no debe despublicar el kit
+    -- mientras exista otro modelo disponible en la misma categoría.
+    update public.product_variants
+      set stock_on_hand = 0
+      where id = v_dynamic_lens_variant;
+    if (select is_available from public.kit_availability where kit_id = v_dynamic_kit) is distinct from true
+       or (select is_available from public.variant_availability where variant_id = v_dynamic_lens_alt_variant) is distinct from true then
+      raise exception 'Prueba 7h2, el kit sigue disponible con otra variante de la categoría';
+    end if;
+
+    -- 7i --------------------------------------------------------------------
+    -- Una variante de otra categoría no se puede usar como componente.
+    v_res := public.quote_cart(jsonb_build_object(
+      'items', jsonb_build_array(jsonb_build_object(
+        'kit_id', v_dynamic_kit,
+        'line_key', 'prueba-seleccion-invalida',
+        'quantity', 1,
+        'selections', jsonb_build_array(
+          jsonb_build_object('component_id', v_dynamic_lens_component, 'variant_id', v_dynamic_lens_variant),
+          jsonb_build_object('component_id', v_dynamic_shirt_component, 'variant_id', v_dynamic_lens_variant)
+        )
+      )),
+      'payment_method', 'card',
+      'shipping_method', 'pickup'
+    ));
+    if (v_res #>> '{lines,0,unavailable}')::boolean is not true then
+      raise exception 'Prueba 7i, una variante fuera de la categoría configurada se rechaza: %', v_res;
     end if;
 
     -- 8 ----------------------------------------------------------------------

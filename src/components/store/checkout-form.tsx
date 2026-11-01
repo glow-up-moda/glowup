@@ -14,7 +14,7 @@ import { Button, ButtonLink } from "@/components/ui/button";
 import { IconAlert } from "@/components/ui/icons";
 import { TrackEvent } from "@/components/store/track-event";
 import { formatMoney, variantText } from "@/lib/format";
-import { useCart } from "@/lib/store/cart";
+import { cartItemKey, useCart } from "@/lib/store/cart";
 import { type CheckoutTotals, couponMessage } from "@/lib/store/checkout";
 
 export type ShippingZone = {
@@ -127,7 +127,7 @@ export function CheckoutForm({
   pickup: { address: string | null; hours: string | null };
 }) {
   const router = useRouter();
-  const { items, clear } = useCart();
+  const { items, clear, setPrice } = useCart();
 
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -165,6 +165,8 @@ export function CheckoutForm({
     items: items.map((item) => ({
       kind: item.kind,
       id: item.id,
+      cartKey: item.cartKey,
+      selections: item.selections,
       quantity: item.quantity,
     })),
     couponCode: coupon,
@@ -186,6 +188,13 @@ export function CheckoutForm({
     let active = true;
     quoteCheckout(JSON.parse(quoteKey)).then((result) => {
       if (!active) return;
+      if ("totals" in result) {
+        for (const line of result.totals.lines) {
+          if (line.quantity > 0) {
+            setPrice(line.id, Math.round(line.lineTotalCents / line.quantity));
+          }
+        }
+      }
       setQuote({
         key: quoteKey,
         totals: "totals" in result ? result.totals : null,
@@ -195,7 +204,7 @@ export function CheckoutForm({
     return () => {
       active = false;
     };
-  }, [quoteKey, items.length, ready]);
+  }, [quoteKey, items.length, ready, setPrice]);
 
   // Copia del carrito para el aviso de carrito abandonado (§13). Se guarda
   // solo con email válido y el consentimiento marcado, y se borra si lo
@@ -206,6 +215,8 @@ export function CheckoutForm({
     items.map((line) => ({
       kind: line.kind,
       id: line.id,
+      cartKey: line.cartKey,
+      selections: line.selections,
       quantity: line.quantity,
     })),
   );
@@ -645,13 +656,23 @@ export function CheckoutForm({
 
         <ul className="mt-3 flex flex-col gap-2">
           {items.map((item) => (
-            <li key={item.id} className="flex justify-between gap-3 text-sm">
+            <li key={cartItemKey(item)} className="flex justify-between gap-3 text-sm">
               <span className="min-w-0">
                 {item.quantity} × {item.name}
-                {variantText(item.color, item.size) && (
+                {item.kind === "kit" && item.selections?.length ? (
                   <span className="block text-azul/80">
-                    {variantText(item.color, item.size)}
+                    {item.selections
+                      .map((selection) =>
+                        `${selection.componentName}: ${selection.productName}${variantText(selection.color, selection.size) ? ` · ${variantText(selection.color, selection.size)}` : ""}`,
+                      )
+                      .join(" · ")}
                   </span>
+                ) : (
+                  variantText(item.color, item.size) && (
+                    <span className="block text-azul/80">
+                      {variantText(item.color, item.size)}
+                    </span>
+                  )
                 )}
               </span>
               <span className="shrink-0">
