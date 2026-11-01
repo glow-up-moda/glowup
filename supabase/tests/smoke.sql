@@ -179,10 +179,10 @@ begin
     select id into v_dynamic_lens_variant from public.product_variants where sku = 'PRUEBA-DYNAMIC-LENS';
     select id into v_dynamic_lens_alt_variant from public.product_variants where sku = 'PRUEBA-DYNAMIC-LENS-ALT';
     select id into v_dynamic_shirt_variant from public.product_variants where sku = 'PRUEBA-DYNAMIC-SHIRT';
-    select id into v_dynamic_lens_component from public.kit_components kc
+    select kc.id into v_dynamic_lens_component from public.kit_components kc
       join public.categories c on c.id = kc.category_id
       where kc.kit_id = v_dynamic_kit and c.slug = 'prueba-lentes';
-    select id into v_dynamic_shirt_component from public.kit_components kc
+    select kc.id into v_dynamic_shirt_component from public.kit_components kc
       join public.categories c on c.id = kc.category_id
       where kc.kit_id = v_dynamic_kit and c.slug = 'prueba-remeras';
     select id into v_zone from public.shipping_zones where name = 'Prueba envío';
