@@ -1138,7 +1138,8 @@ begin
      or not has_table_privilege('authenticated', 'public.kit_components', 'SELECT')
      or not has_table_privilege('authenticated', 'public.kit_components', 'INSERT')
      or not has_table_privilege('authenticated', 'public.kit_components', 'UPDATE')
-     or not has_table_privilege('authenticated', 'public.kit_components', 'DELETE') then
+     or not has_table_privilege('authenticated', 'public.kit_components', 'DELETE')
+     or not has_table_privilege('service_role', 'public.kit_components', 'SELECT') then
     raise exception 'Acceso: kit_components necesita permisos explícitos para catálogo y panel';
   end if;
 
