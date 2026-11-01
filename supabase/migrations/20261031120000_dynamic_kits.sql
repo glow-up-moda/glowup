@@ -21,7 +21,7 @@ create index kit_components_kit_id_idx on public.kit_components (kit_id);
 
 alter table public.kit_components enable row level security;
 
-grant select on public.kit_components to anon, authenticated;
+grant select on public.kit_components to anon, authenticated, service_role;
 create policy "Public reads components of published kits"
   on public.kit_components for select to anon
   using (
