@@ -209,7 +209,7 @@ begin
     'components', v_components
   );
 end;
-$;
+$$;
 
 grant execute on function public.resolve_dynamic_kit(uuid, jsonb) to service_role;
 
