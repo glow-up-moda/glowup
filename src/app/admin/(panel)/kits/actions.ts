@@ -379,6 +379,11 @@ export async function deleteKit(id: string): Promise<FormState> {
   const { supabase } = await requireAdmin();
   if (!isUuid(id)) return { error: "No encontramos ese kit." };
 
+  const { data: kit } = await supabase
+    .from("kits")
+    .select("cover_image_path")
+    .eq("id", id)
+    .maybeSingle();
   const { error } = await supabase.from("kits").delete().eq("id", id);
   if (error) {
     return {
@@ -388,6 +393,9 @@ export async function deleteKit(id: string): Promise<FormState> {
           : dbErrorMessage(error, "No se pudo borrar el kit."),
     };
   }
+
+  if (kit?.cover_image_path)
+    await supabase.storage.from(PRODUCT_IMAGES_BUCKET).remove([kit.cover_image_path]);
 
   revalidatePath("/admin", "layout");
   revalidatePath("/kits");
