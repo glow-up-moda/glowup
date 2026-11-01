@@ -5,6 +5,8 @@
   # del plan gratis se gastan en cada build.
   ignore = "node scripts/netlify-ignore.mjs"
 
+# Cambio neutro para solicitar una publicación productiva tras la migración de kits dinámicos.
+
 # La dirección de Netlify sigue respondiendo aunque haya dominio propio, y eso
 # es el mismo sitio en dos direcciones: para Google, contenido duplicado. Se
 # manda todo al dominio.
