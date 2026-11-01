@@ -1127,19 +1127,7 @@ begin
       end if;
     end;
 
-  exception when others then
-    -- La secuencia no vuelve atrás con el rollback: se restaura antes de fallar.
-    perform setval('public.order_number_seq', v_seq_last, v_seq_called);
-    raise;
-  end;
-
-  perform setval('public.order_number_seq', v_seq_last, v_seq_called);
-end
-$$;
-
--- Los cálculos internos de kits no deben ser invocables desde la API pública.
-do $
-begin
+  -- Seguridad del RPC interno y permisos explícitos para la tabla nueva.
   if has_function_privilege('anon', 'public.resolve_dynamic_kit(uuid, jsonb)', 'EXECUTE')
      or has_function_privilege('authenticated', 'public.resolve_dynamic_kit(uuid, jsonb)', 'EXECUTE')
      or not has_function_privilege('service_role', 'public.resolve_dynamic_kit(uuid, jsonb)', 'EXECUTE') then
@@ -1153,8 +1141,16 @@ begin
      or not has_table_privilege('authenticated', 'public.kit_components', 'DELETE') then
     raise exception 'Acceso: kit_components necesita permisos explícitos para catálogo y panel';
   end if;
+
+  exception when others then
+    -- La secuencia no vuelve atrás con el rollback: se restaura antes de fallar.
+    perform setval('public.order_number_seq', v_seq_last, v_seq_called);
+    raise;
+  end;
+
+  perform setval('public.order_number_seq', v_seq_last, v_seq_called);
 end
-$;
+$$;
 
 rollback;
 
