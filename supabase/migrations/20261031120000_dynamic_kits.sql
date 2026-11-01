@@ -341,21 +341,23 @@ begin
     end if;
 
     v_subtotal := v_subtotal + v_price * v_line.quantity;
-    v_lines := v_lines || jsonb_build_object(
-      'variant_id', v_line.variant_id,
-      'kit_id', v_line.kit_id,
-      'line_key', v_line_key,
-      'name', v_name,
-      'quantity', v_line.quantity,
-      'unit_price_cents', v_price,
-      'line_total_cents', v_price * v_line.quantity,
-      'in_stock', v_available >= v_line.quantity,
-      'unavailable', false
-    ) || case
-      when v_components is not null
-        then jsonb_build_object('components', v_components)
-      else '{}'::jsonb
-    end;
+    v_lines := v_lines || jsonb_build_array(
+      jsonb_build_object(
+        'variant_id', v_line.variant_id,
+        'kit_id', v_line.kit_id,
+        'line_key', v_line_key,
+        'name', v_name,
+        'quantity', v_line.quantity,
+        'unit_price_cents', v_price,
+        'line_total_cents', v_price * v_line.quantity,
+        'in_stock', v_available >= v_line.quantity,
+        'unavailable', false
+      ) || case
+        when v_components is not null
+          then jsonb_build_object('components', v_components)
+        else '{}'::jsonb
+      end
+    );
   end loop;
 
   -- Cupón: vigencia, usos y mínimo, medidos ahora.
