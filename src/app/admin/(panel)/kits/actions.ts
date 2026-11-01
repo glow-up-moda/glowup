@@ -298,13 +298,28 @@ export async function uploadKitCoverImage(
 
   let webp: Buffer;
   try {
-    webp = await sharp(Buffer.from(await file.arrayBuffer()), {
+    const source = sharp(Buffer.from(await file.arrayBuffer()), {
       failOn: "error",
-    })
-      .rotate()
+    }).rotate();
+    webp = await source
+      .clone()
       .resize({ width: 1200, height: 1500, fit: "cover" })
-      .webp({ quality: 90 })
+      .webp({ quality: 82 })
       .toBuffer();
+
+    // El bucket product-images admite archivos de hasta 2 MB.
+    if (webp.byteLength > 2 * 1024 * 1024) {
+      webp = await source
+        .clone()
+        .resize({ width: 900, height: 1125, fit: "cover" })
+        .webp({ quality: 75 })
+        .toBuffer();
+    }
+    if (webp.byteLength > 2 * 1024 * 1024) {
+      return {
+        errors: { file: "La imagen sigue siendo muy pesada después de optimizarla. Probá con otra." },
+      };
+    }
   } catch {
     return {
       errors: { file: "No pudimos leer esa imagen. Probá con una JPG o PNG." },
