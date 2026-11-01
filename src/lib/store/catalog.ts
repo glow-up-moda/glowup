@@ -305,7 +305,7 @@ export async function listKits(limit?: number): Promise<KitCard[]> {
   let query = supabase
     .from("kits")
     .select(
-      "id, name, slug, price_cents, compare_at_price_cents, is_dynamic, discount_percent, created_at, kit_items(quantity, product_variants(product_id, color, size, products(name, slug))), kit_components(id, category_id, quantity, sort_order)",
+      "id, name, slug, price_cents, compare_at_price_cents, cover_image_path, is_dynamic, discount_percent, created_at, kit_items(quantity, product_variants(product_id, color, size, products(name, slug))), kit_components(id, category_id, quantity, sort_order)",
     )
     .order("created_at", { ascending: false });
   if (limit) query = query.limit(limit);
@@ -479,7 +479,11 @@ export async function listKits(limit?: number): Promise<KitCard[]> {
       compareAtPriceCents: kit.is_dynamic ? null : kit.compare_at_price_cents,
       isDynamic: kit.is_dynamic,
       discountPercent: kit.discount_percent,
-      images: kit.is_dynamic ? dynamicImages : fixedImagesForKit,
+      images: kit.cover_image_path
+        ? [{ path: kit.cover_image_path, alt: kit.name }]
+        : kit.is_dynamic
+          ? dynamicImages
+          : fixedImagesForKit,
       items,
       components,
       isAvailable:
