@@ -2,9 +2,9 @@
 
 import { randomUUID } from "node:crypto";
 
-import sharp from "sharp";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import sharp from "sharp";
 import { z } from "zod";
 
 import { dbErrorMessage } from "@/lib/admin/errors";
@@ -281,7 +281,7 @@ export async function updateKit(
   redirect(`/admin/kits/${id}?hecho=guardado`);
 }
 
-
+/** Guarda una portada propia, independiente de las fotos de los productos. */
 export async function uploadKitCoverImage(
   kitId: string,
   _prev: FormState,
@@ -335,7 +335,9 @@ export async function uploadKitCoverImage(
     .eq("id", kitId);
   if (updateError) {
     await storage.remove([path]);
-    return { error: dbErrorMessage(updateError, "No se pudo guardar la imagen.") };
+    return {
+      error: dbErrorMessage(updateError, "No se pudo guardar la imagen."),
+    };
   }
 
   if (kit.cover_image_path) await storage.remove([kit.cover_image_path]);
@@ -359,20 +361,26 @@ export async function removeKitCoverImage(
     .eq("id", kitId)
     .maybeSingle();
   if (!kit) return { error: "No encontramos ese kit." };
-  if (!kit.cover_image_path) return { message: "El kit ya usa las fotos de sus productos." };
+  if (!kit.cover_image_path)
+    return { message: "El kit ya usa las fotos de sus productos." };
 
   const { error } = await supabase
     .from("kits")
     .update({ cover_image_path: null })
     .eq("id", kitId);
-  if (error) return { error: dbErrorMessage(error, "No se pudo quitar la imagen.") };
+  if (error)
+    return { error: dbErrorMessage(error, "No se pudo quitar la imagen.") };
 
-  await supabase.storage.from(PRODUCT_IMAGES_BUCKET).remove([kit.cover_image_path]);
+  await supabase.storage
+    .from(PRODUCT_IMAGES_BUCKET)
+    .remove([kit.cover_image_path]);
 
   revalidatePath("/admin", "layout");
   revalidatePath("/kits");
   revalidatePath("/");
-  return { message: "Imagen propia quitada. Se volvieron a usar las fotos de los productos." };
+  return {
+    message: "Imagen propia quitada. Se volvieron a usar las fotos de los productos.",
+  };
 }
 
 export async function deleteKit(id: string): Promise<FormState> {
@@ -395,7 +403,9 @@ export async function deleteKit(id: string): Promise<FormState> {
   }
 
   if (kit?.cover_image_path)
-    await supabase.storage.from(PRODUCT_IMAGES_BUCKET).remove([kit.cover_image_path]);
+    await supabase.storage
+      .from(PRODUCT_IMAGES_BUCKET)
+      .remove([kit.cover_image_path]);
 
   revalidatePath("/admin", "layout");
   revalidatePath("/kits");
