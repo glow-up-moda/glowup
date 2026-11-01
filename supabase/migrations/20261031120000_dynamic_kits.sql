@@ -211,6 +211,9 @@ begin
 end;
 $$;
 
+-- La función solo se usa desde cotizaciones del servidor. PostgreSQL concede
+-- EXECUTE a PUBLIC por defecto; retiramos ese acceso explícitamente.
+revoke execute on function public.resolve_dynamic_kit(uuid, jsonb) from public, anon, authenticated;
 grant execute on function public.resolve_dynamic_kit(uuid, jsonb) to service_role;
 
 create or replace function public.calculate_order_totals(
