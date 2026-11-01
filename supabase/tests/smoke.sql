@@ -1137,6 +1137,25 @@ begin
 end
 $$;
 
+-- Los cálculos internos de kits no deben ser invocables desde la API pública.
+do $
+begin
+  if has_function_privilege('anon', 'public.resolve_dynamic_kit(uuid, jsonb)', 'EXECUTE')
+     or has_function_privilege('authenticated', 'public.resolve_dynamic_kit(uuid, jsonb)', 'EXECUTE')
+     or not has_function_privilege('service_role', 'public.resolve_dynamic_kit(uuid, jsonb)', 'EXECUTE') then
+    raise exception 'Seguridad: resolve_dynamic_kit debe ser ejecutable únicamente por service_role';
+  end if;
+
+  if not has_table_privilege('anon', 'public.kit_components', 'SELECT')
+     or not has_table_privilege('authenticated', 'public.kit_components', 'SELECT')
+     or not has_table_privilege('authenticated', 'public.kit_components', 'INSERT')
+     or not has_table_privilege('authenticated', 'public.kit_components', 'UPDATE')
+     or not has_table_privilege('authenticated', 'public.kit_components', 'DELETE') then
+    raise exception 'Acceso: kit_components necesita permisos explícitos para catálogo y panel';
+  end if;
+end
+$;
+
 rollback;
 
 select 'todas las pruebas pasaron' as resultado;
