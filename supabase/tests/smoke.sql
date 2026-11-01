@@ -88,12 +88,12 @@ from (values
 join public.categories c on c.slug = x.category_slug;
 
 insert into public.product_variants (product_id, color, size, sku, stock_on_hand)
-select p.id, null, null, x.sku, x.stock
+select p.id, x.color, null, x.sku, x.stock
 from (values
-  ('prueba-dynamic-lens', 'PRUEBA-DYNAMIC-LENS', 3),
-  ('prueba-dynamic-lens', 'PRUEBA-DYNAMIC-LENS-ALT', 2),
-  ('prueba-dynamic-shirt', 'PRUEBA-DYNAMIC-SHIRT', 2)
-) as x(product_slug, sku, stock)
+  ('prueba-dynamic-lens', 'Negro', 'PRUEBA-DYNAMIC-LENS', 3),
+  ('prueba-dynamic-lens', 'Carey', 'PRUEBA-DYNAMIC-LENS-ALT', 2),
+  ('prueba-dynamic-shirt', null, 'PRUEBA-DYNAMIC-SHIRT', 2)
+) as x(product_slug, color, sku, stock)
 join public.products p on p.slug = x.product_slug;
 
 with kit as (
