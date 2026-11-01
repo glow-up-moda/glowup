@@ -252,6 +252,7 @@ declare
   v_dynamic_result jsonb;
   v_components jsonb;
   v_line_key text;
+  v_cutoff time;
 begin
   if p_items is null or jsonb_typeof(p_items) <> 'array' or jsonb_array_length(p_items) = 0 then
     raise exception using message = 'invalid_items', detail = jsonb_build_object('reason', 'empty')::text;
@@ -429,9 +430,22 @@ begin
       raise exception using message = 'invalid_shipping',
         detail = jsonb_build_object('reason', 'zone_not_found')::text;
     end if;
-    if p_shipping_method = 'same_day' and not v_zone.same_day then
-      raise exception using message = 'invalid_shipping',
-        detail = jsonb_build_object('reason', 'zone_not_same_day')::text;
+    if p_shipping_method = 'same_day' then
+      if not v_zone.same_day then
+        raise exception using message = 'invalid_shipping',
+          detail = jsonb_build_object('reason', 'zone_not_same_day')::text;
+      end if;
+
+      -- El corte se valida en el servidor para que el reloj del navegador no decida.
+      v_cutoff := public.setting_text('same_day_cutoff_time')::time;
+      if v_cutoff is not null
+         and (now() at time zone 'America/Argentina/Buenos_Aires')::time > v_cutoff then
+        raise exception using message = 'invalid_shipping',
+          detail = jsonb_build_object(
+            'reason', 'same_day_closed',
+            'cutoff', to_char(v_cutoff, 'HH24:MI')
+          )::text;
+      end if;
     end if;
     if p_shipping_method = 'delivery' and v_zone.same_day then
       raise exception using message = 'invalid_shipping',
