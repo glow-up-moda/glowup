@@ -345,6 +345,7 @@ export type Database = {
         }
         Update: {
           compare_at_price_cents?: number | null
+          cover_image_path?: string | null
           created_at?: string
           discount_percent?: number
           id?: string
